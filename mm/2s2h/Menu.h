@@ -14,6 +14,8 @@ private:
     uint32_t menuHeight;
     uint32_t menuWidth;
 
+    std::shared_ptr<Ship::InputEditorWindow> inputEditorWindow;
+
     void DrawSettingsMenu();
     void DrawEnhancementsMenu();
     void DrawCheatsMenu();

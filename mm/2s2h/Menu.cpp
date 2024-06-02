@@ -48,6 +48,7 @@ static const std::unordered_map<int32_t, const char*> alwaysWinDoggyraceOptions 
 };
 
 void BenMenu::InitElement() {
+    inputEditorWindow = std::dynamic_pointer_cast<Ship::InputEditorWindow>(Ship::Context::GetInstance()->GetWindow()->GetGui()->GetGuiWindow("Input Editor"));
 }
 
 void BenMenu::UpdateElement() {
@@ -296,7 +297,7 @@ void BenMenu::DrawSettingsMenu() {
             DrawGraphicsSettings((windowWidth - style.ItemSpacing.x) / 3);
             break;
         case 2:
-            DrawControllerSettings((windowWidth - style.ItemSpacing.x) / 3);
+            DrawControllerSettings((windowWidth - style.ItemSpacing.x));
     }
     ImGui::PopFont();
 
@@ -468,7 +469,8 @@ void BenMenu::DrawGraphicsSettings(float width) {
 }
 
 void BenMenu::DrawControllerSettings(float width) {
-    ImGui::BeginChild("Audio Settings", { width, 600 });
+    ImGui::BeginChild("Controller Settings", { width, 600 });
+    inputEditorWindow->DrawPortTabContents(0);
     ImGui::EndChild();
 }
 
