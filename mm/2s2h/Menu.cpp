@@ -24,14 +24,15 @@ extern PlayState* gPlayState;
 }
 std::vector<ImVec2> windowTypeSizes = { {} };
 
-static const std::unordered_map<int32_t, const char*> debugSaveOptions = {
-    { DEBUG_SAVE_INFO_COMPLETE, "100\% save" },
-    { DEBUG_SAVE_INFO_VANILLA_DEBUG, "Vanilla debug save" },
-    { DEBUG_SAVE_INFO_NONE, "Empty save" },
+static const std::unordered_map<Ship::AudioBackend, const char*> audioBackendsMap = {
+    { Ship::AudioBackend::WASAPI, "Windows Audio Session API" },
+    { Ship::AudioBackend::SDL, "SDL" },
 };
 
-const char* logLevels[] = {
-    "trace", "debug", "info", "warn", "error", "critical", "off",
+static std::unordered_map<Ship::WindowBackend, const char*> windowBackendsMap = {
+    { Ship::WindowBackend::FAST3D_DXGI_DX11, "DirectX" },
+    { Ship::WindowBackend::FAST3D_SDL_OPENGL, "OpenGL" },
+    { Ship::WindowBackend::FAST3D_SDL_METAL, "Metal" },
 };
 
 namespace BenGui {
@@ -57,7 +58,9 @@ uint32_t enhSize = sizeof(enhancementList) / sizeof(enhancementList[0]);
 void DrawSearchSettings() {
     ImGui::Text("Search: ");
     ImGui::SameLine();
+    ImGui::PushStyleColor(ImGuiCol_FrameBg, menuTheme[CVarGetInteger("gSettings.MenuTheme", 0)]);
     ImGui::InputText("##search", searchText, sizeof(searchText));
+    ImGui::PopStyleColor(1);
     std::string str(searchText);
 
     if (str == "") {
@@ -83,11 +86,12 @@ void DrawGeneralSettings() {
 
 #if not defined(__SWITCH__) and not defined(__WIIU__)
     SearchMenuGetItem(MENU_ITEM_MENUBAR_CONTROLLER_NAV);
-    bool cursor = Ship::Context::GetInstance()->GetWindow()->ShouldForceCursorVisibility();
-    if (UIWidgets::Checkbox("Cursor Always Visible", &cursor,
-                            { .tooltip = "Makes the cursor always visible, even in full screen." })) {
-        Ship::Context::GetInstance()->GetWindow()->SetForceCursorVisibility(cursor);
-    }
+    SearchMenuGetItem(MENU_ITEM_CURSOR_VISIBILITY);
+    //bool cursor = Ship::Context::GetInstance()->GetWindow()->ShouldForceCursorVisibility();
+    //if (UIWidgets::Checkbox("Cursor Always Visible", &cursor,
+    //                        { .tooltip = "Makes the cursor always visible, even in full screen." })) {
+    //    Ship::Context::GetInstance()->GetWindow()->SetForceCursorVisibility(cursor);
+    //}
 #endif
     SearchMenuGetItem(MENU_ITEM_HOTKEY_TEXT);
 }
@@ -99,7 +103,16 @@ void DrawAudioSettings() {
     SearchMenuGetItem(MENU_ITEM_SOUND_EFFECT_VOLUME);
     SearchMenuGetItem(MENU_ITEM_FANFARE_VOLUME);
     SearchMenuGetItem(MENU_ITEM_AMBIENT_VOLUME);
-    SearchMenuGetItem(MENU_ITEM_AUDIO_BACKEND);
+
+    auto currentAudioBackend = Ship::Context::GetInstance()->GetAudio()->GetAudioBackend();
+    if (UIWidgets::Combobox(
+            "Audio API", &currentAudioBackend, audioBackendsMap,
+            { .color = menuTheme[CVarGetInteger("gSettings.MenuTheme", 0)],
+              .tooltip = "Sets the audio API used by the game. Requires a relaunch to take effect.",
+              .disabled = Ship::Context::GetInstance()->GetAudio()->GetAvailableAudioBackends()->size() <= 1,
+              .disabledTooltip = "Only one audio API is available on this platform." })) {
+        Ship::Context::GetInstance()->GetAudio()->SetAudioBackend(currentAudioBackend);
+    }
 }
 
 void DrawGraphicsSettings() {
@@ -116,7 +129,18 @@ void DrawGraphicsSettings() {
         SearchMenuGetItem(MENU_ITEM_JITTER_FIX);
     }
     //  #endregion */
-    SearchMenuGetItem(MENU_ITEM_RENDERER_API);
+    if (UIWidgets::Combobox("Renderer API (Needs reload)", &configWindowBackend, availableWindowBackendsMap,
+                            { .color = menuTheme[CVarGetInteger("gSettings.MenuTheme", 0)],
+                              .tooltip = "Sets the renderer API used by the game. Requires a relaunch to take effect.",
+                              .disabled = availableWindowBackends->size() <= 1,
+                              .disabledTooltip = "Only one renderer API is available on this platform." })) {
+        Ship::Context::GetInstance()->GetConfig()->SetInt("Window.Backend.Id",
+                                                          static_cast<int32_t>(configWindowBackend));
+        Ship::Context::GetInstance()->GetConfig()->SetString("Window.Backend.Name",
+                                                             windowBackendsMap.at(configWindowBackend));
+        Ship::Context::GetInstance()->GetConfig()->Save();
+        UpdateWindowBackendObjects();
+    }
 
     if (Ship::Context::GetInstance()->GetWindow()->CanDisableVerticalSync()) {
         SearchMenuGetItem(MENU_ITEM_ENABLE_VSYNC);
@@ -235,7 +259,15 @@ void DrawGraphicsEnhancements() {
     ImGui::SeparatorText("Clock");
     SearchMenuGetItem(MENU_ITEM_CLOCK_OPTIONS);
     SearchMenuGetItem(MENU_ITEM_MILITARY_CLOCK);
-    MotionBlur_RenderMenuOptions();
+
+    ImGui::SeparatorText("Motion Blur");
+    SearchMenuGetItem(MENU_ITEM_MOTION_BLUR_MODE);
+    SearchMenuGetItem(MENU_ITEM_MOTION_BLUE_INTERPOLATE);
+    if (CVarGetInteger("gEnhancements.Graphics.MotionBlur.Mode", 0) == 0) {
+        SearchMenuGetItem(MENU_ITEM_MOTION_BLUR_ENABLE);
+        SearchMenuGetItem(MENU_ITEM_MOTION_BLUR_STRENGTH);
+    }
+    //MotionBlur_RenderMenuOptions();
 
     ImGui::SeparatorText("Other");
     SearchMenuGetItem(MENU_ITEM_AUTHENTIC_LOGO);
@@ -316,92 +348,41 @@ void DrawHudEditorContents() {
 void DrawGeneralDevTools() {
     // PortNote: This should be hidden for ports on systems that are single-screen, and/or smaller than 1280x800.
     // Popout will assume size of 1280x800, and will break on those systems.
-    UIWidgets::CVarCheckbox("Popout Menu", "gSettings.Menu.Popout",
-                            { .tooltip = "Changes the menu display from overlay to windowed." });
-    if (UIWidgets::Button("Open App Files Folder",
-                          { .tooltip = "Opens the folder that contains the save and mods folders, etc." })) {
-        std::string filesPath = Ship::Context::GetInstance()->GetAppDirectoryPath();
-        SDL_OpenURL(std::string("file:///" + std::filesystem::absolute(filesPath).string()).c_str());
-    }
-    if (UIWidgets::CVarCheckbox("Debug Mode", "gDeveloperTools.DebugEnabled",
-                                { .tooltip = "Enables Debug Mode, allowing you to select maps with L + R + Z." })) {
-        // If disabling debug mode, disable all debug features
-        if (!CVarGetInteger("gDeveloperTools.DebugEnabled", 0)) {
-            CVarClear("gDeveloperTools.DebugSaveFileMode");
-            CVarClear("gDeveloperTools.PreventActorUpdate");
-            CVarClear("gDeveloperTools.PreventActorDraw");
-            CVarClear("gDeveloperTools.PreventActorInit");
-            CVarClear("gDeveloperTools.DisableObjectDependency");
-            if (gPlayState != NULL) {
-                gPlayState->frameAdvCtx.enabled = false;
-            }
-            RegisterDebugSaveCreate();
-            RegisterPreventActorUpdateHooks();
-            RegisterPreventActorDrawHooks();
-            RegisterPreventActorInitHooks();
-        }
-    };
+    SearchMenuGetItem(MENU_ITEM_MODERN_MENU_POPOUT);
+    SearchMenuGetItem(MENU_ITEM_OPEN_APP_FILES);
+    SearchMenuGetItem(MENU_ITEM_DEBUG_MODE_ENABLE);
 
     if (CVarGetInteger("gDeveloperTools.DebugEnabled", 0)) {
-        UIWidgets::CVarCheckbox(
-            "Better Map Select", "gDeveloperTools.BetterMapSelect.Enabled",
-            { .tooltip = "Overrides the original map select with a translated, more user-friendly version." });
-
-        if (UIWidgets::CVarCombobox(
-                "Debug Save File Mode", "gDeveloperTools.DebugSaveFileMode", debugSaveOptions,
-                { .tooltip =
-                      "Change the behavior of creating saves while debug mode is enabled:\n\n"
-                      "- Empty Save: The default 3 heart save file in first cycle\n"
-                      "- Vanilla Debug Save: Uses the title screen save info (8 hearts, all items and masks)\n"
-                      "- 100\% Save: All items, equipment, mask, quast status and bombers notebook complete" })) {
-            RegisterDebugSaveCreate();
-        }
+        SearchMenuGetItem(MENU_ITEM_DEBUG_BETTER_MAP_SELECT);
+        SearchMenuGetItem(MENU_ITEM_DEBUG_SAVE_FILE_MODE);
     }
 
-    if (UIWidgets::CVarCheckbox("Prevent Actor Update", "gDeveloperTools.PreventActorUpdate")) {
-        RegisterPreventActorUpdateHooks();
-    }
-    if (UIWidgets::CVarCheckbox("Prevent Actor Draw", "gDeveloperTools.PreventActorDraw")) {
-        RegisterPreventActorDrawHooks();
-    }
-    if (UIWidgets::CVarCheckbox("Prevent Actor Init", "gDeveloperTools.PreventActorInit")) {
-        RegisterPreventActorInitHooks();
-    }
-    UIWidgets::CVarCheckbox("Disable Object Dependency", "gDeveloperTools.DisableObjectDependency");
-    if (UIWidgets::CVarCombobox("Log Level", "gDeveloperTools.LogLevel", logLevels,
-                                {
-                                    .tooltip = "The log level determines which messages are printed to the "
-                                               "console. This does not affect the log file output",
-                                    .defaultIndex = 1,
-                                })) {
-        Ship::Context::GetInstance()->GetLogger()->set_level(
-            (spdlog::level::level_enum)CVarGetInteger("gDeveloperTools.LogLevel", 1));
-    }
+    SearchMenuGetItem(MENU_ITEM_PREVENT_ACTOR_UPDATE);
+    SearchMenuGetItem(MENU_ITEM_PREVENT_ACTOR_DRAW);
+    SearchMenuGetItem(MENU_ITEM_PREVENT_ACTOR_INIT);
+    SearchMenuGetItem(MENU_ITEM_DISABLE_OBJECT_DEPENDECY);
+    SearchMenuGetItem(MENU_ITEM_DEBUG_LOG_LEVEL);
 
     if (gPlayState != NULL) {
         ImGui::Separator();
-        UIWidgets::Checkbox(
-            "Frame Advance", (bool*)&gPlayState->frameAdvCtx.enabled,
-            { .tooltip = "This allows you to advance through the game one frame at a time on command. "
-                         "To advance a frame, hold Z and tap R on the second controller. Holding Z "
-                         "and R will advance a frame every half second. You can also use the buttons below." });
+        SearchMenuGetItem(MENU_ITEM_FRAME_ADVANCE_ENABLE);
         if (gPlayState->frameAdvCtx.enabled) {
-            if (UIWidgets::Button("Advance 1", { .size = UIWidgets::Sizes::Inline })) {
-                CVarSetInteger("gDeveloperTools.FrameAdvanceTick", 1);
-            }
-            ImGui::SameLine();
-            UIWidgets::Button("Advance (Hold)", { .size = UIWidgets::Sizes::Inline });
+            SearchMenuGetItem(MENU_ITEM_FRAME_ADVANCE_SINGLE);
+            SearchMenuGetItem(MENU_ITEM_FRAME_ADVANCE_HOLD);
             if (ImGui::IsItemActive()) {
                 CVarSetInteger("gDeveloperTools.FrameAdvanceTick", 1);
             }
         }
     }
+    ImGui::PushStyleColor(ImGuiCol_Button, menuTheme[CVarGetInteger("gSettings.MenuTheme", 0)]);
     RenderWarpPointSection();
+    ImGui::PopStyleColor(1);
 }
 
 void DrawCollisionViewerContents() {
     UIWidgets::WindowButton("Popout Collision Viewer", "gWindows.CollisionViewer", mCollisionViewerWindow,
-                            { .tooltip = "Draws collision to the screen" });
+                            { .color = menuTheme[CVarGetInteger("gSettings.MenuTheme", 0)],
+                              .tooltip = "Draws collision to the screen" });
     if (!CVarGetInteger("gWindows.CollisionViewer", 0)) {
         mCollisionViewerWindow->DrawElement();
     }
@@ -410,7 +391,8 @@ void DrawCollisionViewerContents() {
 void DrawStatsContents() {
     UIWidgets::WindowButton(
         "Popout Stats", "gOpenWindows.Stats", mStatsWindow,
-        { .tooltip = "Shows the stats window, with your FPS and frametimes, and the OS you're playing on" });
+        { .color = menuTheme[CVarGetInteger("gSettings.MenuTheme", 0)],
+          .tooltip = "Shows the stats window, with your FPS and frametimes, and the OS you're playing on" });
     if (!CVarGetInteger("gOpenWindows.Stats", 0)) {
         mStatsWindow->DrawElement();
     }
@@ -419,7 +401,8 @@ void DrawStatsContents() {
 void DrawConsoleContents() {
     UIWidgets::WindowButton(
         "Popout Console", "gOpenWindows.Console", mConsoleWindow,
-        { .tooltip = "Enables the console window, allowing you to input commands, type help for some examples" });
+        { .color = menuTheme[CVarGetInteger("gSettings.MenuTheme", 0)],
+          .tooltip = "Enables the console window, allowing you to input commands, type help for some examples" });
     if (!CVarGetInteger("gOpenWindows.Console", 0)) {
         mConsoleWindow->DrawElement();
     }
@@ -428,7 +411,8 @@ void DrawConsoleContents() {
 void DrawGfxDebuggerContents() {
     UIWidgets::WindowButton(
         "Popout Gfx Debugger", "gOpenWindows.GfxDebugger", mGfxDebuggerWindow,
-        { .tooltip = "Enables the Gfx Debugger window, allowing you to input commands, type help for some examples" });
+        { .color = menuTheme[CVarGetInteger("gSettings.MenuTheme", 0)],
+          .tooltip = "Enables the Gfx Debugger window, allowing you to input commands, type help for some examples" });
     if (!CVarGetInteger("gOpenWindows.GfxDebugger", 0)) {
         mGfxDebuggerWindow->DrawElement();
     }
@@ -436,7 +420,8 @@ void DrawGfxDebuggerContents() {
 
 void DrawSaveEditorContents() {
     UIWidgets::WindowButton("Popout Save Editor", "gWindows.SaveEditor", mSaveEditorWindow,
-                            { .tooltip = "Enables the Save Editor window, allowing you to edit your save file" });
+                            { .color = menuTheme[CVarGetInteger("gSettings.MenuTheme", 0)],
+                              .tooltip = "Enables the Save Editor window, allowing you to edit your save file" });
     if (!CVarGetInteger("gWindows.SaveEditor", 0)) {
         mSaveEditorWindow->DrawElement();
     }
@@ -445,14 +430,16 @@ void DrawSaveEditorContents() {
 void DrawActorViewerContents() {
     UIWidgets::WindowButton(
         "Popout Actor Viewer", "gWindows.ActorViewer", mActorViewerWindow,
-        { .tooltip = "Enables the Actor Viewer window, allowing you to view actors in the world." });
+        { .color = menuTheme[CVarGetInteger("gSettings.MenuTheme", 0)],
+          .tooltip = "Enables the Actor Viewer window, allowing you to view actors in the world." });
     if (!CVarGetInteger("gWindows.ActorViewer", 0)) {
         mActorViewerWindow->DrawElement();
     }
 }
 
 void DrawEventLogContents() {
-    UIWidgets::WindowButton("Popout Event Log", "gWindows.EventLog", mEventLogWindow);
+    UIWidgets::WindowButton("Popout Event Log", "gWindows.EventLog", mEventLogWindow,
+        { .color = menuTheme[CVarGetInteger("gSettings.MenuTheme", 0)], });
     if (!CVarGetInteger("gWindows.EventLog", 0)) {
         mActorViewerWindow->DrawElement();
     }
@@ -469,8 +456,8 @@ void BenMenu::InitElement() {
     poppedSize.y = CVarGetInteger("gSettings.Menu.PoppedHeight", 800);
     poppedPos.x = CVarGetInteger("gSettings.Menu.PoppedPos.x", 0);
     poppedPos.y = CVarGetInteger("gSettings.Menu.PoppedPos.y", 0);
-    std::vector<UIWidgets::SidebarEntry> searchSidebar = { { "Search", { DrawSearchSettings, nullptr, nullptr } } };
-    std::vector<UIWidgets::SidebarEntry> settingsSidebar = { { "General", { DrawGeneralSettings, nullptr, nullptr } },
+    std::vector<UIWidgets::SidebarEntry> settingsSidebar = { { "Search", { DrawSearchSettings, nullptr, nullptr } },
+                                                             { "General", { DrawGeneralSettings, nullptr, nullptr } },
                                                              { "Audio", { DrawAudioSettings, nullptr, nullptr } },
                                                              { "Graphics", { DrawGraphicsSettings, nullptr, nullptr } },
                                                              { "Controls", { DrawControllerSettings } } };
@@ -497,8 +484,7 @@ void BenMenu::InitElement() {
                                                              { "Actor Viewer", { DrawActorViewerContents, nullptr } },
                                                              { "Event Log", { DrawEventLogContents, nullptr } } };
 
-    menuEntries = { { "Search", searchSidebar, "gSettings.Menu.SearchSidebarIndex" },
-                    { "Settings", settingsSidebar, "gSettings.Menu.SettingsSidebarIndex" },
+    menuEntries = { { "Settings", settingsSidebar, "gSettings.Menu.SettingsSidebarIndex" },
                     { "Enhancements", enhancementsSidebar, "gSettings.Menu.EnhancementsSidebarIndex" },
                     { "Developer Tools", devToolsSidebar, "gSettings.Menu.DevToolsSidebarIndex" } };
 

@@ -87,7 +87,7 @@ void Play_DrawMotionBlur(PlayState* this) {
         sMotionBlurStatus = MOTION_BLUR_OFF;
     }
 
-    MotionBlur_Override(&sMotionBlurStatus, &alpha);
+    MotionBlur_Overrides(&sMotionBlurStatus, &alpha);
 
     if (sMotionBlurStatus != MOTION_BLUR_OFF) {
         OPEN_DISPS(gfxCtx);
