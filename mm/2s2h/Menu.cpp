@@ -87,11 +87,11 @@ void DrawGeneralSettings() {
 #if not defined(__SWITCH__) and not defined(__WIIU__)
     SearchMenuGetItem(MENU_ITEM_MENUBAR_CONTROLLER_NAV);
     SearchMenuGetItem(MENU_ITEM_CURSOR_VISIBILITY);
-    //bool cursor = Ship::Context::GetInstance()->GetWindow()->ShouldForceCursorVisibility();
-    //if (UIWidgets::Checkbox("Cursor Always Visible", &cursor,
-    //                        { .tooltip = "Makes the cursor always visible, even in full screen." })) {
-    //    Ship::Context::GetInstance()->GetWindow()->SetForceCursorVisibility(cursor);
-    //}
+    // bool cursor = Ship::Context::GetInstance()->GetWindow()->ShouldForceCursorVisibility();
+    // if (UIWidgets::Checkbox("Cursor Always Visible", &cursor,
+    //                         { .tooltip = "Makes the cursor always visible, even in full screen." })) {
+    //     Ship::Context::GetInstance()->GetWindow()->SetForceCursorVisibility(cursor);
+    // }
 #endif
     SearchMenuGetItem(MENU_ITEM_HOTKEY_TEXT);
 }
@@ -267,7 +267,7 @@ void DrawGraphicsEnhancements() {
         SearchMenuGetItem(MENU_ITEM_MOTION_BLUR_ENABLE);
         SearchMenuGetItem(MENU_ITEM_MOTION_BLUR_STRENGTH);
     }
-    //MotionBlur_RenderMenuOptions();
+    // MotionBlur_RenderMenuOptions();
 
     ImGui::SeparatorText("Other");
     SearchMenuGetItem(MENU_ITEM_AUTHENTIC_LOGO);
@@ -380,9 +380,9 @@ void DrawGeneralDevTools() {
 }
 
 void DrawCollisionViewerContents() {
-    UIWidgets::WindowButton("Popout Collision Viewer", "gWindows.CollisionViewer", mCollisionViewerWindow,
-                            { .color = menuTheme[CVarGetInteger("gSettings.MenuTheme", 0)],
-                              .tooltip = "Draws collision to the screen" });
+    UIWidgets::WindowButton(
+        "Popout Collision Viewer", "gWindows.CollisionViewer", mCollisionViewerWindow,
+        { .color = menuTheme[CVarGetInteger("gSettings.MenuTheme", 0)], .tooltip = "Draws collision to the screen" });
     if (!CVarGetInteger("gWindows.CollisionViewer", 0)) {
         mCollisionViewerWindow->DrawElement();
     }
@@ -439,7 +439,9 @@ void DrawActorViewerContents() {
 
 void DrawEventLogContents() {
     UIWidgets::WindowButton("Popout Event Log", "gWindows.EventLog", mEventLogWindow,
-        { .color = menuTheme[CVarGetInteger("gSettings.MenuTheme", 0)], });
+                            {
+                                .color = menuTheme[CVarGetInteger("gSettings.MenuTheme", 0)],
+                            });
     if (!CVarGetInteger("gWindows.EventLog", 0)) {
         mActorViewerWindow->DrawElement();
     }
