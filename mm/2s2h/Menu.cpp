@@ -265,8 +265,14 @@ void DrawGraphicsEnhancements() {
     SearchMenuGetItem(MENU_ITEM_MOTION_BLUE_INTERPOLATE);
     if (CVarGetInteger("gEnhancements.Graphics.MotionBlur.Mode", 0) == 0) {
         SearchMenuGetItem(MENU_ITEM_MOTION_BLUR_ENABLE);
+    } else if (CVarGetInteger("gEnhancements.Graphics.MotionBlur.Mode", 0) == 1) {
+        CVarSetInteger("gEnhancements.Graphics.MotionBlur.Toggle", 0);
+    }
+    if (CVarGetInteger("gEnhancements.Graphics.MotionBlur.Mode", 0) == 2 ||
+        CVarGetInteger("gEnhancements.Graphics.MotionBlur.Toggle", 0) == 1) {
         SearchMenuGetItem(MENU_ITEM_MOTION_BLUR_STRENGTH);
     }
+
     // MotionBlur_RenderMenuOptions();
 
     ImGui::SeparatorText("Other");

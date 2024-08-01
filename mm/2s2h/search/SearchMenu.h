@@ -3,7 +3,6 @@
 extern "C" {
 #include "functions.h"
 extern PlayState* gPlayState;
-extern void MotionBlur_Overrides(u8* status, s32* alpha);
 }
 
 using WidgetFunc = void (*)();
@@ -1093,18 +1092,6 @@ cvarObject enhancementList[] = {
       {},
       nullptr },
 };
-
-void MotionBlur_Overrides(u8* status, s32* alpha) {
-    if (CVarGetInteger("gEnhancements.Graphics.MotionBlur.Mode", 0) == 1) {
-        *status = 0;
-        *alpha = 0;
-    } else if (CVarGetInteger("gEnhancements.Graphics.MotionBlur.Mode", 0) == 2 ||
-               CVarGetInteger("gEnhancements.Graphics.MotionBlur.Toggle", 0) == 1) {
-        if (*status == 0)
-            *status = 2;
-        *alpha = CVarGetInteger("gEnhancements.Graphics.MotionBlur.Strength", 180);
-    }
-}
 
 void SearchMenuGetItem(uint32_t index) {
     float floatMin;
