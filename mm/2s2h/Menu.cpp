@@ -273,8 +273,6 @@ void DrawGraphicsEnhancements() {
         SearchMenuGetItem(MENU_ITEM_MOTION_BLUR_STRENGTH);
     }
 
-    // MotionBlur_RenderMenuOptions();
-
     ImGui::SeparatorText("Other");
     SearchMenuGetItem(MENU_ITEM_AUTHENTIC_LOGO);
     SearchMenuGetItem(MENU_ITEM_BOW_RETICLE);

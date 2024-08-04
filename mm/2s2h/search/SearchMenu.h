@@ -346,7 +346,7 @@ cvarObject enhancementList[] = {
       { 1, 8, 1 },
       ([]() { Ship::Context::GetInstance()->GetWindow()->SetMsaaLevel(CVarGetInteger(CVAR_MSAA_VALUE, 1)); }) },
     { MENU_ITEM_FRAME_RATE,
-      "Crrent FPS: %d",
+      "Current FPS: %d",
       "gInterpolationFPS",
       "Uses Matrix Interpolation to create extra frames, resulting in smoother graphics. This is "
       "purely visual and does not impact game logic, execution of glitches etc.\n\n A higher target "
@@ -359,7 +359,7 @@ cvarObject enhancementList[] = {
       "",
       "Matches interpolation value to the current game's window refresh rate.",
       BUTTON,
-      {},
+      { },
       ([]() {
           int hz = Ship::Context::GetInstance()->GetWindow()->GetCurrentRefreshRate();
           if (hz >= 20 && hz <= 360) {
@@ -1093,7 +1093,31 @@ cvarObject enhancementList[] = {
       nullptr },
 };
 
+bool disabledReq;
+const char* disabledTooltip;
+
+void SearchMenuGetDisabled (uint32_t index) {
+    switch (index) {
+        case MENU_ITEM_ENABLE_FREE_LOOK:
+            disabledReq = CVarGetInteger("gEnhancements.Camera.DebugCam.Enable", 0) != 0;
+            disabledTooltip = "This is disabled due to Debug Camera being enabled.";
+            break;
+        case MENU_ITEM_ENABLE_DEBUG_CAMERA:
+            disabledReq = CVarGetInteger("gEnhancements.Camera.FreeLook.Enable", 0) != 0;
+            disabledTooltip = "This is disabled due to Free Look being enabled.";
+            break;
+        case MENU_ITEM_AUTOSAVE_INTERVAL:
+            disabledReq = !CVarGetInteger("gEnhancements.Saving.Autosave", 0);
+            disabledTooltip = "This is disabled due to Autosave being disabled.";
+            break;
+        default:
+            disabledReq = false;
+            break;
+    }
+}
+
 void SearchMenuGetItem(uint32_t index) {
+    SearchMenuGetDisabled(index);
     float floatMin;
     float floatMax;
     float floatDefault;
@@ -1104,6 +1128,8 @@ void SearchMenuGetItem(uint32_t index) {
                                         {
                                             .color = menuTheme[CVarGetInteger("gSettings.MenuTheme", 0)],
                                             .tooltip = enhancementList[index].cVarTooltip,
+                                            .disabled = disabledReq,
+                                            .disabledTooltip = disabledTooltip,
                                         })) {
                 if (enhancementList[index].cVarFunction != nullptr) {
                     enhancementList[index].cVarFunction();
@@ -1116,6 +1142,8 @@ void SearchMenuGetItem(uint32_t index) {
                                         {
                                             .color = menuTheme[CVarGetInteger("gSettings.MenuTheme", 0)],
                                             .tooltip = enhancementList[index].cVarTooltip,
+                                            .disabled = disabledReq,
+                                            .disabledTooltip = disabledTooltip,
                                         })) {
                 if (enhancementList[index].cVarFunction != nullptr) {
                     enhancementList[index].cVarFunction();
@@ -1129,6 +1157,8 @@ void SearchMenuGetItem(uint32_t index) {
                                          {
                                              .color = menuTheme[CVarGetInteger("gSettings.MenuTheme", 0)],
                                              .tooltip = enhancementList[index].cVarTooltip,
+                                             .disabled = disabledReq,
+                                             .disabledTooltip = disabledTooltip,
                                          })) {
                 if (enhancementList[index].cVarFunction != nullptr) {
                     enhancementList[index].cVarFunction();
@@ -1144,6 +1174,8 @@ void SearchMenuGetItem(uint32_t index) {
                                            {
                                                .color = menuTheme[CVarGetInteger("gSettings.MenuTheme", 0)],
                                                .tooltip = enhancementList[index].cVarTooltip,
+                                               .disabled = disabledReq,
+                                               .disabledTooltip = disabledTooltip,
                                            })) {
                 if (enhancementList[index].cVarFunction != nullptr) {
                     enhancementList[index].cVarFunction();
@@ -1155,6 +1187,8 @@ void SearchMenuGetItem(uint32_t index) {
                                   {
                                       .color = menuTheme[CVarGetInteger("gSettings.MenuTheme", 0)],
                                       .tooltip = enhancementList[index].cVarTooltip,
+                                      .disabled = disabledReq,
+                                      .disabledTooltip = disabledTooltip,
                                   })) {
                 if (enhancementList[index].cVarFunction != nullptr) {
                     enhancementList[index].cVarFunction();
