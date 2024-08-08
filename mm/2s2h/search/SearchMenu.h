@@ -40,6 +40,13 @@ std::unordered_map<int32_t, const char*> menuThemeOptions = {
     { COLOR_YELLOW, "Yellow" },
 };
 
+typedef enum {
+    DISABLE_NONE,
+    DISABLE_DEBUG_CAMERA_ENABLED,
+    DISABLE_FREE_LOOK_ENABLED,
+    DISABLE_AUTOSAVE,
+} DisabledReason;
+
 struct widgetOptions {
     int32_t min;
     int32_t max;
@@ -47,7 +54,7 @@ struct widgetOptions {
     std::unordered_map<int32_t, const char*> comboBoxOptions;
 };
 
-typedef struct {
+struct cvarObject {
     uint32_t cVarIndex;
     const char* cVarText;
     const char* cVarName;
@@ -55,7 +62,8 @@ typedef struct {
     uint32_t widgetType;
     widgetOptions cVarOptions;
     WidgetFunc cVarFunction;
-} cvarObject;
+    std::vector<DisabledReason> disabledReasonList = {};
+};
 
 typedef enum {
     CHECKBOX,
@@ -112,6 +120,13 @@ static const std::unordered_map<int32_t, const char*> logLevels = {
     { DEBUG_LOG_TRACE, "Trace" }, { DEBUG_LOG_DEBUG, "Debug" }, { DEBUG_LOG_INFO, "Info" },
     { DEBUG_LOG_WARN, "Warn" },   { DEBUG_LOG_ERROR, "Error" }, { DEBUG_LOG_CRITICAL, "Critical" },
     { DEBUG_LOG_OFF, "Off" },
+};
+
+std::unordered_map<DisabledReason, const char*> reasonToTooltip = {
+    { DISABLE_NONE, "" },
+    { DISABLE_DEBUG_CAMERA_ENABLED, "This setting is disabled because Debug Camera is enabled." },
+    { DISABLE_FREE_LOOK_ENABLED, "This setting is disabled because Free Look is enabled." },
+    { DISABLE_AUTOSAVE, "This setting is disabled because Autosave is disabled."},
 };
 
 typedef enum {
@@ -424,7 +439,7 @@ cvarObject enhancementList[] = {
       "stick in the controller config menu, and map the camera stick to the right stick.",
       CHECKBOX,
       {},
-      ([]() { RegisterCameraFreeLook(); }) },
+      ([]() { RegisterCameraFreeLook(); }), { DISABLE_DEBUG_CAMERA_ENABLED } },
     { MENU_ITEM_FREE_LOOK_CAMERA_DISTANCE,
       "Camera Distance: %d",
       "gEnhancements.Camera.FreeLook.MaxCameraDistance",
@@ -460,7 +475,7 @@ cvarObject enhancementList[] = {
       "Enables free camera control.",
       CHECKBOX,
       {},
-      ([]() { RegisterDebugCam(); }) },
+      ([]() { RegisterDebugCam(); }), { DISABLE_FREE_LOOK_ENABLED } },
     { MENU_ITEM_INVERT_CAMERA_X_AXIS,
       "Invert Camera X Axis",
       "gEnhancements.Camera.RightStick.InvertXAxis",
@@ -655,7 +670,7 @@ cvarObject enhancementList[] = {
       "Sets the interval between Autosaves.",
       SLIDER_INT,
       { 1, 60, 5 },
-      nullptr },
+      nullptr, { DISABLE_AUTOSAVE } },
     { MENU_ITEM_DISABLE_BOTTLE_RESET,
       "Do not reset Bottle content",
       "gEnhancements.Cycle.DoNotResetBottleContent",
@@ -1093,31 +1108,35 @@ cvarObject enhancementList[] = {
       nullptr },
 };
 
-bool disabledReq;
+// to-do: map of strings for tooltips
+bool cVarDebugCamera;
+bool cVarFreeLook;
+bool cVarAutoSave;
 const char* disabledTooltip;
 
-void SearchMenuGetDisabled (uint32_t index) {
-    switch (index) {
-        case MENU_ITEM_ENABLE_FREE_LOOK:
-            disabledReq = CVarGetInteger("gEnhancements.Camera.DebugCam.Enable", 0) != 0;
-            disabledTooltip = "This is disabled due to Debug Camera being enabled.";
-            break;
-        case MENU_ITEM_ENABLE_DEBUG_CAMERA:
-            disabledReq = CVarGetInteger("gEnhancements.Camera.FreeLook.Enable", 0) != 0;
-            disabledTooltip = "This is disabled due to Free Look being enabled.";
-            break;
-        case MENU_ITEM_AUTOSAVE_INTERVAL:
-            disabledReq = !CVarGetInteger("gEnhancements.Saving.Autosave", 0);
-            disabledTooltip = "This is disabled due to Autosave being disabled.";
-            break;
+bool SearchMenuGetDisabled (DisabledReason reason) {
+    switch (reason) {
+        case DISABLE_DEBUG_CAMERA_ENABLED:
+            return cVarFreeLook;
+        case DISABLE_FREE_LOOK_ENABLED:
+            return cVarDebugCamera;
+        case DISABLE_AUTOSAVE:
+            return cVarAutoSave;
         default:
-            disabledReq = false;
-            break;
+            return NULL;
     }
 }
 
 void SearchMenuGetItem(uint32_t index) {
-    SearchMenuGetDisabled(index);
+    DisabledReason disabledReason = DISABLE_NONE;
+    if (!enhancementList[index].disabledReasonList.empty()) {
+        for (DisabledReason reason : enhancementList[index].disabledReasonList) {
+            if (SearchMenuGetDisabled(reason)) {
+                disabledReason = reason;
+                break;
+            }
+        }
+    }
     float floatMin;
     float floatMax;
     float floatDefault;
@@ -1128,8 +1147,8 @@ void SearchMenuGetItem(uint32_t index) {
                                         {
                                             .color = menuTheme[CVarGetInteger("gSettings.MenuTheme", 0)],
                                             .tooltip = enhancementList[index].cVarTooltip,
-                                            .disabled = disabledReq,
-                                            .disabledTooltip = disabledTooltip,
+                                            .disabled = disabledReason != DISABLE_NONE,
+                                            .disabledTooltip = reasonToTooltip.at(disabledReason),
                                         })) {
                 if (enhancementList[index].cVarFunction != nullptr) {
                     enhancementList[index].cVarFunction();
@@ -1142,8 +1161,8 @@ void SearchMenuGetItem(uint32_t index) {
                                         {
                                             .color = menuTheme[CVarGetInteger("gSettings.MenuTheme", 0)],
                                             .tooltip = enhancementList[index].cVarTooltip,
-                                            .disabled = disabledReq,
-                                            .disabledTooltip = disabledTooltip,
+                                            .disabled = disabledReason != DISABLE_NONE,
+                                            .disabledTooltip = reasonToTooltip.at(disabledReason),
                                         })) {
                 if (enhancementList[index].cVarFunction != nullptr) {
                     enhancementList[index].cVarFunction();
@@ -1157,8 +1176,8 @@ void SearchMenuGetItem(uint32_t index) {
                                          {
                                              .color = menuTheme[CVarGetInteger("gSettings.MenuTheme", 0)],
                                              .tooltip = enhancementList[index].cVarTooltip,
-                                             .disabled = disabledReq,
-                                             .disabledTooltip = disabledTooltip,
+                                             .disabled = disabledReason != DISABLE_NONE,
+                                             .disabledTooltip = reasonToTooltip.at(disabledReason),
                                          })) {
                 if (enhancementList[index].cVarFunction != nullptr) {
                     enhancementList[index].cVarFunction();
@@ -1174,8 +1193,8 @@ void SearchMenuGetItem(uint32_t index) {
                                            {
                                                .color = menuTheme[CVarGetInteger("gSettings.MenuTheme", 0)],
                                                .tooltip = enhancementList[index].cVarTooltip,
-                                               .disabled = disabledReq,
-                                               .disabledTooltip = disabledTooltip,
+                                               .disabled = disabledReason != DISABLE_NONE,
+                                               .disabledTooltip = reasonToTooltip.at(disabledReason),
                                            })) {
                 if (enhancementList[index].cVarFunction != nullptr) {
                     enhancementList[index].cVarFunction();
@@ -1187,8 +1206,8 @@ void SearchMenuGetItem(uint32_t index) {
                                   {
                                       .color = menuTheme[CVarGetInteger("gSettings.MenuTheme", 0)],
                                       .tooltip = enhancementList[index].cVarTooltip,
-                                      .disabled = disabledReq,
-                                      .disabledTooltip = disabledTooltip,
+                                      .disabled = disabledReason != DISABLE_NONE,
+                                      .disabledTooltip = reasonToTooltip.at(disabledReason),
                                   })) {
                 if (enhancementList[index].cVarFunction != nullptr) {
                     enhancementList[index].cVarFunction();

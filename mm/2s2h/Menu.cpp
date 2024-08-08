@@ -558,6 +558,10 @@ void BenMenu::Draw() {
 }
 
 void BenMenu::DrawElement() {
+    cVarDebugCamera = CVarGetInteger("gEnhancements.Camera.FreeLook.Enable", 0);
+    cVarFreeLook = CVarGetInteger("gEnhancements.Camera.DebugCam.Enable", 0);
+    cVarAutoSave = CVarGetInteger("gEnhancements.Saving.Autosave", 0);
+
     windowHeight = ImGui::GetMainViewport()->WorkSize.y;
     windowWidth = ImGui::GetMainViewport()->WorkSize.x;
     auto windowFlags = ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoSavedSettings;
