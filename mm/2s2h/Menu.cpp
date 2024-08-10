@@ -455,7 +455,6 @@ BenMenu::BenMenu(const std::string& consoleVariable, const std::string& name) : 
 }
 
 void BenMenu::InitElement() {
-    SearchMenuInitialize();
     popped = CVarGetInteger("gSettings.Menu.Popout", 0);
     poppedSize.x = CVarGetInteger("gSettings.Menu.PoppedWidth", 1280);
     poppedSize.y = CVarGetInteger("gSettings.Menu.PoppedHeight", 800);

@@ -1212,15 +1212,3 @@ void SearchMenuGetItem(uint32_t index) {
             break;
     }
 }
-
-bool isInitialized = false;
-
-void SearchMenuInitialize() {
-    if (!isInitialized) {
-        // Insert Disabled Evaluations
-        disabledMap["Debug Camera is Enabled"] = CVarGetInteger("gEnhancements.Camera.DebugCam.Enable", 0);
-        disabledMap["Free Look is Enabled"] = CVarGetInteger("gEnhancements.Camera.FreeLook.Enable", 0);
-        disabledMap["AutoSave is Disabled"] = !CVarGetInteger("gEnhancements.Saving.Autosave", 0);
-    }
-    isInitialized = true;
-}
