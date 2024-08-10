@@ -238,9 +238,7 @@ void DrawSaveTimeEnhancements() {
     SearchMenuGetItem(MENU_ITEM_PERSIST_OWL_SAVES);
     SearchMenuGetItem(MENU_ITEM_PAUSE_MENU_SAVE);
     SearchMenuGetItem(MENU_ITEM_AUTOSAVE);
-    if (CVarGetInteger("gEnhancements.Saving.Autosave", 0)) {
-        SearchMenuGetItem(MENU_ITEM_AUTOSAVE_INTERVAL);
-    }
+    SearchMenuGetItem(MENU_ITEM_AUTOSAVE_INTERVAL);
 
     ImGui::SeparatorText("Time Cycle");
     SearchMenuGetItem(MENU_ITEM_DISABLE_BOTTLE_RESET);
@@ -457,6 +455,7 @@ BenMenu::BenMenu(const std::string& consoleVariable, const std::string& name) : 
 }
 
 void BenMenu::InitElement() {
+    SearchMenuInitialize();
     popped = CVarGetInteger("gSettings.Menu.Popout", 0);
     poppedSize.x = CVarGetInteger("gSettings.Menu.PoppedWidth", 1280);
     poppedSize.y = CVarGetInteger("gSettings.Menu.PoppedHeight", 800);
@@ -558,9 +557,7 @@ void BenMenu::Draw() {
 }
 
 void BenMenu::DrawElement() {
-    cVarDebugCamera = CVarGetInteger("gEnhancements.Camera.FreeLook.Enable", 0);
-    cVarFreeLook = CVarGetInteger("gEnhancements.Camera.DebugCam.Enable", 0);
-    cVarAutoSave = CVarGetInteger("gEnhancements.Saving.Autosave", 0);
+    SearchMenuUpdateDisabled();
 
     windowHeight = ImGui::GetMainViewport()->WorkSize.y;
     windowWidth = ImGui::GetMainViewport()->WorkSize.x;

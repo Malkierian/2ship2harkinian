@@ -6,6 +6,9 @@ extern PlayState* gPlayState;
 }
 
 using WidgetFunc = void (*)();
+std::string disabledTempTooltip;
+const char* disabledTooltip;
+bool disabledValue = false;
 
 std::vector<ImVec4> menuTheme = {
     ImVec4(1.0f, 1.0f, 1.0f, 1.0f),    ImVec4(0.4f, 0.4f, 0.4f, 1.0f), ImVec4(0.1f, 0.1f, 0.1f, 1.0f),
@@ -27,25 +30,29 @@ typedef enum {
     COLOR_YELLOW,
 } colorOptions;
 
-std::unordered_map<int32_t, const char*> menuThemeOptions = {
-    { COLOR_WHITE, "White" },
-    { COLOR_GRAY, "Gray" },
-    { COLOR_DARK_GRAY, "Dark Gray" },
-    { COLOR_INDIGO, "Indigo" },
-    { COLOR_RED, "Red" },
-    { COLOR_DARK_RED, "Dark Red" },
-    { COLOR_LIGHT_GREEN, "Light Green" },
-    { COLOR_GREEN, "Green" },
-    { COLOR_DARK_GREEN, "Dark Green" },
-    { COLOR_YELLOW, "Yellow" },
+typedef enum {
+    CHECKBOX,
+    COMBOBOX,
+    SLIDER_INT,
+    SLIDER_FLOAT,
+    BUTTON,
 };
 
 typedef enum {
-    DISABLE_NONE,
-    DISABLE_DEBUG_CAMERA_ENABLED,
-    DISABLE_FREE_LOOK_ENABLED,
-    DISABLE_AUTOSAVE,
-} DisabledReason;
+    MOTION_BLUR_DYNAMIC,
+    MOTION_BLUR_ALWAYS_OFF,
+    MOTION_BLUR_ALWAYS_ON,
+};
+
+typedef enum {
+    DEBUG_LOG_TRACE,
+    DEBUG_LOG_DEBUG,
+    DEBUG_LOG_INFO,
+    DEBUG_LOG_WARN,
+    DEBUG_LOG_ERROR,
+    DEBUG_LOG_CRITICAL,
+    DEBUG_LOG_OFF,
+};
 
 struct widgetOptions {
     int32_t min;
@@ -62,15 +69,20 @@ struct cvarObject {
     uint32_t widgetType;
     widgetOptions cVarOptions;
     WidgetFunc cVarFunction;
-    std::vector<DisabledReason> disabledReasonList = {};
+    std::vector<const char*> disabledName;
 };
 
-typedef enum {
-    CHECKBOX,
-    COMBOBOX,
-    SLIDER_INT,
-    SLIDER_FLOAT,
-    BUTTON,
+std::unordered_map<int32_t, const char*> menuThemeOptions = {
+    { COLOR_WHITE, "White" },
+    { COLOR_GRAY, "Gray" },
+    { COLOR_DARK_GRAY, "Dark Gray" },
+    { COLOR_INDIGO, "Indigo" },
+    { COLOR_RED, "Red" },
+    { COLOR_DARK_RED, "Dark Red" },
+    { COLOR_LIGHT_GREEN, "Light Green" },
+    { COLOR_GREEN, "Green" },
+    { COLOR_DARK_GREEN, "Dark Green" },
+    { COLOR_YELLOW, "Yellow" },
 };
 
 static const std::unordered_map<int32_t, const char*> alwaysWinDoggyraceOptions = {
@@ -90,11 +102,7 @@ static const std::unordered_map<int32_t, const char*> textureFilteringMap = {
     { FILTER_NONE, "None" },
 };
 
-typedef enum {
-    MOTION_BLUR_DYNAMIC,
-    MOTION_BLUR_ALWAYS_OFF,
-    MOTION_BLUR_ALWAYS_ON,
-};
+
 static const std::unordered_map<int32_t, const char*> motionBlurOptions = {
     { MOTION_BLUR_DYNAMIC, "Dynamic (default)" },
     { MOTION_BLUR_ALWAYS_OFF, "Always Off" },
@@ -107,26 +115,17 @@ static const std::unordered_map<int32_t, const char*> debugSaveOptions = {
     { DEBUG_SAVE_INFO_NONE, "Empty save" },
 };
 
-typedef enum {
-    DEBUG_LOG_TRACE,
-    DEBUG_LOG_DEBUG,
-    DEBUG_LOG_INFO,
-    DEBUG_LOG_WARN,
-    DEBUG_LOG_ERROR,
-    DEBUG_LOG_CRITICAL,
-    DEBUG_LOG_OFF,
-};
+
 static const std::unordered_map<int32_t, const char*> logLevels = {
     { DEBUG_LOG_TRACE, "Trace" }, { DEBUG_LOG_DEBUG, "Debug" }, { DEBUG_LOG_INFO, "Info" },
     { DEBUG_LOG_WARN, "Warn" },   { DEBUG_LOG_ERROR, "Error" }, { DEBUG_LOG_CRITICAL, "Critical" },
     { DEBUG_LOG_OFF, "Off" },
 };
 
-std::unordered_map<DisabledReason, const char*> reasonToTooltip = {
-    { DISABLE_NONE, "" },
-    { DISABLE_DEBUG_CAMERA_ENABLED, "This setting is disabled because Debug Camera is enabled." },
-    { DISABLE_FREE_LOOK_ENABLED, "This setting is disabled because Free Look is enabled." },
-    { DISABLE_AUTOSAVE, "This setting is disabled because Autosave is disabled."},
+std::unordered_map<const char*, bool> disabledMap = {
+    { "Debug Camera is Enabled", false },
+    { "Free Look is Enabled", false },
+    { "AutoSave is Disabled", false },
 };
 
 typedef enum {
@@ -439,7 +438,7 @@ cvarObject enhancementList[] = {
       "stick in the controller config menu, and map the camera stick to the right stick.",
       CHECKBOX,
       {},
-      ([]() { RegisterCameraFreeLook(); }), { DISABLE_DEBUG_CAMERA_ENABLED } },
+      ([]() { RegisterCameraFreeLook(); }), { "Debug Camera is Enabled" } },
     { MENU_ITEM_FREE_LOOK_CAMERA_DISTANCE,
       "Camera Distance: %d",
       "gEnhancements.Camera.FreeLook.MaxCameraDistance",
@@ -475,7 +474,7 @@ cvarObject enhancementList[] = {
       "Enables free camera control.",
       CHECKBOX,
       {},
-      ([]() { RegisterDebugCam(); }), { DISABLE_FREE_LOOK_ENABLED } },
+      ([]() { RegisterDebugCam(); }), { "Free Look is Enabled" } },
     { MENU_ITEM_INVERT_CAMERA_X_AXIS,
       "Invert Camera X Axis",
       "gEnhancements.Camera.RightStick.InvertXAxis",
@@ -670,7 +669,7 @@ cvarObject enhancementList[] = {
       "Sets the interval between Autosaves.",
       SLIDER_INT,
       { 1, 60, 5 },
-      nullptr, { DISABLE_AUTOSAVE } },
+      nullptr, { "AutoSave is Disabled" } },
     { MENU_ITEM_DISABLE_BOTTLE_RESET,
       "Do not reset Bottle content",
       "gEnhancements.Cycle.DoNotResetBottleContent",
@@ -1108,35 +1107,30 @@ cvarObject enhancementList[] = {
       nullptr },
 };
 
-// to-do: map of strings for tooltips
-bool cVarDebugCamera;
-bool cVarFreeLook;
-bool cVarAutoSave;
-const char* disabledTooltip;
-
-bool SearchMenuGetDisabled (DisabledReason reason) {
-    switch (reason) {
-        case DISABLE_DEBUG_CAMERA_ENABLED:
-            return cVarFreeLook;
-        case DISABLE_FREE_LOOK_ENABLED:
-            return cVarDebugCamera;
-        case DISABLE_AUTOSAVE:
-            return cVarAutoSave;
-        default:
-            return NULL;
-    }
+void SearchMenuUpdateDisabled() {
+    disabledMap.at("Debug Camera is Enabled") = CVarGetInteger("gEnhancements.Camera.DebugCam.Enable", 0);
+    disabledMap.at("Free Look is Enabled") = CVarGetInteger("gEnhancements.Camera.FreeLook.Enable", 0);
+    disabledMap.at("AutoSave is Disabled") = !CVarGetInteger("gEnhancements.Saving.Autosave", 0);
 }
 
 void SearchMenuGetItem(uint32_t index) {
-    DisabledReason disabledReason = DISABLE_NONE;
-    if (!enhancementList[index].disabledReasonList.empty()) {
-        for (DisabledReason reason : enhancementList[index].disabledReasonList) {
-            if (SearchMenuGetDisabled(reason)) {
-                disabledReason = reason;
-                break;
+    disabledTempTooltip = "This setting is disabled because the following is set: \n\n";
+    disabledValue = false;
+    disabledTooltip = " ";
+
+    if (!enhancementList[index].disabledName.empty()) {
+        for (int i = 0; i < enhancementList[index].disabledName.size(); i++) {
+            if (disabledMap.at(enhancementList[index].disabledName[i]) == true) {
+                disabledValue = true;
+                disabledTempTooltip += std::string("- ") + enhancementList[index].disabledName[i] + std::string("\n");
             }
         }
+        disabledTooltip = disabledTempTooltip.c_str();
+    } else {
+        disabledValue = false;
+        disabledTooltip= " ";
     }
+
     float floatMin;
     float floatMax;
     float floatDefault;
@@ -1147,8 +1141,8 @@ void SearchMenuGetItem(uint32_t index) {
                                         {
                                             .color = menuTheme[CVarGetInteger("gSettings.MenuTheme", 0)],
                                             .tooltip = enhancementList[index].cVarTooltip,
-                                            .disabled = disabledReason != DISABLE_NONE,
-                                            .disabledTooltip = reasonToTooltip.at(disabledReason),
+                                            .disabled = disabledValue,
+                                            .disabledTooltip = disabledTooltip,
                                         })) {
                 if (enhancementList[index].cVarFunction != nullptr) {
                     enhancementList[index].cVarFunction();
@@ -1161,8 +1155,8 @@ void SearchMenuGetItem(uint32_t index) {
                                         {
                                             .color = menuTheme[CVarGetInteger("gSettings.MenuTheme", 0)],
                                             .tooltip = enhancementList[index].cVarTooltip,
-                                            .disabled = disabledReason != DISABLE_NONE,
-                                            .disabledTooltip = reasonToTooltip.at(disabledReason),
+                                            .disabled = disabledValue,
+                                            .disabledTooltip = disabledTooltip,
                                         })) {
                 if (enhancementList[index].cVarFunction != nullptr) {
                     enhancementList[index].cVarFunction();
@@ -1176,8 +1170,8 @@ void SearchMenuGetItem(uint32_t index) {
                                          {
                                              .color = menuTheme[CVarGetInteger("gSettings.MenuTheme", 0)],
                                              .tooltip = enhancementList[index].cVarTooltip,
-                                             .disabled = disabledReason != DISABLE_NONE,
-                                             .disabledTooltip = reasonToTooltip.at(disabledReason),
+                                             .disabled = disabledValue,
+                                             .disabledTooltip = disabledTooltip,
                                          })) {
                 if (enhancementList[index].cVarFunction != nullptr) {
                     enhancementList[index].cVarFunction();
@@ -1193,8 +1187,8 @@ void SearchMenuGetItem(uint32_t index) {
                                            {
                                                .color = menuTheme[CVarGetInteger("gSettings.MenuTheme", 0)],
                                                .tooltip = enhancementList[index].cVarTooltip,
-                                               .disabled = disabledReason != DISABLE_NONE,
-                                               .disabledTooltip = reasonToTooltip.at(disabledReason),
+                                               .disabled = disabledValue,
+                                               .disabledTooltip = disabledTooltip,
                                            })) {
                 if (enhancementList[index].cVarFunction != nullptr) {
                     enhancementList[index].cVarFunction();
@@ -1206,8 +1200,8 @@ void SearchMenuGetItem(uint32_t index) {
                                   {
                                       .color = menuTheme[CVarGetInteger("gSettings.MenuTheme", 0)],
                                       .tooltip = enhancementList[index].cVarTooltip,
-                                      .disabled = disabledReason != DISABLE_NONE,
-                                      .disabledTooltip = reasonToTooltip.at(disabledReason),
+                                      .disabled = disabledValue,
+                                      .disabledTooltip = disabledTooltip,
                                   })) {
                 if (enhancementList[index].cVarFunction != nullptr) {
                     enhancementList[index].cVarFunction();
@@ -1217,4 +1211,16 @@ void SearchMenuGetItem(uint32_t index) {
         default:
             break;
     }
+}
+
+bool isInitialized = false;
+
+void SearchMenuInitialize() {
+    if (!isInitialized) {
+        // Insert Disabled Evaluations
+        disabledMap["Debug Camera is Enabled"] = CVarGetInteger("gEnhancements.Camera.DebugCam.Enable", 0);
+        disabledMap["Free Look is Enabled"] = CVarGetInteger("gEnhancements.Camera.FreeLook.Enable", 0);
+        disabledMap["AutoSave is Disabled"] = !CVarGetInteger("gEnhancements.Saving.Autosave", 0);
+    }
+    isInitialized = true;
 }
