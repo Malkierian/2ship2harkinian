@@ -452,7 +452,7 @@ void AddSettings() {
                 { .defaultVariant = COLOR_INDIGO, .comboBoxOptions = menuThemeOptions } },
 #if not defined(__SWITCH__) and not defined(__WIIU__)
               { "Menu Controller Navigation", CVAR_IMGUI_CONTROLLER_NAV,
-                "Allows controller navigation of the 2s2h menu (Settings, Enhancements,...)\nCAUTION: "
+                "Allows controller navigation of the 2Ship menu (Settings, Enhancements,...)\nCAUTION: "
                 "This will disable game inputs while the menu is visible.\n\nD-pad to move between "
                 "items, A to select, B to move up in scope.",
                 WIDGET_CVAR_CHECKBOX },
