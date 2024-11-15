@@ -727,43 +727,44 @@ void AddSettings() {
                                       WIDGET_WINDOW_BUTTON,
                                       { .size = UIWidgets::Sizes::Inline, .windowName = "2S2H Input Editor" } } } } });
 
-    settingsSidebar.push_back({ "Notifications",
-                                1,
-                                { {
-                                    { "Position",
-                                      "gNotifications.Position",
-                                      "Which corner of the screen notifications appear in.",
-                                      WIDGET_CVAR_COMBOBOX,
-                                      { .defaultVariant = 3, .comboBoxOptions = notificationPosition } },
-                                    { "Duration: %.0f seconds",
-                                      "gNotifications.Duration",
-                                      "How long notifications are displayed for.",
-                                      WIDGET_CVAR_SLIDER_FLOAT,
-                                      { .min = 3.0f, .max = 30.0f, .defaultVariant = 10.0f, .format = "%.1f", .step = 0.1f } },
-                                    { "Background Opacity: %.0f%%",
-                                      "gNotifications.BgOpacity",
-                                      "How opaque the background of notifications is.",
-                                      WIDGET_CVAR_SLIDER_FLOAT,
-                                      { .min = 0.0f, .max = 1.0f, .defaultVariant = 0.5f, .format = "%.0f%%", .isPercentage = true } },
-                                    { "Size %.1f",
-                                      "gNotifications.Size",
-                                      "How large notifications are.",
-                                      WIDGET_CVAR_SLIDER_FLOAT,
-                                      { .min = 1.0f, .max = 5.0f, .defaultVariant = 1.8f, .format = "%.1f", .step = 0.1f } },
-                                    { "Test Notification",
-                                      "",
-                                      "Displays a test notification.",
-                                      WIDGET_BUTTON,
-                                      {},
-                                      [](widgetInfo& info) {
-                                          Notification::Emit({
-                                              .itemIcon = "__OTR__icon_item_24_static_yar/gQuestIconGoldSkulltulaTex",
-                                              .prefix = "This",
-                                              .message = "is a",
-                                              .suffix = "test.",
-                                          });
-                                      } },
-                                } } });
+    settingsSidebar.push_back(
+        { "Notifications",
+          1,
+          { {
+              { "Position",
+                "gNotifications.Position",
+                "Which corner of the screen notifications appear in.",
+                WIDGET_CVAR_COMBOBOX,
+                { .defaultVariant = 3, .comboBoxOptions = notificationPosition } },
+              { "Duration: %.0f seconds",
+                "gNotifications.Duration",
+                "How long notifications are displayed for.",
+                WIDGET_CVAR_SLIDER_FLOAT,
+                { .min = 3.0f, .max = 30.0f, .defaultVariant = 10.0f, .format = "%.1f", .step = 0.1f } },
+              { "Background Opacity: %.0f%%",
+                "gNotifications.BgOpacity",
+                "How opaque the background of notifications is.",
+                WIDGET_CVAR_SLIDER_FLOAT,
+                { .min = 0.0f, .max = 1.0f, .defaultVariant = 0.5f, .format = "%.0f%%", .isPercentage = true } },
+              { "Size %.1f",
+                "gNotifications.Size",
+                "How large notifications are.",
+                WIDGET_CVAR_SLIDER_FLOAT,
+                { .min = 1.0f, .max = 5.0f, .defaultVariant = 1.8f, .format = "%.1f", .step = 0.1f } },
+              { "Test Notification",
+                "",
+                "Displays a test notification.",
+                WIDGET_BUTTON,
+                {},
+                [](widgetInfo& info) {
+                    Notification::Emit({
+                        .itemIcon = "__OTR__icon_item_24_static_yar/gQuestIconGoldSkulltulaTex",
+                        .prefix = "This",
+                        .message = "is a",
+                        .suffix = "test.",
+                    });
+                } },
+          } } });
 
     if (CVarGetInteger("gSettings.SidebarSearch", 0)) {
         settingsSidebar.insert(settingsSidebar.begin() + searchSidebarIndex, searchSidebarEntry);
@@ -919,14 +920,14 @@ void AddEnhancements() {
                 "gEnhancements.Camera.FreeLook.MaxPitch",
                 "Maximum Height of the Camera.",
                 WIDGET_CVAR_SLIDER_FLOAT,
-                {.min = -89.0f, .max = 89.0f, .defaultVariant = 72.0f, .format = "%.0f\xC2\xB0"},
+                { .min = -89.0f, .max = 89.0f, .defaultVariant = 72.0f, .format = "%.0f\xC2\xB0" },
                 [](widgetInfo& info) { FreeLookPitchMinMax(); },
                 [](widgetInfo& info) { info.isHidden = disabledMap.at(DISABLE_FOR_FREE_LOOK_OFF).active; } },
               { "Min Camera Height Angle: %.0f\xC2\xB0",
                 "gEnhancements.Camera.FreeLook.MinPitch",
                 "Minimum Height of the Camera.",
                 WIDGET_CVAR_SLIDER_FLOAT,
-                {.min = -89.0f, .max = 89.0f, .defaultVariant = -49.0f, .format = "%.0f\xC2\xB0"},
+                { .min = -89.0f, .max = 89.0f, .defaultVariant = -49.0f, .format = "%.0f\xC2\xB0" },
                 [](widgetInfo& info) { FreeLookPitchMinMax(); },
                 [](widgetInfo& info) { info.isHidden = disabledMap.at(DISABLE_FOR_FREE_LOOK_OFF).active; } },
               { "Debug Camera",
@@ -966,7 +967,7 @@ void AddEnhancements() {
                 "gEnhancements.Camera.RightStick.CameraSensitivity.X",
                 "Adjust the Sensitivity of the x axis when in Third Person.",
                 WIDGET_CVAR_SLIDER_FLOAT,
-                {.min = 0.01f, .max = 5.0f, .defaultVariant = 1.0f, .format = "%.0f%%", .isPercentage = true },
+                { .min = 0.01f, .max = 5.0f, .defaultVariant = 1.0f, .format = "%.0f%%", .isPercentage = true },
                 nullptr,
                 [](widgetInfo& info) {
                     if (disabledMap.at(DISABLE_FOR_CAMERAS_OFF).active) {
@@ -977,7 +978,7 @@ void AddEnhancements() {
                 "gEnhancements.Camera.RightStick.CameraSensitivity.Y",
                 "Adjust the Sensitivity of the x axis when in Third Person.",
                 WIDGET_CVAR_SLIDER_FLOAT,
-                {.min = 0.01f, .max = 5.0f, .defaultVariant = 1.0f, .format = "%.0f%%", .isPercentage = true },
+                { .min = 0.01f, .max = 5.0f, .defaultVariant = 1.0f, .format = "%.0f%%", .isPercentage = true },
                 nullptr,
                 [](widgetInfo& info) {
                     if (disabledMap.at(DISABLE_FOR_CAMERAS_OFF).active) {
@@ -997,7 +998,7 @@ void AddEnhancements() {
                 "gEnhancements.Camera.DebugCam.CameraSpeed",
                 "Adjusts the speed of the Camera.",
                 WIDGET_CVAR_SLIDER_FLOAT,
-                {.min = 0.1f, .max = 3.0f, .defaultVariant = 0.5f, .format = "%.0f%%", .isPercentage = true },
+                { .min = 0.1f, .max = 3.0f, .defaultVariant = 0.5f, .format = "%.0f%%", .isPercentage = true },
                 nullptr,
                 [](widgetInfo& info) { info.isHidden = disabledMap.at(DISABLE_FOR_DEBUG_CAM_OFF).active; } } } } });
     // Cheats
@@ -1819,16 +1820,15 @@ void SearchMenuGetItem(widgetInfo& widget) {
                     assert(false);
                     return;
                 }
-                if (UIWidgets::SliderInt(
-                        widget.widgetName.c_str(), pointer,
-                        std::get<int32_t>(widget.widgetOptions.min),
-                        std::get<int32_t>(widget.widgetOptions.max),
-                        {
-                            .color = menuTheme[menuThemeIndex],
-                            .tooltip = widget.widgetTooltip,
-                            .disabled = disabledValue,
-                            .disabledTooltip = disabledTooltip,
-                        })) {
+                if (UIWidgets::SliderInt(widget.widgetName.c_str(), pointer,
+                                         std::get<int32_t>(widget.widgetOptions.min),
+                                         std::get<int32_t>(widget.widgetOptions.max),
+                                         {
+                                             .color = menuTheme[menuThemeIndex],
+                                             .tooltip = widget.widgetTooltip,
+                                             .disabled = disabledValue,
+                                             .disabledTooltip = disabledTooltip,
+                                         })) {
                     if (widget.widgetCallback != nullptr) {
                         widget.widgetCallback(widget);
                     }
@@ -1842,35 +1842,33 @@ void SearchMenuGetItem(widgetInfo& widget) {
                     assert(false);
                     return;
                 }
-                if (UIWidgets::SliderFloat(
-                        widget.widgetName.c_str(), pointer,
-                        std::get<float>(widget.widgetOptions.min),
-                        std::get<float>(widget.widgetOptions.max),
-                        { .color = menuTheme[menuThemeIndex],
-                            .tooltip = widget.widgetTooltip,
-                            .disabled = disabledValue,
-                            .disabledTooltip = disabledTooltip,
-                            .showButtons = widget.widgetOptions.showButtons,
-                            .format = widget.widgetOptions.format,
-                            .step = widget.widgetOptions.step,
-                            .isPercentage = widget.widgetOptions.isPercentage })) {
+                if (UIWidgets::SliderFloat(widget.widgetName.c_str(), pointer,
+                                           std::get<float>(widget.widgetOptions.min),
+                                           std::get<float>(widget.widgetOptions.max),
+                                           { .color = menuTheme[menuThemeIndex],
+                                             .tooltip = widget.widgetTooltip,
+                                             .disabled = disabledValue,
+                                             .disabledTooltip = disabledTooltip,
+                                             .showButtons = widget.widgetOptions.showButtons,
+                                             .format = widget.widgetOptions.format,
+                                             .step = widget.widgetOptions.step,
+                                             .isPercentage = widget.widgetOptions.isPercentage })) {
                     if (widget.widgetCallback != nullptr) {
                         widget.widgetCallback(widget);
                     }
                 }
             } break;
             case WIDGET_CVAR_SLIDER_INT:
-                if (UIWidgets::CVarSliderInt(
-                        widget.widgetName.c_str(), widget.widgetCVar,
-                        std::get<int32_t>(widget.widgetOptions.min),
-                        std::get<int32_t>(widget.widgetOptions.max),
-                        std::get<int32_t>(widget.widgetOptions.defaultVariant),
-                        {
-                            .color = menuTheme[menuThemeIndex],
-                            .tooltip = widget.widgetTooltip,
-                            .disabled = disabledValue,
-                            .disabledTooltip = disabledTooltip,
-                        })) {
+                if (UIWidgets::CVarSliderInt(widget.widgetName.c_str(), widget.widgetCVar,
+                                             std::get<int32_t>(widget.widgetOptions.min),
+                                             std::get<int32_t>(widget.widgetOptions.max),
+                                             std::get<int32_t>(widget.widgetOptions.defaultVariant),
+                                             {
+                                                 .color = menuTheme[menuThemeIndex],
+                                                 .tooltip = widget.widgetTooltip,
+                                                 .disabled = disabledValue,
+                                                 .disabledTooltip = disabledTooltip,
+                                             })) {
                     if (widget.widgetCallback != nullptr) {
                         widget.widgetCallback(widget);
                     }
