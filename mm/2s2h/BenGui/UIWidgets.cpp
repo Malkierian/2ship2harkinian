@@ -430,8 +430,8 @@ void ClampFloat(float* value, float min, float max, float step) {
         ss << std::setprecision(ticks) << std::setiosflags(std::ios_base::fixed) << (float)*value;
         std::string msg = fmt::format("String value: {}", ss.str());
         SPDLOG_ERROR(msg.c_str());
-        float str = std::stof(ss.str());
-        msg = fmt::format("stof: {}", str);
+        float str = float(std::stod(ss.str()));
+        msg = fmt::format("stod: {}", str);
         SPDLOG_ERROR(msg.c_str());
         *value = str;
     }
