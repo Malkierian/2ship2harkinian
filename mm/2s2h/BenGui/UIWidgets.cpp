@@ -456,7 +456,7 @@ bool SliderFloat(const char* label, float* value, float min, float max, const Fl
     if (options.showButtons) {
         if (Button("-", { .color = options.color, .size = Sizes::Inline }) && *value > min) {
             *value -= options.step;
-            ClampFloat(value, min, max, options.step);
+            // ClampFloat(value, min, max, options.step);
             Ship::Context::GetInstance()->GetWindow()->GetGui()->SaveConsoleVariablesOnNextTick();
             dirty = true;
         }
@@ -468,7 +468,7 @@ bool SliderFloat(const char* label, float* value, float min, float max, const Fl
     if (ImGui::SliderScalar(invisibleLabel, ImGuiDataType_Float, &valueToDisplay, &minToDisplay, &maxToDisplay,
                             options.format, options.flags)) {
         *value = options.isPercentage ? valueToDisplay / 100.0f : valueToDisplay;
-        ClampFloat(value, min, max, options.step);
+        // ClampFloat(value, min, max, options.step);
         Ship::Context::GetInstance()->GetWindow()->GetGui()->SaveConsoleVariablesOnNextTick();
         dirty = true;
     }
@@ -477,7 +477,7 @@ bool SliderFloat(const char* label, float* value, float min, float max, const Fl
         ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
         if (Button("+", { .color = options.color, .size = Sizes::Inline }) && *value < max) {
             *value += options.step;
-            ClampFloat(value, min, max, options.step);
+            // ClampFloat(value, min, max, options.step);
             Ship::Context::GetInstance()->GetWindow()->GetGui()->SaveConsoleVariablesOnNextTick();
             dirty = true;
         }
