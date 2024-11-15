@@ -7,6 +7,7 @@
 #include <unordered_map>
 #include <libultraship/libultra/types.h>
 #include "2s2h/ShipUtils.h"
+#include <fmt/format.h>
 
 namespace UIWidgets {
 // Automatically adds newlines to break up text longer than a specified number of characters
@@ -425,9 +426,14 @@ void ClampFloat(float* value, float min, float max, float step) {
         *value = max;
     } else {
         *value = std::round(*value * factor) / factor;
+        std::string msg = fmt::format("Value after round: {}", (float)*value);
+        SPDLOG_ERROR(msg.c_str());
         std::stringstream ss;
-        ss << std::setprecision(ticks) << std::setiosflags(std::ios_base::fixed) << *value;
-        *value = std::stof(ss.str());
+        ss << std::setprecision(ticks) << std::setiosflags(std::ios_base::fixed) << (float)*value;
+        msg = fmt::format("String value: {}", ss.str());
+        SPDLOG_ERROR(msg.c_str());
+        float str = std::stof(ss.str());
+        *value = str;
     }
 }
 
@@ -456,7 +462,7 @@ bool SliderFloat(const char* label, float* value, float min, float max, const Fl
     if (options.showButtons) {
         if (Button("-", { .color = options.color, .size = Sizes::Inline }) && *value > min) {
             *value -= options.step;
-            // ClampFloat(value, min, max, options.step);
+            ClampFloat(value, min, max, options.step);
             Ship::Context::GetInstance()->GetWindow()->GetGui()->SaveConsoleVariablesOnNextTick();
             dirty = true;
         }
@@ -468,7 +474,12 @@ bool SliderFloat(const char* label, float* value, float min, float max, const Fl
     if (ImGui::SliderScalar(invisibleLabel, ImGuiDataType_Float, &valueToDisplay, &minToDisplay, &maxToDisplay,
                             options.format, options.flags)) {
         *value = options.isPercentage ? valueToDisplay / 100.0f : valueToDisplay;
-        // ClampFloat(value, min, max, options.step);
+        std::string msg = fmt::format("Val: {}; ValDisp: {}; Max: {}; MaxDisp: {}; Min: {}; MinDisp: {}", (float)*value,
+                                      valueToDisplay, max, maxToDisplay, min, minToDisplay);
+        SPDLOG_ERROR(msg.c_str());
+        ClampFloat(value, min, max, options.step);
+        msg = fmt::format("After clamp -  Val: {}; Max: {}; Min: {}", (float)*value, max, min);
+        SPDLOG_ERROR(msg.c_str());
         Ship::Context::GetInstance()->GetWindow()->GetGui()->SaveConsoleVariablesOnNextTick();
         dirty = true;
     }
@@ -477,7 +488,7 @@ bool SliderFloat(const char* label, float* value, float min, float max, const Fl
         ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
         if (Button("+", { .color = options.color, .size = Sizes::Inline }) && *value < max) {
             *value += options.step;
-            // ClampFloat(value, min, max, options.step);
+            ClampFloat(value, min, max, options.step);
             Ship::Context::GetInstance()->GetWindow()->GetGui()->SaveConsoleVariablesOnNextTick();
             dirty = true;
         }
