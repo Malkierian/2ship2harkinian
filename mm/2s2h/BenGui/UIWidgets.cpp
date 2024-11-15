@@ -426,13 +426,13 @@ void ClampFloat(float* value, float min, float max, float step) {
         *value = max;
     } else {
         *value = std::round(*value * factor) / factor;
-        std::string msg = fmt::format("Value after round: {}", (float)*value);
-        SPDLOG_ERROR(msg.c_str());
         std::stringstream ss;
         ss << std::setprecision(ticks) << std::setiosflags(std::ios_base::fixed) << (float)*value;
-        msg = fmt::format("String value: {}", ss.str());
+        std::string msg = fmt::format("String value: {}", ss.str());
         SPDLOG_ERROR(msg.c_str());
         float str = std::stof(ss.str());
+        msg = fmt::format("stof: {}", str);
+        SPDLOG_ERROR(msg.c_str());
         *value = str;
     }
 }
@@ -474,11 +474,8 @@ bool SliderFloat(const char* label, float* value, float min, float max, const Fl
     if (ImGui::SliderScalar(invisibleLabel, ImGuiDataType_Float, &valueToDisplay, &minToDisplay, &maxToDisplay,
                             options.format, options.flags)) {
         *value = options.isPercentage ? valueToDisplay / 100.0f : valueToDisplay;
-        std::string msg = fmt::format("Val: {}; ValDisp: {}; Max: {}; MaxDisp: {}; Min: {}; MinDisp: {}", (float)*value,
-                                      valueToDisplay, max, maxToDisplay, min, minToDisplay);
-        SPDLOG_ERROR(msg.c_str());
         ClampFloat(value, min, max, options.step);
-        msg = fmt::format("After clamp -  Val: {}; Max: {}; Min: {}", (float)*value, max, min);
+        std::string msg = fmt::format("After clamp -  Val: {}; Max: {}; Min: {}", (float)*value, max, min);
         SPDLOG_ERROR(msg.c_str());
         Ship::Context::GetInstance()->GetWindow()->GetGui()->SaveConsoleVariablesOnNextTick();
         dirty = true;
