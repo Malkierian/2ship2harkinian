@@ -425,15 +425,8 @@ void ClampFloat(float* value, float min, float max, float step) {
     } else if (*value > max) {
         *value = max;
     } else {
-        *value = std::round(*value * factor) / factor;
-        std::stringstream ss;
-        ss << std::setprecision(ticks) << std::setiosflags(std::ios_base::fixed) << (float)*value;
-        std::string msg = fmt::format("String value: {}", ss.str());
-        SPDLOG_ERROR(msg.c_str());
-        float str = float(std::stod(ss.str()));
-        msg = fmt::format("stod: {}", str);
-        SPDLOG_ERROR(msg.c_str());
-        *value = str;
+        int trunc = (int)std::round(*value * factor);
+        *value =  (float)trunc / factor;
     }
 }
 
