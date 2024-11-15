@@ -426,7 +426,7 @@ void ClampFloat(float* value, float min, float max, float step) {
         *value = max;
     } else {
         int trunc = (int)std::round(*value * factor);
-        *value =  (float)trunc / factor;
+        *value = (float)trunc / factor;
     }
 }
 
@@ -467,9 +467,6 @@ bool SliderFloat(const char* label, float* value, float min, float max, const Fl
     if (ImGui::SliderScalar(invisibleLabel, ImGuiDataType_Float, &valueToDisplay, &minToDisplay, &maxToDisplay,
                             options.format, options.flags)) {
         *value = options.isPercentage ? valueToDisplay / 100.0f : valueToDisplay;
-        ClampFloat(value, min, max, options.step);
-        std::string msg = fmt::format("After clamp -  Val: {}; Max: {}; Min: {}", (float)*value, max, min);
-        SPDLOG_ERROR(msg.c_str());
         Ship::Context::GetInstance()->GetWindow()->GetGui()->SaveConsoleVariablesOnNextTick();
         dirty = true;
     }
