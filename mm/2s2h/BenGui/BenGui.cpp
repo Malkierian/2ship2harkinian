@@ -23,6 +23,7 @@
 
 #include "Enhancements/Trackers/ItemTracker.h"
 #include "Enhancements/Trackers/ItemTrackerSettings.h"
+#include "Menu.h"
 
 namespace BenGui {
 // MARK: - Delegates
@@ -38,7 +39,7 @@ std::shared_ptr<HudEditorWindow> mHudEditorWindow;
 std::shared_ptr<ActorViewerWindow> mActorViewerWindow;
 std::shared_ptr<CollisionViewerWindow> mCollisionViewerWindow;
 std::shared_ptr<EventLogWindow> mEventLogWindow;
-std::shared_ptr<BenMenu> mBenMenu;
+std::shared_ptr<Ship::Menu> mBenMenu;
 std::shared_ptr<BenInputEditorWindow> mBenInputEditorWindow;
 std::shared_ptr<Notification::Window> mNotificationWindow;
 std::shared_ptr<ItemTrackerWindow> mItemTrackerWindow;
@@ -63,7 +64,7 @@ void SetupGuiElements() {
 #endif
     }
 
-    mBenMenu = std::make_shared<BenMenu>("gWindows.Menu", "Settings Menu");
+    mBenMenu = std::make_shared<Ship::Menu>("gWindows.Menu", "Settings Menu");
     gui->SetMenu(mBenMenu);
 
     mStatsWindow = gui->GetGuiWindow("Stats");

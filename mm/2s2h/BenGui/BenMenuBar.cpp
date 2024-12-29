@@ -34,17 +34,6 @@ static const std::unordered_map<int32_t, const char*> debugSaveOptions = {
     { DEBUG_SAVE_INFO_NONE, "Empty save" },
 };
 
-static const std::unordered_map<Ship::AudioBackend, const char*> audioBackendsMap = {
-    { Ship::AudioBackend::WASAPI, "Windows Audio Session API" },
-    { Ship::AudioBackend::SDL, "SDL" },
-};
-
-static std::unordered_map<Ship::WindowBackend, const char*> windowBackendsMap = {
-    { Ship::WindowBackend::FAST3D_DXGI_DX11, "DirectX" },
-    { Ship::WindowBackend::FAST3D_SDL_OPENGL, "OpenGL" },
-    { Ship::WindowBackend::FAST3D_SDL_METAL, "Metal" },
-};
-
 static const std::unordered_map<int32_t, const char*> clockTypeOptions = {
     { CLOCK_TYPE_ORIGINAL, "Original" },
     { CLOCK_TYPE_3DS, "MM3D style" },
@@ -80,20 +69,20 @@ std::shared_ptr<std::vector<Ship::WindowBackend>> availableWindowBackends;
 std::unordered_map<Ship::WindowBackend, const char*> availableWindowBackendsMap;
 Ship::WindowBackend configWindowBackend;
 
-void UpdateWindowBackendObjects() {
-    Ship::WindowBackend runningWindowBackend = Ship::Context::GetInstance()->GetWindow()->GetWindowBackend();
-    int32_t configWindowBackendId = Ship::Context::GetInstance()->GetConfig()->GetInt("Window.Backend.Id", -1);
-    if (Ship::Context::GetInstance()->GetWindow()->IsAvailableWindowBackend(configWindowBackendId)) {
-        configWindowBackend = static_cast<Ship::WindowBackend>(configWindowBackendId);
-    } else {
-        configWindowBackend = runningWindowBackend;
-    }
-
-    availableWindowBackends = Ship::Context::GetInstance()->GetWindow()->GetAvailableWindowBackends();
-    for (auto& backend : *availableWindowBackends) {
-        availableWindowBackendsMap[backend] = windowBackendsMap[backend];
-    }
-}
+//void UpdateWindowBackendObjects() {
+//    Ship::WindowBackend runningWindowBackend = Ship::Context::GetInstance()->GetWindow()->GetWindowBackend();
+//    int32_t configWindowBackendId = Ship::Context::GetInstance()->GetConfig()->GetInt("Window.Backend.Id", -1);
+//    if (Ship::Context::GetInstance()->GetWindow()->IsAvailableWindowBackend(configWindowBackendId)) {
+//        configWindowBackend = static_cast<Ship::WindowBackend>(configWindowBackendId);
+//    } else {
+//        configWindowBackend = runningWindowBackend;
+//    }
+//
+//    availableWindowBackends = Ship::Context::GetInstance()->GetWindow()->GetAvailableWindowBackends();
+//    for (auto& backend : *availableWindowBackends) {
+//        availableWindowBackendsMap[backend] = windowBackendsMap[backend];
+//    }
+//}
 
 void DrawMenuBarIcon() {
     static bool gameIconLoaded = false;
@@ -194,13 +183,13 @@ void DrawSettingsMenu() {
             }
 
             auto currentAudioBackend = Ship::Context::GetInstance()->GetAudio()->GetAudioBackend();
-            if (UIWidgets::Combobox(
-                    "Audio API", &currentAudioBackend, audioBackendsMap,
-                    { .tooltip = "Sets the audio API used by the game. Requires a relaunch to take effect.",
-                      .disabled = Ship::Context::GetInstance()->GetAudio()->GetAvailableAudioBackends()->size() <= 1,
-                      .disabledTooltip = "Only one audio API is available on this platform." })) {
-                Ship::Context::GetInstance()->GetAudio()->SetAudioBackend(currentAudioBackend);
-            }
+            //if (UIWidgets::Combobox(
+            //        "Audio API", &currentAudioBackend, audioBackendsMap,
+            //        { .tooltip = "Sets the audio API used by the game. Requires a relaunch to take effect.",
+            //          .disabled = Ship::Context::GetInstance()->GetAudio()->GetAvailableAudioBackends()->size() <= 1,
+            //          .disabledTooltip = "Only one audio API is available on this platform." })) {
+            //    Ship::Context::GetInstance()->GetAudio()->SetAudioBackend(currentAudioBackend);
+            //}
 
             ImGui::EndMenu();
         }
@@ -286,18 +275,18 @@ void DrawSettingsMenu() {
             // UIWidgets::PaddedSeparator(true, true, 3.0f, 3.0f);
             //  #endregion */
 
-            if (UIWidgets::Combobox(
-                    "Renderer API (Needs reload)", &configWindowBackend, availableWindowBackendsMap,
-                    { .tooltip = "Sets the renderer API used by the game. Requires a relaunch to take effect.",
-                      .disabled = availableWindowBackends->size() <= 1,
-                      .disabledTooltip = "Only one renderer API is available on this platform." })) {
-                Ship::Context::GetInstance()->GetConfig()->SetInt("Window.Backend.Id",
-                                                                  static_cast<int32_t>(configWindowBackend));
-                Ship::Context::GetInstance()->GetConfig()->SetString("Window.Backend.Name",
-                                                                     windowBackendsMap.at(configWindowBackend));
-                Ship::Context::GetInstance()->GetConfig()->Save();
-                UpdateWindowBackendObjects();
-            }
+            //if (UIWidgets::Combobox(
+            //        "Renderer API (Needs reload)", &configWindowBackend, availableWindowBackendsMap,
+            //        { .tooltip = "Sets the renderer API used by the game. Requires a relaunch to take effect.",
+            //          .disabled = availableWindowBackends->size() <= 1,
+            //          .disabledTooltip = "Only one renderer API is available on this platform." })) {
+            //    Ship::Context::GetInstance()->GetConfig()->SetInt("Window.Backend.Id",
+            //                                                      static_cast<int32_t>(configWindowBackend));
+            //    Ship::Context::GetInstance()->GetConfig()->SetString("Window.Backend.Name",
+            //                                                         windowBackendsMap.at(configWindowBackend));
+            //    Ship::Context::GetInstance()->GetConfig()->Save();
+            //    UpdateWindowBackendObjects();
+            //}
 
             if (Ship::Context::GetInstance()->GetWindow()->CanDisableVerticalSync()) {
                 UIWidgets::CVarCheckbox("Enable Vsync", CVAR_VSYNC_ENABLED);
@@ -984,7 +973,7 @@ void DrawDeveloperToolsMenu() {
 }
 
 void BenMenuBar::InitElement() {
-    UpdateWindowBackendObjects();
+    //UpdateWindowBackendObjects();
 }
 
 void BenMenuBar::DrawElement() {
