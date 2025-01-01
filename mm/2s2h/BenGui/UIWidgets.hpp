@@ -16,6 +16,8 @@ namespace UIWidgets {
 
     using SectionFunc = void(*)();
 
+    static const ImVec4 COLOR_NONE = { 0, 0, 0, 0 };
+
     struct TextFilters {
         static int FilterNumbers(ImGuiInputTextCallbackData* data) {
             if (data->EventChar < 256 && strchr("1234567890", (char)data->EventChar)) {
@@ -77,8 +79,8 @@ namespace UIWidgets {
     bool MenuItem(const char* label, const char* shortcut = NULL, const ImVec4& color = Colors::Indigo);
 
     struct ButtonOptions {
-        const ImVec4 color = Colors::Gray;
-        const ImVec2 size = Sizes::Fill;
+        ImVec4 color = Colors::Gray;
+        ImVec2 size = Sizes::Fill;
         const char* tooltip = "";
         bool disabled = false;
         const char* disabledTooltip = "";
@@ -90,7 +92,7 @@ namespace UIWidgets {
     bool WindowButton(const char* label, const char* cvarName, std::shared_ptr<Ship::GuiWindow> windowPtr, const ButtonOptions& options = {});
 
     struct CheckboxOptions {
-        const ImVec4 color = Colors::Indigo;
+        ImVec4 color = Colors::Indigo;
         const char* tooltip = "";
         bool disabled = false;
         const char* disabledTooltip = "";
@@ -106,7 +108,7 @@ namespace UIWidgets {
     bool CVarCheckbox(const char* label, const char* cvarName, const CheckboxOptions& options = {});
 
     struct ComboboxOptions {
-        const ImVec4 color = Colors::Indigo;
+        ImVec4 color = Colors::Indigo;
         const char* tooltip = "";
         bool disabled = false;
         const char* disabledTooltip = "";
@@ -385,38 +387,49 @@ namespace UIWidgets {
     }
 
     struct IntSliderOptions {
-        const ImVec4 color = Colors::Gray;
+        ImVec4 color = Colors::Gray;
         const char* tooltip = "";
         bool disabled = false;
         const char* disabledTooltip = "";
         bool showButtons = true;
         ImGuiSliderFlags flags = 0;
         const char* format = "%d";
-        const uint32_t step = 1;
+        int32_t step = 1;
+        int32_t min = 1;
+        int32_t max = 10;
+        int32_t defaultValue = 1;
         ComponentAlignment alignment = ComponentAlignment::Left;
         LabelPosition labelPosition = LabelPosition::Above;
     };
 
     struct FloatSliderOptions {
-        const ImVec4 color = Colors::Gray;
+        ImVec4 color = Colors::Gray;
         const char* tooltip = "";
         bool disabled = false;
         const char* disabledTooltip = "";
         bool showButtons = true;
         ImGuiSliderFlags flags = 0;
         const char* format = "%f";
-        const float step = 0.01f;
+        float step = 0.01f;
+        float min = 0.01f;
+        float max = 10.0f;
+        float defaultValue = 1.0f;
         bool isPercentage = false; // Multiplies visual value by 100
         ComponentAlignment alignment = ComponentAlignment::Left;
         LabelPosition labelPosition = LabelPosition::Above;
     };
 
+    struct SeparatorOptions {
+        ImVec4 color = COLOR_NONE;
+        const char* tooltip = "";
+    };
+
     void PushStyleSlider(const ImVec4& color = Colors::Indigo);
     void PopStyleSlider();
-    bool SliderInt(const char* label, int32_t* value, int32_t min, int32_t max, const IntSliderOptions& options = {});
-    bool CVarSliderInt(const char* label, const char* cvarName, int32_t min, int32_t max, const int32_t defaultValue, const IntSliderOptions& options = {});
-    bool SliderFloat(const char* label, float* value, float min, float max, const FloatSliderOptions& options = {});
-    bool CVarSliderFloat(const char* label, const char* cvarName, float min, float max, const float defaultValue, const FloatSliderOptions& options = {});
+    bool SliderInt(const char* label, int32_t* value, const IntSliderOptions& options = {});
+    bool CVarSliderInt(const char* label, const char* cvarName, const IntSliderOptions& options = {});
+    bool SliderFloat(const char* label, float* value, const FloatSliderOptions& options = {});
+    bool CVarSliderFloat(const char* label, const char* cvarName, const FloatSliderOptions& options = {});
     bool CVarColorPicker(const char* label, const char* cvarName, Color_RGBA8 defaultColor);
     void DrawFlagArray32(const std::string& name, uint32_t& flags);
     void DrawFlagArray16(const std::string& name, uint16_t& flags);

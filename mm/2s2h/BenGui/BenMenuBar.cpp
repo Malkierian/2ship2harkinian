@@ -141,27 +141,57 @@ extern std::shared_ptr<BenInputEditorWindow> mBenInputEditorWindow;
 void DrawSettingsMenu() {
     if (UIWidgets::BeginMenu("Settings")) {
         if (UIWidgets::BeginMenu("Audio")) {
-            UIWidgets::CVarSliderFloat("Master Volume: %.0f %%", "gSettings.Audio.MasterVolume", 0.0f, 1.0f, 1.0f,
-                                       { .showButtons = false, .format = "", .isPercentage = true });
+            UIWidgets::CVarSliderFloat("Master Volume: %.0f %%", "gSettings.Audio.MasterVolume",
+                                       { .showButtons = false,
+                                         .format = "",
+                                         .min = 0.0f,
+                                         .max = 1.0f,
+                                         .defaultValue = 1.0f,
+                                         .isPercentage = true });
 
-            if (UIWidgets::CVarSliderFloat("Main Music Volume: %.0f %%", "gSettings.Audio.MainMusicVolume", 0.0f, 1.0f,
-                                           1.0f, { .showButtons = false, .format = "", .isPercentage = true })) {
+            if (UIWidgets::CVarSliderFloat("Main Music Volume: %.0f %%", "gSettings.Audio.MainMusicVolume",
+                                           { .showButtons = false,
+                                             .format = "",
+                                             .min = 0.0f,
+                                             .max = 1.0f,
+                                             .defaultValue = 1.0f,
+                                             .isPercentage = true })) {
                 AudioSeq_SetPortVolumeScale(SEQ_PLAYER_BGM_MAIN, CVarGetFloat("gSettings.Audio.MainMusicVolume", 1.0f));
             }
-            if (UIWidgets::CVarSliderFloat("Sub Music Volume: %.0f %%", "gSettings.Audio.SubMusicVolume", 0.0f, 1.0f,
-                                           1.0f, { .showButtons = false, .format = "", .isPercentage = true })) {
+            if (UIWidgets::CVarSliderFloat("Sub Music Volume: %.0f %%", "gSettings.Audio.SubMusicVolume",
+                                           { .showButtons = false,
+                                             .format = "",
+                                             .min = 0.0f,
+                                             .max = 1.0f,
+                                             .defaultValue = 1.0f,
+                                             .isPercentage = true })) {
                 AudioSeq_SetPortVolumeScale(SEQ_PLAYER_BGM_SUB, CVarGetFloat("gSettings.Audio.SubMusicVolume", 1.0f));
             }
-            if (UIWidgets::CVarSliderFloat("Sound Effects Volume: %.0f %%", "gSettings.Audio.SoundEffectsVolume", 0.0f,
-                                           1.0f, 1.0f, { .showButtons = false, .format = "", .isPercentage = true })) {
+            if (UIWidgets::CVarSliderFloat("Sound Effects Volume: %.0f %%", "gSettings.Audio.SoundEffectsVolume",
+                                           { .showButtons = false,
+                                             .format = "",
+                                             .min = 0.0f,
+                                             .max = 1.0f,
+                                             .defaultValue = 1.0f,
+                                             .isPercentage = true })) {
                 AudioSeq_SetPortVolumeScale(SEQ_PLAYER_SFX, CVarGetFloat("gSettings.Audio.SoundEffectsVolume", 1.0f));
             }
-            if (UIWidgets::CVarSliderFloat("Fanfare Volume: %.0f %%", "gSettings.Audio.FanfareVolume", 0.0f, 1.0f, 1.0f,
-                                           { .showButtons = false, .format = "", .isPercentage = true })) {
+            if (UIWidgets::CVarSliderFloat("Fanfare Volume: %.0f %%", "gSettings.Audio.FanfareVolume",
+                                           { .showButtons = false,
+                                             .format = "",
+                                             .min = 0.0f,
+                                             .max = 1.0f,
+                                             .defaultValue = 1.0f,
+                                             .isPercentage = true })) {
                 AudioSeq_SetPortVolumeScale(SEQ_PLAYER_FANFARE, CVarGetFloat("gSettings.Audio.FanfareVolume", 1.0f));
             }
-            if (UIWidgets::CVarSliderFloat("Ambience Volume: %.0f %%", "gSettings.Audio.AmbienceVolume", 0.0f, 1.0f,
-                                           1.0f, { .showButtons = false, .format = "", .isPercentage = true })) {
+            if (UIWidgets::CVarSliderFloat("Ambience Volume: %.0f %%", "gSettings.Audio.AmbienceVolume",
+                                           { .showButtons = false,
+                                             .format = "",
+                                             .min = 0.0f,
+                                             .max = 1.0f,
+                                             .defaultValue = 1.0f,
+                                             .isPercentage = true })) {
                 AudioSeq_SetPortVolumeScale(SEQ_PLAYER_AMBIENCE, CVarGetFloat("gSettings.Audio.AmbienceVolume", 1.0f));
             }
 
@@ -180,7 +210,8 @@ void DrawSettingsMenu() {
         if (UIWidgets::BeginMenu("Graphics")) {
 
 #ifndef __APPLE__
-            if (UIWidgets::CVarSliderFloat("Internal Resolution: %f %%", CVAR_INTERNAL_RESOLUTION, 0.5f, 2.0f, 1.0f)) {
+            if (UIWidgets::CVarSliderFloat("Internal Resolution: %f %%", CVAR_INTERNAL_RESOLUTION,
+                                           { .min = 0.5f, .max = 2.0f, .defaultValue = 1.0f })) {
                 Ship::Context::GetInstance()->GetWindow()->SetResolutionMultiplier(
                     CVarGetFloat(CVAR_INTERNAL_RESOLUTION, 1));
             };
@@ -191,7 +222,7 @@ void DrawSettingsMenu() {
 #ifndef __WIIU__
             if (UIWidgets::CVarSliderInt((CVarGetInteger(CVAR_MSAA_VALUE, 1) == 1) ? "Anti-aliasing (MSAA): Off"
                                                                                    : "Anti-aliasing (MSAA): %d",
-                                         CVAR_MSAA_VALUE, 1, 8, 1)) {
+                                         CVAR_MSAA_VALUE, { .min = 1, .max = 8, .defaultValue = 1 })) {
                 Ship::Context::GetInstance()->GetWindow()->SetMsaaLevel(CVarGetInteger(CVAR_MSAA_VALUE, 1));
             };
             UIWidgets::Tooltip(
@@ -201,21 +232,26 @@ void DrawSettingsMenu() {
 #endif
 
             { // FPS Slider
-                constexpr unsigned int minFps = 20;
-                static unsigned int maxFps;
+                constexpr int minFps = 20;
+                static int maxFps;
                 if (Ship::Context::GetInstance()->GetWindow()->GetWindowBackend() ==
                     Ship::WindowBackend::FAST3D_DXGI_DX11) {
                     maxFps = 360;
                 } else {
                     maxFps = Ship::Context::GetInstance()->GetWindow()->GetCurrentRefreshRate();
                 }
-                unsigned int currentFps =
-                    std::max(std::min(OTRGlobals::Instance->GetInterpolationFPS(), maxFps), minFps);
+                int currentFps =
+                    std::max(std::min((int32_t)OTRGlobals::Instance->GetInterpolationFPS(), maxFps), minFps);
                 bool matchingRefreshRate = CVarGetInteger("gMatchRefreshRate", 0) &&
                                            Ship::Context::GetInstance()->GetWindow()->GetWindowBackend() !=
                                                Ship::WindowBackend::FAST3D_DXGI_DX11;
                 UIWidgets::CVarSliderInt((currentFps == 20) ? "FPS: Original (20)" : "FPS: %d", "gInterpolationFPS",
-                                         minFps, maxFps, 20, { .disabled = matchingRefreshRate });
+                                         {
+                                             .disabled = matchingRefreshRate,
+                                             .min = minFps,
+                                             .max = maxFps,
+                                             .defaultValue = 20,
+                                         });
                 if (Ship::Context::GetInstance()->GetWindow()->GetWindowBackend() ==
                     Ship::WindowBackend::FAST3D_DXGI_DX11) {
                     UIWidgets::Tooltip(
@@ -248,7 +284,7 @@ void DrawSettingsMenu() {
                 Ship::WindowBackend::FAST3D_DXGI_DX11) {
                 UIWidgets::CVarSliderInt(CVarGetInteger("gExtraLatencyThreshold", 80) == 0 ? "Jitter fix: Off"
                                                                                            : "Jitter fix: >= %d FPS",
-                                         "gExtraLatencyThreshold", 0, 360, 80);
+                                         "gExtraLatencyThreshold", { .min = 0, .max = 360, .defaultValue = 80 });
                 UIWidgets::Tooltip("When Interpolation FPS setting is at least this threshold, add one frame of input "
                                    "lag (e.g. 16.6 ms for 60 FPS) in order to avoid jitter. This setting allows the "
                                    "CPU to work on one frame while GPU works on the previous frame.\nThis setting "
@@ -258,18 +294,18 @@ void DrawSettingsMenu() {
             // UIWidgets::PaddedSeparator(true, true, 3.0f, 3.0f);
             //  #endregion */
 
-            //if (UIWidgets::Combobox(
-            //        "Renderer API (Needs reload)", &configWindowBackend, availableWindowBackendsMap,
-            //        { .tooltip = "Sets the renderer API used by the game. Requires a relaunch to take effect.",
-            //          .disabled = availableWindowBackends->size() <= 1,
-            //          .disabledTooltip = "Only one renderer API is available on this platform." })) {
-            //    Ship::Context::GetInstance()->GetConfig()->SetInt("Window.Backend.Id",
-            //                                                      static_cast<int32_t>(configWindowBackend));
-            //    Ship::Context::GetInstance()->GetConfig()->SetString("Window.Backend.Name",
-            //                                                         windowBackendsMap.at(configWindowBackend));
-            //    Ship::Context::GetInstance()->GetConfig()->Save();
-            //    UpdateWindowBackendObjects();
-            //}
+            // if (UIWidgets::Combobox(
+            //         "Renderer API (Needs reload)", &configWindowBackend, availableWindowBackendsMap,
+            //         { .tooltip = "Sets the renderer API used by the game. Requires a relaunch to take effect.",
+            //           .disabled = availableWindowBackends->size() <= 1,
+            //           .disabledTooltip = "Only one renderer API is available on this platform." })) {
+            //     Ship::Context::GetInstance()->GetConfig()->SetInt("Window.Backend.Id",
+            //                                                       static_cast<int32_t>(configWindowBackend));
+            //     Ship::Context::GetInstance()->GetConfig()->SetString("Window.Backend.Name",
+            //                                                          windowBackendsMap.at(configWindowBackend));
+            //     Ship::Context::GetInstance()->GetConfig()->Save();
+            //     UpdateWindowBackendObjects();
+            // }
 
             if (Ship::Context::GetInstance()->GetWindow()->CanDisableVerticalSync()) {
                 UIWidgets::CVarCheckbox("Enable Vsync", CVAR_VSYNC_ENABLED);
@@ -345,9 +381,9 @@ void DrawEnhancementsMenu() {
             UIWidgets::CVarCheckbox("Invert Y Axis", "gEnhancements.Camera.FirstPerson.InvertY",
                                     { .defaultValue = true });
             UIWidgets::CVarSliderFloat("X Axis Sensitivity: %.0f%%", "gEnhancements.Camera.FirstPerson.SensitivityX",
-                                       0.1f, 2.0f, 1.0f, { .isPercentage = true });
+                                       { .min = 0.1f, .max = 2.0f, .defaultValue = 1.0f, .isPercentage = true });
             UIWidgets::CVarSliderFloat("Y Axis Sensitivity: %.0f%%", "gEnhancements.Camera.FirstPerson.SensitivityY",
-                                       0.1f, 2.0f, 1.0f, { .isPercentage = true });
+                                       { .min = 0.1f, .max = 2.0f, .defaultValue = 1.0f, .isPercentage = true });
             UIWidgets::CVarCheckbox(
                 "Gyro Aiming", "gEnhancements.Camera.FirstPerson.GyroEnabled",
                 { .tooltip = "Enables gyro aiming in first person mode. Requires a controller with gyro support, and "
@@ -356,11 +392,11 @@ void DrawEnhancementsMenu() {
                 UIWidgets::CVarCheckbox("Invert Gyro X Axis", "gEnhancements.Camera.FirstPerson.GyroInvertX");
                 UIWidgets::CVarCheckbox("Invert Gyro Y Axis", "gEnhancements.Camera.FirstPerson.GyroInvertY");
                 UIWidgets::CVarSliderFloat("Gyro X Axis Sensitivity: %.0f%%",
-                                           "gEnhancements.Camera.FirstPerson.GyroSensitivityX", 0.1f, 2.0f, 1.0f,
-                                           { .isPercentage = true });
+                                           "gEnhancements.Camera.FirstPerson.GyroSensitivityX",
+                                           { .min = 0.1f, .max = 2.0f, .defaultValue = 1.0f, .isPercentage = true });
                 UIWidgets::CVarSliderFloat("Gyro Y Axis Sensitivity: %.0f%%",
-                                           "gEnhancements.Camera.FirstPerson.GyroSensitivityY", 0.1f, 2.0f, 1.0f,
-                                           { .isPercentage = true });
+                                           "gEnhancements.Camera.FirstPerson.GyroSensitivityY",
+                                           { .min = 0.1f, .max = 2.0f, .defaultValue = 1.0f, .isPercentage = true });
             }
 
             UIWidgets::CVarCheckbox(
@@ -375,11 +411,11 @@ void DrawEnhancementsMenu() {
                 UIWidgets::CVarCheckbox("Invert Right Stick Y Axis",
                                         "gEnhancements.Camera.FirstPerson.RightStickInvertY", { .defaultValue = true });
                 UIWidgets::CVarSliderFloat("Right Stick X Axis Sensitivity: %.0f%%",
-                                           "gEnhancements.Camera.FirstPerson.RightStickSensitivityX", 0.1f, 2.0f, 1.0f,
-                                           { .isPercentage = true });
+                                           "gEnhancements.Camera.FirstPerson.RightStickSensitivityX",
+                                           { .min = 0.1f, .max = 2.0f, .defaultValue = 1.0f, .isPercentage = true });
                 UIWidgets::CVarSliderFloat("Right Stick Y Axis Sensitivity: %.0f%%",
-                                           "gEnhancements.Camera.FirstPerson.RightStickSensitivityY", 0.1f, 2.0f, 1.0f,
-                                           { .isPercentage = true });
+                                           "gEnhancements.Camera.FirstPerson.RightStickSensitivityY",
+                                           { .min = 0.1f, .max = 2.0f, .defaultValue = 1.0f, .isPercentage = true });
             }
 
             ImGui::SeparatorText("Free Look");
@@ -395,18 +431,20 @@ void DrawEnhancementsMenu() {
                 UIWidgets::CVarCheckbox("Invert Camera Y Axis", "gEnhancements.Camera.RightStick.InvertYAxis",
                                         { .tooltip = "Inverts the Camera Y Axis", .defaultValue = true });
                 UIWidgets::CVarSliderFloat("Third-Person Horizontal Sensitivity: %.0f",
-                                           "gEnhancements.Camera.RightStick.CameraSensitivity.X", 0.01f, 5.0f, 1.0f);
+                                           "gEnhancements.Camera.RightStick.CameraSensitivity.X",
+                                           { .min = 0.01f, .max = 5.0f, .defaultValue = 1.0f, .isPercentage = true });
                 UIWidgets::CVarSliderFloat("Third-Person Vertical Sensitivity: %.0f",
-                                           "gEnhancements.Camera.RightStick.CameraSensitivity.Y", 0.01f, 5.0f, 1.0f);
+                                           "gEnhancements.Camera.RightStick.CameraSensitivity.Y",
+                                           { .min = 0.01f, .max = 5.0f, .defaultValue = 1.0f, .isPercentage = true });
 
-                UIWidgets::CVarSliderInt("Camera Distance: %d", "gEnhancements.Camera.FreeLook.MaxCameraDistance", 100,
-                                         900, 185);
+                UIWidgets::CVarSliderInt("Camera Distance: %d", "gEnhancements.Camera.FreeLook.MaxCameraDistance",
+                                         { .min = 100, .max = 900, .defaultValue = 185 });
                 UIWidgets::CVarSliderInt("Camera Transition Speed: %d", "gEnhancements.Camera.FreeLook.TransitionSpeed",
-                                         1, 900, 25);
+                                         { .min = 1, .max = 900, .defaultValue = 25 });
                 UIWidgets::CVarSliderFloat("Max Camera Height Angle: %.0f°", "gEnhancements.Camera.FreeLook.MaxPitch",
-                                           -89.0f, 89.0f, 72.0f);
+                                           { .min = -89.0f, .max = 89.0f, .defaultValue = 72.0f });
                 UIWidgets::CVarSliderFloat("Min Camera Height Angle: %.0f°", "gEnhancements.Camera.FreeLook.MinPitch",
-                                           -89.0f, 89.0f, -49.0f);
+                                           { .min = -89.0f, .max = 89.0f, .defaultValue = -49.0f });
                 f32 maxY = CVarGetFloat("gEnhancements.Camera.FreeLook.MaxPitch", 72.0f);
                 f32 minY = CVarGetFloat("gEnhancements.Camera.FreeLook.MinPitch", -49.0f);
                 CVarSetFloat("gEnhancements.Camera.FreeLook.MaxPitch", std::max(maxY, minY));
@@ -424,17 +462,19 @@ void DrawEnhancementsMenu() {
                 UIWidgets::CVarCheckbox("Invert Camera Y Axis", "gEnhancements.Camera.RightStick.InvertYAxis",
                                         { .tooltip = "Inverts the Camera Y Axis", .defaultValue = true });
                 UIWidgets::CVarSliderFloat("Third-Person Horizontal Sensitivity: %.0f",
-                                           "gEnhancements.Camera.RightStick.CameraSensitivity.X", 0.01f, 5.0f, 1.0f);
+                                           "gEnhancements.Camera.RightStick.CameraSensitivity.X",
+                                           { .min = 0.01f, .max = 5.0f, .defaultValue = 1.0f, .isPercentage = true });
                 UIWidgets::CVarSliderFloat("Third-Person Vertical Sensitivity: %.0f",
-                                           "gEnhancements.Camera.RightStick.CameraSensitivity.Y", 0.01f, 5.0f, 1.0f);
+                                           "gEnhancements.Camera.RightStick.CameraSensitivity.Y",
+                                           { .min = 0.01f, .max = 5.0f, .defaultValue = 1.0f, .isPercentage = true });
 
                 UIWidgets::CVarCheckbox(
                     "Enable Roll (Six Degrees Of Freedom)", "gEnhancements.Camera.DebugCam.6DOF",
                     { .tooltip = "This allows for all six degrees of movement with the camera, NOTE: Yaw will work "
                                  "differently in "
                                  "this system, instead rotating around the focal point, rather than a polar axis." });
-                UIWidgets::CVarSliderFloat("Camera Speed: %.0f", "gEnhancements.Camera.DebugCam.CameraSpeed", 0.1f,
-                                           3.0f, 0.5f);
+                UIWidgets::CVarSliderFloat("Camera Speed: %.0f", "gEnhancements.Camera.DebugCam.CameraSpeed",
+                                           { .min = 0.01f, .max = 3.0f, .defaultValue = 0.5f, .isPercentage = true });
             }
 
             ImGui::EndMenu();
@@ -493,8 +533,11 @@ void DrawEnhancementsMenu() {
                                  "saved in, or in South Clock Town." })) {
                 RegisterAutosave();
             }
-            UIWidgets::CVarSliderInt("Autosave Interval (minutes): %d", "gEnhancements.Saving.AutosaveInterval", 1, 60,
-                                     5, { .disabled = !CVarGetInteger("gEnhancements.Saving.Autosave", 0) });
+            UIWidgets::CVarSliderInt("Autosave Interval (minutes): %d", "gEnhancements.Saving.AutosaveInterval",
+                                     { .disabled = !CVarGetInteger("gEnhancements.Saving.Autosave", 0),
+                                       .min = 1,
+                                       .max = 60,
+                                       .defaultValue = 5 });
 
             ImGui::SeparatorText("Time Cycle");
             UIWidgets::CVarCheckbox("Do not reset Bottle content", "gEnhancements.Cycle.DoNotResetBottleContent",
@@ -640,8 +683,13 @@ void DrawEnhancementsMenu() {
                                     { .tooltip = "Adjusts the culling planes to account for widescreen resolutions. "
                                                  "This may have unintended side effects." });
             UIWidgets::CVarSliderInt(
-                "Increase Actor Draw Distance: %dx", "gEnhancements.Graphics.IncreaseActorDrawDistance", 1, 5, 1,
-                { .tooltip = "Increase the range in which Actors are drawn. This may have unintended side effects." });
+                "Increase Actor Draw Distance: %dx", "gEnhancements.Graphics.IncreaseActorDrawDistance",
+                {
+                    .tooltip = "Increase the range in which Actors are drawn. This may have unintended side effects.",
+                    .min = 1,
+                    .max = 5,
+                    .defaultValue = 1,
+                });
 
             ImGui::EndMenu();
         }
@@ -670,7 +718,8 @@ void DrawEnhancementsMenu() {
                              "-Rupee: Get the rupee reward",
                   .defaultIndex = CREMIA_REWARD_RANDOM });
             UIWidgets::CVarSliderInt("Swordsman School Winning Score: %d",
-                                     "gEnhancements.Minigames.SwordsmanSchoolScore", 1, 30, 30);
+                                     "gEnhancements.Minigames.SwordsmanSchoolScore",
+                                     { .min = 1, .max = 30, .defaultValue = 30 });
 
             ImGui::EndMenu();
         }
@@ -694,8 +743,13 @@ void DrawEnhancementsMenu() {
         }
 
         if (UIWidgets::BeginMenu("Player")) {
-            UIWidgets::CVarSliderInt("Climb speed", "gEnhancements.Player.ClimbSpeed", 1, 5, 1,
-                                     { .tooltip = "Increases the speed at which Link climbs vines and ladders." });
+            UIWidgets::CVarSliderInt("Climb speed", "gEnhancements.Player.ClimbSpeed",
+                                     {
+                                         .tooltip = "Increases the speed at which Link climbs vines and ladders.",
+                                         .min = 1,
+                                         .max = 5,
+                                         .defaultValue = 1,
+                                     });
             UIWidgets::CVarCheckbox("Fast Deku Flower Launch", "gEnhancements.Player.FastFlowerLaunch",
                                     { .tooltip = "Speeds up the time it takes to be able to get maximum height from "
                                                  "launching out of a deku flower" });
@@ -747,8 +801,11 @@ void DrawEnhancementsMenu() {
                                           "Accounts for Index-Warp being active, by presenting all valid warps for "
                                           "the registered map points. "
                                           "Great Bay Coast warp is always given for index 0 warp as a convenience." });
-            UIWidgets::CVarSliderInt("Zora Eggs For Bossa Nova", "gEnhancements.Songs.ZoraEggCount", 1, 7, 7,
-                                     { .tooltip = "The number of eggs required to unlock new wave bossa nova." });
+            UIWidgets::CVarSliderInt("Zora Eggs For Bossa Nova", "gEnhancements.Songs.ZoraEggCount",
+                                     { .tooltip = "The number of eggs required to unlock new wave bossa nova.",
+                                       .min = 1,
+                                       .max = 7,
+                                       .defaultValue = 7 });
 
             ImGui::EndMenu();
         }
@@ -956,7 +1013,7 @@ void DrawDeveloperToolsMenu() {
 }
 
 void BenMenuBar::InitElement() {
-    //UpdateWindowBackendObjects();
+    // UpdateWindowBackendObjects();
 }
 
 void BenMenuBar::DrawElement() {

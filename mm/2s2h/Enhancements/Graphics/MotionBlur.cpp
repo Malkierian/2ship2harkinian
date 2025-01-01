@@ -24,13 +24,13 @@ void MotionBlur_RenderMenuOptions() {
         UIWidgets::Checkbox("On/Off", (bool*)&R_MOTION_BLUR_ENABLED);
         if (R_MOTION_BLUR_ENABLED) {
             int32_t motionBlurStrength = R_MOTION_BLUR_ALPHA;
-            if (UIWidgets::SliderInt("Strength", &motionBlurStrength, 0, 255)) {
+            if (UIWidgets::SliderInt("Strength", &motionBlurStrength, { .min = 0, .max = 255 })) {
                 R_MOTION_BLUR_ALPHA = motionBlurStrength;
             }
         }
     }
     if (CVarGetInteger("gEnhancements.Graphics.MotionBlur.Mode", 0) == 2) {
-        UIWidgets::CVarSliderInt("Strength", "gEnhancements.Graphics.MotionBlur.Strength", 0, 255, 180);
+        UIWidgets::CVarSliderInt("Strength", "gEnhancements.Graphics.MotionBlur.Strength", { .min = 0, .max = 255, .defaultValue = 180 });
     }
 }
 

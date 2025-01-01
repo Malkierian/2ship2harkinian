@@ -81,19 +81,19 @@ static const std::unordered_map<int32_t, const char*> dekuGuardSearchBallsOption
 };
 
 class BenMenu : public Ship::Menu {
-public:
+  public:
     BenMenu(const std::string& consoleVariable, const std::string& name);
 
     void InitElement() override;
     void DrawElement() override;
     void UpdateElement() override;
     void Draw() override;
-    
+
     void AddSettings();
     void AddEnhancements();
     void AddDevTools();
 
-protected:
+  protected:
     std::vector<SidebarEntry> settingsSidebar;
     std::vector<SidebarEntry> enhancementsSidebar;
     std::vector<SidebarEntry> devToolsSidebar;

@@ -9,10 +9,11 @@
 
 namespace Ship {
 class Menu : public GuiWindow {
-public:
+  public:
     using GuiWindow::GuiWindow;
 
-    Menu(const std::string& cVar, const std::string& name, uint8_t searchSidebarIndex_ = 0, ColorOption menuThemeIndex_ = COLOR_INDIGO);
+    Menu(const std::string& cVar, const std::string& name, uint8_t searchSidebarIndex_ = 0,
+         ColorOption menuThemeIndex_ = COLOR_INDIGO);
 
     void InitElement() override;
     void DrawElement() override;
@@ -22,7 +23,7 @@ public:
     void RemoveSidebarSearch();
     void UpdateWindowBackendObjects();
 
-protected:
+  protected:
     ImVec2 mOriginalSize;
     std::string mName;
     uint32_t mWindowFlags;
@@ -37,12 +38,12 @@ protected:
 
     std::unordered_map<uint32_t, disabledInfo> disabledMap;
     const SidebarEntry searchSidebarEntry = {
-        "Search",
-        1,
-            { { { "Sidebar Search", "", "Searches all menus for the given text, including tooltips.", WIDGET_SEARCH } } }
-    };
+        .label = "Search",
+        .columnCount = 1,
+        .columnWidgets = { { { .name = "Sidebar Search", .tooltip = "Searches all menus for the given text, including tooltips.", .type = WIDGET_SEARCH, .options = UIWidgets::SeparatorOptions{} } } }
+    };;
 
-private:
+  private:
     bool allowPopout = true; // PortNote: should be set to false on small screen ports
     bool popped;
     ImVec2 poppedSize;

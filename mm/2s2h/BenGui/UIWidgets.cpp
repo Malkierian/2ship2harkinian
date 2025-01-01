@@ -10,6 +10,7 @@
 #include <spdlog/fmt/fmt.h>
 
 namespace UIWidgets {
+
 // Automatically adds newlines to break up text longer than a specified number of characters
 // Manually included newlines will still be respected and reset the line length
 // If line is midword when it hits the limit, text should break at the last encountered space
@@ -321,7 +322,7 @@ void PopStyleSlider() {
     ImGui::PopStyleColor(6);
 }
 
-bool SliderInt(const char* label, int32_t* value, int32_t min, int32_t max, const IntSliderOptions& options) {
+bool SliderInt(const char* label, int32_t* value, const IntSliderOptions& options) {
     bool dirty = false;
     std::string invisibleLabelStr = "##" + std::string(label);
     const char* invisibleLabel = invisibleLabelStr.c_str();
@@ -341,10 +342,10 @@ bool SliderInt(const char* label, int32_t* value, int32_t min, int32_t max, cons
         }
     }
     if (options.showButtons) {
-        if (Button("-", { .color = options.color, .size = Sizes::Inline }) && *value > min) {
+        if (Button("-", { .color = options.color, .size = Sizes::Inline }) && *value > options.min) {
             *value -= options.step;
-            if (*value < min)
-                *value = min;
+            if (*value < options.min)
+                *value = options.min;
             dirty = true;
         }
         ImGui::SameLine(0, 3.0f);
@@ -352,16 +353,17 @@ bool SliderInt(const char* label, int32_t* value, int32_t min, int32_t max, cons
     } else {
         ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
     }
-    if (ImGui::SliderScalar(invisibleLabel, ImGuiDataType_S32, value, &min, &max, options.format, options.flags)) {
+    if (ImGui::SliderScalar(invisibleLabel, ImGuiDataType_S32, value, &options.min, &options.max, options.format,
+                            options.flags)) {
         dirty = true;
     }
     if (options.showButtons) {
         ImGui::SameLine(0, 3.0f);
         ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
-        if (Button("+", { .color = options.color, .size = Sizes::Inline }) && *value < max) {
+        if (Button("+", { .color = options.color, .size = Sizes::Inline }) && *value < options.max) {
             *value += options.step;
-            if (*value > max)
-                *value = max;
+            if (*value > options.max)
+                *value = options.max;
             dirty = true;
         }
     }
@@ -378,11 +380,10 @@ bool SliderInt(const char* label, int32_t* value, int32_t min, int32_t max, cons
     return dirty;
 }
 
-bool CVarSliderInt(const char* label, const char* cvarName, int32_t min, int32_t max, const int32_t defaultValue,
-                   const IntSliderOptions& options) {
+bool CVarSliderInt(const char* label, const char* cvarName, const IntSliderOptions& options) {
     bool dirty = false;
-    int32_t value = CVarGetInteger(cvarName, defaultValue);
-    if (SliderInt(label, &value, min, max, options)) {
+    int32_t value = CVarGetInteger(cvarName, options.defaultValue);
+    if (SliderInt(label, &value, options)) {
         CVarSetInteger(cvarName, value);
         Ship::Context::GetInstance()->GetWindow()->GetGui()->SaveConsoleVariablesOnNextTick();
         ShipInit::Init(cvarName);
@@ -429,13 +430,13 @@ void ClampFloat(float* value, float min, float max, float step) {
     }
 }
 
-bool SliderFloat(const char* label, float* value, float min, float max, const FloatSliderOptions& options) {
+bool SliderFloat(const char* label, float* value, const FloatSliderOptions& options) {
     bool dirty = false;
     std::string invisibleLabelStr = "##" + std::string(label);
     const char* invisibleLabel = invisibleLabelStr.c_str();
     float valueToDisplay = options.isPercentage ? *value * 100.0f : *value;
-    float maxToDisplay = options.isPercentage ? max * 100.0f : max;
-    float minToDisplay = options.isPercentage ? min * 100.0f : min;
+    float maxToDisplay = options.isPercentage ? options.max * 100.0f : options.max;
+    float minToDisplay = options.isPercentage ? options.min * 100.0f : options.min;
     ImGui::PushID(label);
     ImGui::BeginGroup();
     ImGui::BeginDisabled(options.disabled);
@@ -452,9 +453,9 @@ bool SliderFloat(const char* label, float* value, float min, float max, const Fl
         }
     }
     if (options.showButtons) {
-        if (Button("-", { .color = options.color, .size = Sizes::Inline }) && *value > min) {
+        if (Button("-", { .color = options.color, .size = Sizes::Inline }) && *value > options.min) {
             *value -= options.step;
-            ClampFloat(value, min, max, options.step);
+            ClampFloat(value, options.min, options.max, options.step);
             dirty = true;
         }
         ImGui::SameLine(0, 3.0f);
@@ -465,15 +466,15 @@ bool SliderFloat(const char* label, float* value, float min, float max, const Fl
     if (ImGui::SliderScalar(invisibleLabel, ImGuiDataType_Float, &valueToDisplay, &minToDisplay, &maxToDisplay,
                             options.format, options.flags)) {
         *value = options.isPercentage ? valueToDisplay / 100.0f : valueToDisplay;
-        ClampFloat(value, min, max, options.step);
+        ClampFloat(value, options.min, options.max, options.step);
         dirty = true;
     }
     if (options.showButtons) {
         ImGui::SameLine(0, 3.0f);
         ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
-        if (Button("+", { .color = options.color, .size = Sizes::Inline }) && *value < max) {
+        if (Button("+", { .color = options.color, .size = Sizes::Inline }) && *value < options.max) {
             *value += options.step;
-            ClampFloat(value, min, max, options.step);
+            ClampFloat(value, options.min, options.max, options.step);
             dirty = true;
         }
     }
@@ -490,11 +491,10 @@ bool SliderFloat(const char* label, float* value, float min, float max, const Fl
     return dirty;
 }
 
-bool CVarSliderFloat(const char* label, const char* cvarName, float min, float max, const float defaultValue,
-                     const FloatSliderOptions& options) {
+bool CVarSliderFloat(const char* label, const char* cvarName, const FloatSliderOptions& options) {
     bool dirty = false;
-    float value = CVarGetFloat(cvarName, defaultValue);
-    if (SliderFloat(label, &value, min, max, options)) {
+    float value = CVarGetFloat(cvarName, options.defaultValue);
+    if (SliderFloat(label, &value, options)) {
         CVarSetFloat(cvarName, value);
         Ship::Context::GetInstance()->GetWindow()->GetGui()->SaveConsoleVariablesOnNextTick();
         ShipInit::Init(cvarName);
