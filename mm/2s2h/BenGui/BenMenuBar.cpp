@@ -1,5 +1,6 @@
 #include "BenMenuBar.h"
 #include "BenPort.h"
+#include "MenuTypes.h"
 #include <imgui.h>
 #include "public/bridge/consolevariablebridge.h"
 #include <libultraship/libultraship.h>
@@ -65,24 +66,6 @@ static const std::unordered_map<int32_t, const char*> dekuGuardSearchBallsOption
 };
 
 namespace BenGui {
-std::shared_ptr<std::vector<Ship::WindowBackend>> availableWindowBackends;
-std::unordered_map<Ship::WindowBackend, const char*> availableWindowBackendsMap;
-Ship::WindowBackend configWindowBackend;
-
-//void UpdateWindowBackendObjects() {
-//    Ship::WindowBackend runningWindowBackend = Ship::Context::GetInstance()->GetWindow()->GetWindowBackend();
-//    int32_t configWindowBackendId = Ship::Context::GetInstance()->GetConfig()->GetInt("Window.Backend.Id", -1);
-//    if (Ship::Context::GetInstance()->GetWindow()->IsAvailableWindowBackend(configWindowBackendId)) {
-//        configWindowBackend = static_cast<Ship::WindowBackend>(configWindowBackendId);
-//    } else {
-//        configWindowBackend = runningWindowBackend;
-//    }
-//
-//    availableWindowBackends = Ship::Context::GetInstance()->GetWindow()->GetAvailableWindowBackends();
-//    for (auto& backend : *availableWindowBackends) {
-//        availableWindowBackendsMap[backend] = windowBackendsMap[backend];
-//    }
-//}
 
 void DrawMenuBarIcon() {
     static bool gameIconLoaded = false;
@@ -183,13 +166,13 @@ void DrawSettingsMenu() {
             }
 
             auto currentAudioBackend = Ship::Context::GetInstance()->GetAudio()->GetAudioBackend();
-            //if (UIWidgets::Combobox(
-            //        "Audio API", &currentAudioBackend, audioBackendsMap,
-            //        { .tooltip = "Sets the audio API used by the game. Requires a relaunch to take effect.",
-            //          .disabled = Ship::Context::GetInstance()->GetAudio()->GetAvailableAudioBackends()->size() <= 1,
-            //          .disabledTooltip = "Only one audio API is available on this platform." })) {
-            //    Ship::Context::GetInstance()->GetAudio()->SetAudioBackend(currentAudioBackend);
-            //}
+            if (UIWidgets::Combobox(
+                    "Audio API", &currentAudioBackend, audioBackendsMap,
+                    { .tooltip = "Sets the audio API used by the game. Requires a relaunch to take effect.",
+                      .disabled = Ship::Context::GetInstance()->GetAudio()->GetAvailableAudioBackends()->size() <= 1,
+                      .disabledTooltip = "Only one audio API is available on this platform." })) {
+                Ship::Context::GetInstance()->GetAudio()->SetAudioBackend(currentAudioBackend);
+            }
 
             ImGui::EndMenu();
         }

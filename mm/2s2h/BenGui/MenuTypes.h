@@ -2,10 +2,6 @@
 
 #include <libultraship/libultraship.h>
 #include "UIWidgets.hpp"
-extern std::unordered_map<s16, const char*> warpPointSceneList;
-extern void Warp();
-
-namespace Ship {
 
 typedef enum {
     COLOR_WHITE,
@@ -51,7 +47,7 @@ using VoidFunc = void (*)();
 using DisableInfoFunc = bool (*)(disabledInfo&);
 using DisableVec = std::vector<DisableOption>;
 using WidgetFunc = void (*)(widgetInfo&);
-const ImVec4 COLOR_NONE = { 0, 0, 0, 0 };
+static const ImVec4 COLOR_NONE = { 0, 0, 0, 0 };
 
 typedef enum {
     WIDGET_CHECKBOX,
@@ -70,8 +66,7 @@ typedef enum {
     WIDGET_SEPARATOR_TEXT,
     WIDGET_TEXT,
     WIDGET_WINDOW_BUTTON,
-    WIDGET_AUDIO_BACKEND, // needed because of special operations that can't be handled easily with the normal combobox
-                          // widget
+    WIDGET_AUDIO_BACKEND, // needed for special operations that can't be handled easily with the normal combobox widget
     WIDGET_VIDEO_BACKEND  // same as above
 } WidgetType;
 
@@ -191,4 +186,14 @@ struct MainMenuEntry {
     std::vector<SidebarEntry> sidebarEntries;
     const char* sidebarCvar;
 };
-} // namespace Ship
+
+static const std::unordered_map<Ship::AudioBackend, const char*> audioBackendsMap = {
+    { Ship::AudioBackend::WASAPI, "Windows Audio Session API" },
+    { Ship::AudioBackend::SDL, "SDL" },
+};
+
+static const std::unordered_map<Ship::WindowBackend, const char*> windowBackendsMap = {
+    { Ship::WindowBackend::FAST3D_DXGI_DX11, "DirectX" },
+    { Ship::WindowBackend::FAST3D_SDL_OPENGL, "OpenGL" },
+    { Ship::WindowBackend::FAST3D_SDL_METAL, "Metal" },
+};
