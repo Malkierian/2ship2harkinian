@@ -66,17 +66,6 @@ bool operator>(Color_RGBA8 const& l, Color_RGBA8 const& r) noexcept {
            (l.r >= r.r && l.g >= r.g && l.b >= r.b && l.a > r.a);
 }
 
-std::unordered_map<ColorOption, ImVec4> menuTheme = { { COLOR_WHITE, UIWidgets::Colors::White },
-                                                      { COLOR_GRAY, UIWidgets::Colors::Gray },
-                                                      { COLOR_DARK_GRAY, UIWidgets::Colors::DarkGray },
-                                                      { COLOR_INDIGO, UIWidgets::Colors::Indigo },
-                                                      { COLOR_RED, UIWidgets::Colors::Red },
-                                                      { COLOR_DARK_RED, UIWidgets::Colors::DarkRed },
-                                                      { COLOR_LIGHT_GREEN, UIWidgets::Colors::LightGreen },
-                                                      { COLOR_GREEN, UIWidgets::Colors::Green },
-                                                      { COLOR_DARK_GREEN, UIWidgets::Colors::DarkGreen },
-                                                      { COLOR_YELLOW, UIWidgets::Colors::Yellow } };
-
 void Menu::InsertSidebarSearch() {
     menuEntries[0].sidebarEntries.insert(menuEntries[0].sidebarEntries.begin() + searchSidebarIndex,
                                          searchSidebarEntry);
@@ -111,7 +100,7 @@ void Menu::UpdateWindowBackendObjects() {
     }
 }
 
-Menu::Menu(const std::string& cVar, const std::string& name, uint8_t searchSidebarIndex_, ColorOption menuThemeIndex_)
+Menu::Menu(const std::string& cVar, const std::string& name, uint8_t searchSidebarIndex_, UIWidgets::Color menuThemeIndex_)
     : GuiWindow(cVar, name), searchSidebarIndex(searchSidebarIndex_), menuThemeIndex(menuThemeIndex_) {
 }
 
@@ -210,16 +199,18 @@ void Menu::MenuDrawItem(widgetInfo& widget) {
                     assert(false);
                     return;
                 }
-                if (UIWidgets::Checkbox(widget.name.c_str(), pointer,
-                                        std::get<UIWidgets::CheckboxOptions>(widget.options))) {
+                UIWidgets::CheckboxOptions& options = std::get<UIWidgets::CheckboxOptions>(widget.options);
+                options.color = menuThemeIndex;
+                if (UIWidgets::Checkbox(widget.name.c_str(), pointer, options)) {
                     if (widget.callback != nullptr) {
                         widget.callback(widget);
                     }
                 }
             } break;
             case WIDGET_CVAR_CHECKBOX: {
-                if (UIWidgets::CVarCheckbox(widget.name.c_str(), widget.cVar,
-                                            std::get<UIWidgets::CheckboxOptions>(widget.options))) {
+                UIWidgets::CheckboxOptions& options = std::get<UIWidgets::CheckboxOptions>(widget.options);
+                options.color = menuThemeIndex;
+                if (UIWidgets::CVarCheckbox(widget.name.c_str(), widget.cVar, options)) {
                     if (widget.callback != nullptr) {
                         widget.callback(widget);
                     }
@@ -229,7 +220,7 @@ void Menu::MenuDrawItem(widgetInfo& widget) {
                 auto currentAudioBackend = Ship::Context::GetInstance()->GetAudio()->GetAudioBackend();
                 if (UIWidgets::Combobox(
                         "Audio API", &currentAudioBackend, audioBackendsMap,
-                        { .color = menuTheme[menuThemeIndex],
+                        { .color = menuThemeIndex,
                           .tooltip = widget.tooltip,
                           .disabled =
                               Ship::Context::GetInstance()->GetAudio()->GetAvailableAudioBackends()->size() <= 1,
@@ -240,7 +231,7 @@ void Menu::MenuDrawItem(widgetInfo& widget) {
             case WIDGET_VIDEO_BACKEND: {
                 if (UIWidgets::Combobox(
                         "Renderer API (Needs reload)", &configWindowBackend, availableWindowBackendsMap,
-                        { .color = menuTheme[menuThemeIndex],
+                        { .color = menuThemeIndex,
                           .tooltip = widget.tooltip,
                           .disabled = availableWindowBackends->size() <= 1,
                           .disabledTooltip = "Only one renderer API is available on this platform." })) {
@@ -256,12 +247,12 @@ void Menu::MenuDrawItem(widgetInfo& widget) {
                 ImGui::Separator();
             } break;
             case WIDGET_SEPARATOR_TEXT: {
-                UIWidgets::SeparatorOptions options = std::get<UIWidgets::SeparatorOptions>(widget.options);
-                if (options.color != UIWidgets::COLOR_NONE) {
+                UIWidgets::TextOptions options = std::get<UIWidgets::TextOptions>(widget.options);
+                if (options.color != UIWidgets::Color::NoColor) {
                     ImGui::PushStyleColor(ImGuiCol_Text, options.color);
                 }
                 ImGui::SeparatorText(widget.name.c_str());
-                if (options.color != UIWidgets::COLOR_NONE) {
+                if (options.color != UIWidgets::Color::NoColor) {
                     ImGui::PopStyleColor();
                 }
             } break;
@@ -276,16 +267,18 @@ void Menu::MenuDrawItem(widgetInfo& widget) {
                     assert(false);
                     return;
                 }
-                if (UIWidgets::Combobox(widget.name.c_str(), pointer, widget.comboMap,
-                                        std::get<UIWidgets::ComboboxOptions>(widget.options))) {
+                UIWidgets::ComboboxOptions& options = std::get<UIWidgets::ComboboxOptions>(widget.options);
+                options.color = menuThemeIndex;
+                if (UIWidgets::Combobox(widget.name.c_str(), pointer, widget.comboMap, options)) {
                     if (widget.callback != nullptr) {
                         widget.callback(widget);
                     }
                 };
             } break;
             case WIDGET_CVAR_COMBOBOX: {
-                if (UIWidgets::CVarCombobox(widget.name.c_str(), widget.cVar, widget.comboMap,
-                                            std::get<UIWidgets::ComboboxOptions>(widget.options))) {
+                UIWidgets::ComboboxOptions& options = std::get<UIWidgets::ComboboxOptions>(widget.options);
+                options.color = menuThemeIndex;
+                if (UIWidgets::CVarCombobox(widget.name.c_str(), widget.cVar, widget.comboMap, options)) {
                     if (widget.callback != nullptr) {
                         widget.callback(widget);
                     }
@@ -298,8 +291,9 @@ void Menu::MenuDrawItem(widgetInfo& widget) {
                     assert(false);
                     return;
                 }
-                if (UIWidgets::SliderInt(widget.name.c_str(), pointer,
-                                         std::get<UIWidgets::IntSliderOptions>(widget.options))) {
+                UIWidgets::IntSliderOptions& options = std::get<UIWidgets::IntSliderOptions>(widget.options);
+                options.color = menuThemeIndex;
+                if (UIWidgets::SliderInt(widget.name.c_str(), pointer, options)) {
                     if (widget.callback != nullptr) {
                         widget.callback(widget);
                     }
@@ -313,37 +307,44 @@ void Menu::MenuDrawItem(widgetInfo& widget) {
                     assert(false);
                     return;
                 }
-                if (UIWidgets::SliderFloat(widget.name.c_str(), pointer,
-                                           std::get<UIWidgets::FloatSliderOptions>(widget.options))) {
+                UIWidgets::FloatSliderOptions& options = std::get<UIWidgets::FloatSliderOptions>(widget.options);
+                options.color = menuThemeIndex;
+                if (UIWidgets::SliderFloat(widget.name.c_str(), pointer, options)) {
                     if (widget.callback != nullptr) {
                         widget.callback(widget);
                     }
                 }
             } break;
             case WIDGET_CVAR_SLIDER_INT: {
-                if (UIWidgets::CVarSliderInt(widget.name.c_str(), widget.cVar,
-                                             std::get<UIWidgets::IntSliderOptions>(widget.options))) {
+                UIWidgets::IntSliderOptions& options = std::get<UIWidgets::IntSliderOptions>(widget.options);
+                options.color = menuThemeIndex;
+                if (UIWidgets::CVarSliderInt(widget.name.c_str(), widget.cVar, options)) {
                     if (widget.callback != nullptr) {
                         widget.callback(widget);
                     }
                 };
             } break;
             case WIDGET_CVAR_SLIDER_FLOAT: {
-                if (UIWidgets::CVarSliderFloat(widget.name.c_str(), widget.cVar,
-                                               std::get<UIWidgets::FloatSliderOptions>(widget.options))) {
+                UIWidgets::FloatSliderOptions& options = std::get<UIWidgets::FloatSliderOptions>(widget.options);
+                options.color = menuThemeIndex;
+                if (UIWidgets::CVarSliderFloat(widget.name.c_str(), widget.cVar, options)) {
                     if (widget.callback != nullptr) {
                         widget.callback(widget);
                     }
                 }
             } break;
             case WIDGET_BUTTON: {
-                if (UIWidgets::Button(widget.name.c_str(), std::get<UIWidgets::ButtonOptions>(widget.options))) {
+                UIWidgets::ButtonOptions& options = std::get<UIWidgets::ButtonOptions>(widget.options);
+                options.color = menuThemeIndex;
+                if (UIWidgets::Button(widget.name.c_str(), options)) {
                     if (widget.callback != nullptr) {
                         widget.callback(widget);
                     }
                 }
             } break;
             case WIDGET_WINDOW_BUTTON: {
+                UIWidgets::ButtonOptions& options = std::get<UIWidgets::ButtonOptions>(widget.options);
+                options.color = menuThemeIndex;
                 if (widget.windowName == nullptr || widget.windowName[0] == '\0') {
                     std::string msg =
                         fmt::format("Error drawing window contents for {}: windowName not defined", widget.name);
@@ -357,8 +358,7 @@ void Menu::MenuDrawItem(widgetInfo& widget) {
                     SPDLOG_ERROR(msg.c_str());
                     break;
                 }
-                UIWidgets::WindowButton(widget.name.c_str(), widget.cVar, window,
-                                        std::get<UIWidgets::ButtonOptions>(widget.options));
+                UIWidgets::WindowButton(widget.name.c_str(), widget.cVar, window, options);
                 if (!window->IsVisible()) {
                     window->DrawElement();
                 }
@@ -400,7 +400,7 @@ void Menu::MenuDrawItem(widgetInfo& widget) {
                                 widgetStr.erase(std::remove(widgetStr.begin(), widgetStr.end(), ' '), widgetStr.end());
                                 if (widgetStr.find(menuSearchText) != std::string::npos) {
                                     MenuDrawItem(info);
-                                    ImGui::PushStyleColor(ImGuiCol_Text, UIWidgets::Colors::Gray);
+                                    ImGui::PushStyleColor(ImGuiCol_Text, UIWidgets::Color::Gray);
                                     std::string origin =
                                         fmt::format("  ({} -> {}, Clmn {})", menuLabel, sidebar.label, column);
                                     ImGui::Text("%s", origin.c_str());
@@ -438,7 +438,7 @@ void Menu::DrawElement() {
     for (auto& [reason, info] : disabledMap) {
         info.active = info.evaluation(info);
     }
-    menuThemeIndex = static_cast<ColorOption>(CVarGetInteger("gSettings.MenuTheme", 3));
+    menuThemeIndex = static_cast<UIWidgets::Color>(CVarGetInteger("gSettings.MenuTheme", 3));
 
     windowHeight = ImGui::GetMainViewport()->WorkSize.y;
     windowWidth = ImGui::GetMainViewport()->WorkSize.x;
@@ -551,7 +551,7 @@ void Menu::DrawElement() {
     for (int i = 0; i < sectionCount; i++) {
         auto entry = menuEntries.at(i);
         uint8_t nextIndex = i;
-        UIWidgets::PushStyleButton(menuTheme[menuThemeIndex]);
+        UIWidgets::PushStyleButton(menuThemeIndex);
         if (headerIndex != i) {
             ImGui::PushStyleColor(ImGuiCol_Button, { 0, 0, 0, 0 });
         }
@@ -596,7 +596,7 @@ void Menu::DrawElement() {
     }
     ImGui::EndChild();
     ImGui::SameLine(menuSize.x - (buttonSize.x * 2) - style.ItemSpacing.x);
-    if (UIWidgets::Button(ICON_FA_UNDO, { .color = UIWidgets::Colors::Red,
+    if (UIWidgets::Button(ICON_FA_UNDO, { .color = UIWidgets::Color::Red,
                                           .size = UIWidgets::Sizes::Inline,
                                           .tooltip = "Reset"
 #ifdef __APPLE__
@@ -614,7 +614,7 @@ void Menu::DrawElement() {
     ImGui::SameLine();
     if (UIWidgets::Button(
             ICON_FA_POWER_OFF,
-            { .color = UIWidgets::Colors::Red, .size = UIWidgets::Sizes::Inline, .tooltip = "Quit 2S2H" })) {
+            { .color = UIWidgets::Color::Red, .size = UIWidgets::Sizes::Inline, .tooltip = "Quit 2S2H" })) {
         if (!popped) {
             ToggleVisibility();
         }
@@ -647,7 +647,7 @@ void Menu::DrawElement() {
     for (size_t i = 0; i < sidebar.size(); i++) {
         auto sidebarEntry = sidebar.at(i);
         uint8_t nextIndex = i;
-        UIWidgets::PushStyleButton(menuTheme[menuThemeIndex]);
+        UIWidgets::PushStyleButton(menuThemeIndex);
         if (sectionIndex != i) {
             ImGui::PushStyleColor(ImGuiCol_Button, { 0, 0, 0, 0 });
         }
@@ -709,7 +709,7 @@ void Menu::DrawElement() {
                         if (widgetStr.find(menuSearchText) != std::string::npos) {
                             MenuDrawItem(info);
                             searchCount++;
-                            ImGui::PushStyleColor(ImGuiCol_Text, UIWidgets::Colors::Gray);
+                            ImGui::PushStyleColor(ImGuiCol_Text, UIWidgets::Color::Gray);
                             std::string origin = fmt::format("  ({} -> {}, Clmn {})", menuLabel, sidebar.label, column);
                             ImGui::Text("%s", origin.c_str());
                             ImGui::PopStyleColor();

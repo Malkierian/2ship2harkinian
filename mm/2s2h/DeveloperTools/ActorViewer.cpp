@@ -362,7 +362,7 @@ void ActorViewerWindow::DrawElement() {
                 }
             }
 
-            if (UIWidgets::Button("Kill", { .color = UIWidgets::Colors::Red }) && selectedActor != nullptr &&
+            if (UIWidgets::Button("Kill", { .color = UIWidgets::Color::Red }) && selectedActor != nullptr &&
                 selectedActor->id != ACTOR_PLAYER) {
                 Actor_Kill(selectedActor);
             }
@@ -411,12 +411,12 @@ void ActorViewerWindow::DrawElement() {
                 newActor.rot = player->actor.world.rot;
             }
 
-            if (UIWidgets::Button("Spawn", { .color = UIWidgets::Colors::Green })) {
+            if (UIWidgets::Button("Spawn", { .color = UIWidgets::Color::Green })) {
                 Actor_Spawn(&gPlayState->actorCtx, gPlayState, newActor.id, newActor.pos.x, newActor.pos.y,
                             newActor.pos.z, newActor.rot.x, newActor.rot.y, newActor.rot.z, newActor.params);
             }
 
-            if (UIWidgets::Button("Spawn as Child", { .color = UIWidgets::Colors::Green })) {
+            if (UIWidgets::Button("Spawn as Child", { .color = UIWidgets::Color::Green })) {
                 Actor* parent = selectedActor;
                 if (parent != nullptr && parent->child == nullptr) {
                     Actor_SpawnAsChild(&gPlayState->actorCtx, parent, gPlayState, newActor.id, newActor.pos.x,

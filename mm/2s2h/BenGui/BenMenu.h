@@ -10,16 +10,24 @@
 namespace BenGui {
 
 static const std::unordered_map<int32_t, const char*> menuThemeOptions = {
-    { COLOR_WHITE, "White" },
-    { COLOR_GRAY, "Gray" },
-    { COLOR_DARK_GRAY, "Dark Gray" },
-    { COLOR_INDIGO, "Indigo" },
-    { COLOR_RED, "Red" },
-    { COLOR_DARK_RED, "Dark Red" },
-    { COLOR_LIGHT_GREEN, "Light Green" },
-    { COLOR_GREEN, "Green" },
-    { COLOR_DARK_GREEN, "Dark Green" },
-    { COLOR_YELLOW, "Yellow" },
+    { UIWidgets::Color::Pink, "Pink"},
+    { UIWidgets::Color::Red, "Red" },
+    { UIWidgets::Color::DarkRed, "Dark Red" },
+    { UIWidgets::Color::Orange, "Orange"},
+    { UIWidgets::Color::LightGreen, "Light Green" },
+    { UIWidgets::Color::Green, "Green" },
+    { UIWidgets::Color::DarkGreen, "Dark Green" },
+    { UIWidgets::Color::LightBlue, "Light Blue" },
+    { UIWidgets::Color::Blue, "Blue" },
+    { UIWidgets::Color::DarkBlue, "Dark Blue" },
+    { UIWidgets::Color::Indigo, "Indigo" },
+    { UIWidgets::Color::Violet, "Violet" },
+    { UIWidgets::Color::Purple, "Purple" },
+    { UIWidgets::Color::Brown, "Brown" },
+    { UIWidgets::Color::DarkBrown, "Dark Brown" },
+    { UIWidgets::Color::LightGray, "Light Gray" },
+    { UIWidgets::Color::Gray, "Gray" },
+    { UIWidgets::Color::DarkGray, "Dark Gray" },
 };
 
 static const std::unordered_map<int32_t, const char*> alwaysWinDoggyraceOptions = {

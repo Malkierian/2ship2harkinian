@@ -13,7 +13,7 @@ class Menu : public GuiWindow {
     using GuiWindow::GuiWindow;
 
     Menu(const std::string& cVar, const std::string& name, uint8_t searchSidebarIndex_ = 0,
-         ColorOption menuThemeIndex_ = COLOR_INDIGO);
+         UIWidgets::Color menuThemeIndex_ = UIWidgets::Color::Indigo);
 
     void InitElement() override;
     void DrawElement() override;
@@ -31,7 +31,7 @@ class Menu : public GuiWindow {
     void MenuDrawItem(widgetInfo& widget);
     ImGuiTextFilter menuSearch;
     uint8_t searchSidebarIndex;
-    ColorOption menuThemeIndex;
+    UIWidgets::Color menuThemeIndex;
     std::shared_ptr<std::vector<Ship::WindowBackend>> availableWindowBackends;
     std::unordered_map<Ship::WindowBackend, const char*> availableWindowBackendsMap;
     Ship::WindowBackend configWindowBackend;
@@ -40,7 +40,7 @@ class Menu : public GuiWindow {
     const SidebarEntry searchSidebarEntry = {
         .label = "Search",
         .columnCount = 1,
-        .columnWidgets = { { { .name = "Sidebar Search", .tooltip = "Searches all menus for the given text, including tooltips.", .type = WIDGET_SEARCH, .options = UIWidgets::SeparatorOptions{} } } }
+        .columnWidgets = { { { .name = "Sidebar Search", .tooltip = "Searches all menus for the given text, including tooltips.", .type = WIDGET_SEARCH, .options = UIWidgets::TextOptions{} } } }
     };;
 
   private:

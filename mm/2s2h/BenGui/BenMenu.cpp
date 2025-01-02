@@ -44,7 +44,7 @@ void BenMenu::AddSettings() {
                 .cVar = "gSettings.MenuTheme",
                 .tooltip = "Changes the Theme of the Menu Widgets.",
                 .type = WIDGET_CVAR_COMBOBOX,
-                .options = UIWidgets::ComboboxOptions{ .defaultIndex = COLOR_INDIGO },
+                .options = UIWidgets::ComboboxOptions{ .defaultIndex = UIWidgets::Color::DarkBlue },
                 .comboMap = menuThemeOptions },
 #if not defined(__SWITCH__) and not defined(__WIIU__)
               { .name = "Menu Controller Navigation",
@@ -52,7 +52,8 @@ void BenMenu::AddSettings() {
                 .tooltip = "Allows controller navigation of the 2Ship menu (Settings, Enhancements,...)\nCAUTION: "
                            "This will disable game inputs while the menu is visible.\n\nD-pad to move between "
                            "items, A to select, B to move up in scope.",
-                .type = WIDGET_CVAR_CHECKBOX },
+                .type = WIDGET_CVAR_CHECKBOX,
+                .options = UIWidgets::CheckboxOptions{} },
               { .name = "Cursor Always Visible",
                 .cVar = "gSettings.CursorVisibility",
                 .tooltip = "Makes the cursor always visible, even in full screen.",
@@ -309,7 +310,8 @@ void BenMenu::AddSettings() {
                 { .name = "Renderer API (Needs reload)",
                   .cVar = NULL,
                   .tooltip = "Sets the renderer API used by the game.",
-                  .type = WIDGET_VIDEO_BACKEND },
+                  .type = WIDGET_VIDEO_BACKEND,
+                  .options = UIWidgets::CheckboxOptions{} },
                 { .name = "Enable Vsync",
                   .cVar = CVAR_VSYNC_ENABLED,
                   .tooltip = "Enables Vsync.",
@@ -339,6 +341,7 @@ void BenMenu::AddSettings() {
                   .cVar = CVAR_TEXTURE_FILTER,
                   .tooltip = "Sets the applied Texture Filtering.",
                   .type = WIDGET_CVAR_COMBOBOX,
+                  .options = UIWidgets::ComboboxOptions{},
                   .comboMap = textureFilteringMap } } } });
     // Input Editor
     settingsSidebar.push_back(
@@ -410,13 +413,13 @@ void BenMenu::AddEnhancements() {
           .columnCount = 3,
           .columnWidgets = {
               {
-                  { .name = "Fixes", .type = WIDGET_SEPARATOR_TEXT },
+                  { .name = "Fixes", .type = WIDGET_SEPARATOR_TEXT, .options = UIWidgets::TextOptions{} },
                   { .name = "Fix Targeting Camera Snap",
                     .cVar = "gEnhancements.Camera.FixTargettingCameraSnap",
                     .tooltip = "Fixes the camera snap that occurs when you are moving and press the targeting button.",
                     .type = WIDGET_CVAR_CHECKBOX,
                     .options = UIWidgets::CheckboxOptions{} },
-                  { .name = "First Person", .type = WIDGET_SEPARATOR_TEXT },
+                  { .name = "First Person", .type = WIDGET_SEPARATOR_TEXT, .options = UIWidgets::TextOptions{} },
                   { .name = "Disable Auto-Centering",
                     .cVar = "gEnhancements.Camera.FirstPerson.DisableFirstPersonAutoCenterView",
                     .tooltip = "Disables the auto-centering of the camera in first person mode.",
@@ -557,7 +560,7 @@ void BenMenu::AddEnhancements() {
                         } },
               },
               // Camera Enhancements
-              { { .name = "Cameras", .type = WIDGET_SEPARATOR_TEXT },
+              { { .name = "Cameras", .type = WIDGET_SEPARATOR_TEXT, .options = UIWidgets::TextOptions{} },
                 { .name = "Free Look",
                   .cVar = "gEnhancements.Camera.FreeLook.Enable",
                   .tooltip = "Enables free look camera control\nNote: You must remap C buttons off of the right "
@@ -770,7 +773,7 @@ void BenMenu::AddEnhancements() {
         { .label = "Gameplay",
           .columnCount = 3,
           .columnWidgets = {
-              { { .name = "Player", .type = WIDGET_SEPARATOR_TEXT },
+              { { .name = "Player", .type = WIDGET_SEPARATOR_TEXT, .options = UIWidgets::TextOptions{} },
                 { .name = "Fast Deku Flower Launch",
                   .cVar = "gEnhancements.Player.FastFlowerLaunch",
                   .tooltip = "Speeds up the time it takes to be able to get maximum height from launching out of a "
@@ -837,7 +840,7 @@ void BenMenu::AddEnhancements() {
                   .tooltip = "Enables magic spin attacks for the Fierce Deity Sword and Great Fairy's Sword.",
                   .type = WIDGET_CVAR_CHECKBOX,
                   .options = UIWidgets::CheckboxOptions{} } },
-              { { .name = "Modes", .type = WIDGET_SEPARATOR_TEXT },
+              { { .name = "Modes", .type = WIDGET_SEPARATOR_TEXT, .options = UIWidgets::TextOptions{} },
                 { .name = "Play as Kafei",
                   .cVar = "gModes.PlayAsKafei",
                   .tooltip = "Requires scene reload to take effect.",
@@ -868,7 +871,7 @@ void BenMenu::AddEnhancements() {
                               CVarClear("gModes.MirroredWorld.State");
                           }
                       } } },
-              { { .name = "Saving", .type = WIDGET_SEPARATOR_TEXT },
+              { { .name = "Saving", .type = WIDGET_SEPARATOR_TEXT, .options = UIWidgets::TextOptions{} },
                 { .name = "Persistent Owl Saves",
                   .cVar = "gEnhancements.Saving.PersistentOwlSaves",
                   .tooltip = "Continuing a save will not remove the owl save. Playing Song of "
@@ -903,7 +906,7 @@ void BenMenu::AddEnhancements() {
                               info.activeDisables.push_back(DISABLE_FOR_AUTO_SAVE_OFF);
                           }
                       } },
-                { .name = "Time Cycle", .type = WIDGET_SEPARATOR_TEXT },
+                { .name = "Time Cycle", .type = WIDGET_SEPARATOR_TEXT, .options = UIWidgets::TextOptions{} },
                 { .name = "Do not reset Bottle content",
                   .cVar = "gEnhancements.Cycle.DoNotResetBottleContent",
                   .tooltip = "Playing the Song Of Time will not reset the bottles' content.",
@@ -939,7 +942,7 @@ void BenMenu::AddEnhancements() {
                   .callback = [](widgetInfo& info) { RegisterKeepExpressMail(); } },
                 { .name = "Unstable",
                   .type = WIDGET_SEPARATOR_TEXT,
-                  .options = UIWidgets::SeparatorOptions{ .color = UIWidgets::Colors::Yellow } },
+                  .options = UIWidgets::TextOptions{ .color = UIWidgets::Color::Orange } },
                 { .name = "Disable Save Delay",
                   .cVar = "gEnhancements.Saving.DisableSaveDelay",
                   .tooltip = "Removes the arbitrary 2 second timer for saving from the original game. This is known to "
@@ -951,7 +954,7 @@ void BenMenu::AddEnhancements() {
         { .label = "Graphics",
           .columnCount = 3,
           .columnWidgets = { {
-              { .name = "Clock", .type = WIDGET_SEPARATOR_TEXT },
+              { .name = "Clock", .type = WIDGET_SEPARATOR_TEXT, .options = UIWidgets::TextOptions{} },
               { .name = "Clock Type",
                 .cVar = "gEnhancements.Graphics.ClockType",
                 .tooltip = "Swaps between Graphical and Text only Clock types.",
@@ -963,14 +966,14 @@ void BenMenu::AddEnhancements() {
                 .tooltip = "Changes from a 12 Hour to a 24 Hour Clock",
                 .type = WIDGET_CVAR_CHECKBOX,
                 .options = UIWidgets::CheckboxOptions{} },
-              { .name = "Mods", .type = WIDGET_SEPARATOR_TEXT },
+              { .name = "Mods", .type = WIDGET_SEPARATOR_TEXT, .options = UIWidgets::TextOptions{} },
               { .name = "Use Alternate Assets",
                 .cVar = "gEnhancements.Mods.AlternateAssets",
                 .tooltip = "Toggle between standard assets and alternate assets. Usually mods will indicate if "
                            "this setting has to be used or not.",
                 .type = WIDGET_CVAR_CHECKBOX,
                 .options = UIWidgets::CheckboxOptions{} },
-              { .name = "Motion Blur", .type = WIDGET_SEPARATOR_TEXT },
+              { .name = "Motion Blur", .type = WIDGET_SEPARATOR_TEXT, .options = UIWidgets::TextOptions{} },
               { .name = "Motion Blur Mode",
                 .cVar = "gEnhancements.Graphics.MotionBlur.Mode",
                 .tooltip = "Selects the Mode for Motion Blur.",
@@ -1019,7 +1022,7 @@ void BenMenu::AddEnhancements() {
                         info.isHidden = mBenMenu->disabledMap.at(DISABLE_FOR_MOTION_BLUR_MODE).value != 0 ||
                                         mBenMenu->disabledMap.at(DISABLE_FOR_MOTION_BLUR_OFF).active;
                     } },
-              { .name = "Other", .type = WIDGET_SEPARATOR_TEXT },
+              { .name = "Other", .type = WIDGET_SEPARATOR_TEXT, .options = UIWidgets::TextOptions{} },
               { .name = "3D Item Drops",
                 .cVar = "gEnhancements.Graphics.3DItemDrops",
                 .tooltip = "Makes item drops 3D",
@@ -1045,7 +1048,7 @@ void BenMenu::AddEnhancements() {
                 .options = UIWidgets::CheckboxOptions{} },
               { .name = "Unstable",
                 .type = WIDGET_SEPARATOR_TEXT,
-                .options = UIWidgets::SeparatorOptions{ .color = UIWidgets::Colors::Yellow } },
+                .options = UIWidgets::TextOptions{ .color = UIWidgets::Color::Orange } },
               { .name = "Disable Scene Geometry Distance Check",
                 .cVar = "gEnhancements.Graphics.DisableSceneGeometryDistanceCheck",
                 .tooltip = "Disables the distance check for scene geometry, allowing it to be drawn no matter how far "
@@ -1070,7 +1073,7 @@ void BenMenu::AddEnhancements() {
           .columnCount = 3,
           .columnWidgets = {
               // Mask Enhancements
-              { { .name = "Masks", .type = WIDGET_SEPARATOR_TEXT },
+              { { .name = "Masks", .type = WIDGET_SEPARATOR_TEXT, .options = UIWidgets::TextOptions{} },
                 { .name = "Blast Mask has Powder Keg Force",
                   .cVar = "gEnhancements.Masks.BlastMaskKeg",
                   .tooltip = "Blast Mask can also destroy objects only the Powder Keg can.",
@@ -1098,7 +1101,7 @@ void BenMenu::AddEnhancements() {
                   .type = WIDGET_CVAR_CHECKBOX,
                   .options = UIWidgets::CheckboxOptions{} } },
               // Song Enhancements
-              { { .name = "Ocarina", .type = WIDGET_SEPARATOR_TEXT },
+              { { .name = "Ocarina", .type = WIDGET_SEPARATOR_TEXT, .options = UIWidgets::TextOptions{} },
                 { .name = "Better Song of Double Time",
                   .cVar = "gEnhancements.Songs.BetterSongOfDoubleTime",
                   .tooltip = "When playing the Song of Double Time, you can now choose the exact time you want to go "
@@ -1152,7 +1155,7 @@ void BenMenu::AddEnhancements() {
           .columnCount = 3,
           .columnWidgets = {
               // Cutscene Skips
-              { { .name = "Cutscenes", .type = WIDGET_SEPARATOR_TEXT },
+              { { .name = "Cutscenes", .type = WIDGET_SEPARATOR_TEXT, .options = UIWidgets::TextOptions{} },
                 { .name = "Hide Title Cards",
                   .cVar = "gEnhancements.Cutscenes.HideTitleCards",
                   .tooltip = "Hides Title Cards when entering areas.",
@@ -1196,7 +1199,7 @@ void BenMenu::AddEnhancements() {
                   .type = WIDGET_CVAR_CHECKBOX,
                   .options = UIWidgets::CheckboxOptions{} } },
               // Dialogue Enhancements
-              { { .name = "Dialogue", .type = WIDGET_SEPARATOR_TEXT },
+              { { .name = "Dialogue", .type = WIDGET_SEPARATOR_TEXT, .options = UIWidgets::TextOptions{} },
                 { .name = "Fast Bank Selection",
                   .cVar = "gEnhancements.Dialogue.FastBankSelection",
                   .tooltip =
@@ -1214,7 +1217,7 @@ void BenMenu::AddEnhancements() {
           .columnCount = 3,
           .columnWidgets = {
               // Fixes
-              { { .name = "Fixes", .type = WIDGET_SEPARATOR_TEXT },
+              { { .name = "Fixes", .type = WIDGET_SEPARATOR_TEXT, .options = UIWidgets::TextOptions{} },
                 { .name = "Fix Ammo Count Color",
                   .cVar = "gFixes.FixAmmoCountEnvColor",
                   .tooltip = "Fixes a missing gDPSetEnvColor, which causes the ammo count to be "
@@ -1262,7 +1265,7 @@ void BenMenu::AddEnhancements() {
           .columnCount = 3,
           .columnWidgets = {
               // Restorations
-              { { .name = "Restorations", .type = WIDGET_SEPARATOR_TEXT },
+              { { .name = "Restorations", .type = WIDGET_SEPARATOR_TEXT, .options = UIWidgets::TextOptions{} },
                 { .name = "Constant Distance Backflips and Sidehops",
                   .cVar = "gEnhancements.Restorations.ConstantFlipsHops",
                   .tooltip = "Backflips and Sidehops travel a constant distance as they did in OoT.",
@@ -1300,7 +1303,8 @@ void BenMenu::AddEnhancements() {
                   .cVar = "gEnhancements.Cheats.DisableTakkuriSteal",
                   .tooltip = "Prevents the Takkuri from stealing key items like bottles and swords. It may still steal "
                              "other items.",
-                  .type = WIDGET_CVAR_CHECKBOX },
+                  .type = WIDGET_CVAR_CHECKBOX,
+        .options = UIWidgets::CheckboxOptions{} },
                 { .name = "Deku Guard Search Balls",
                   .cVar = "gEnhancements.Cheats.DekuGuardSearchBalls",
                   .tooltip = "Choose when to show the Deku Palace Guards' search balls\n"
@@ -1341,7 +1345,8 @@ void BenMenu::AddDevTools() {
               { { .name = "Popout Menu",
                   .cVar = "gSettings.Menu.Popout",
                   .tooltip = "Changes the menu display from overlay to windowed.",
-                  .type = WIDGET_CVAR_CHECKBOX },
+                  .type = WIDGET_CVAR_CHECKBOX,
+                  .options = UIWidgets::CheckboxOptions{} },
                 { .name = "Set Warp Point",
                   .tooltip = "Creates warp point that you can teleport to later",
                   .type = WIDGET_BUTTON,
@@ -1365,7 +1370,7 @@ void BenMenu::AddDevTools() {
                       } },
                 { .name = "Scene Room ID",
                   .type = WIDGET_TEXT,
-                  .options = UIWidgets::SeparatorOptions{},
+                  .options = UIWidgets::TextOptions{},
                   .preFunc =
                       [](widgetInfo& info) {
                           u32 sceneId = Entrance_GetSceneIdAbsolute(

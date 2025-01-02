@@ -888,7 +888,7 @@ const char* logLevels[] = {
 };
 
 void DrawDeveloperToolsMenu() {
-    if (UIWidgets::BeginMenu("Developer Tools", UIWidgets::Colors::Yellow)) {
+    if (UIWidgets::BeginMenu("Developer Tools", UIWidgets::Color::Orange)) {
         if (UIWidgets::CVarCheckbox("Debug Mode", "gDeveloperTools.DebugEnabled",
                                     { .tooltip = "Enables Debug Mode, revealing some developer options and allows you "
                                                  "to enter Map Select with L + R + Z" })) {

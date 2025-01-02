@@ -4,19 +4,6 @@
 #include "UIWidgets.hpp"
 
 typedef enum {
-    COLOR_WHITE,
-    COLOR_GRAY,
-    COLOR_DARK_GRAY,
-    COLOR_INDIGO,
-    COLOR_RED,
-    COLOR_DARK_RED,
-    COLOR_LIGHT_GREEN,
-    COLOR_GREEN,
-    COLOR_DARK_GREEN,
-    COLOR_YELLOW,
-} ColorOption;
-
-typedef enum {
     DISABLE_FOR_CAMERAS_OFF,
     DISABLE_FOR_DEBUG_CAM_ON,
     DISABLE_FOR_DEBUG_CAM_OFF,
@@ -115,7 +102,7 @@ struct widgetInfo {
     const char* tooltip;
     WidgetType type;
     std::variant<UIWidgets::ButtonOptions, UIWidgets::CheckboxOptions, UIWidgets::ComboboxOptions,
-                 UIWidgets::FloatSliderOptions, UIWidgets::IntSliderOptions, UIWidgets::SeparatorOptions>
+                 UIWidgets::FloatSliderOptions, UIWidgets::IntSliderOptions, UIWidgets::TextOptions>
         options;
     std::variant<bool*, int32_t*, float*> valuePointer;
     std::unordered_map<int32_t, const char*> comboMap = {};

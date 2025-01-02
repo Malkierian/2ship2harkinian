@@ -16,8 +16,6 @@ namespace UIWidgets {
 
     using SectionFunc = void(*)();
 
-    static const ImVec4 COLOR_NONE = { 0, 0, 0, 0 };
-
     struct TextFilters {
         static int FilterNumbers(ImGuiInputTextCallbackData* data) {
             if (data->EventChar < 256 && strchr("1234567890", (char)data->EventChar)) {
@@ -39,17 +37,58 @@ namespace UIWidgets {
     std::string WrappedText(const std::string& text, unsigned int charactersPerLine = 60);
     void Tooltip(const char* text);
 
-    namespace Colors {
-        const ImVec4 White = ImVec4(1.0f, 1.0f, 1.0f, 1.0f);
-        const ImVec4 Gray = ImVec4(0.4f, 0.4f, 0.4f, 1.0f);
-        const ImVec4 DarkGray = ImVec4(0.1f, 0.1f, 0.1f, 1.0f);
-        const ImVec4 Indigo = ImVec4(0.24f, 0.31f, 0.71f, 1.0f);
-        const ImVec4 Red = ImVec4(0.5f, 0.0f, 0.0f, 1.0f);
-        const ImVec4 DarkRed = ImVec4(0.3f, 0.0f, 0.0f, 1.0f);
-        const ImVec4 LightGreen = ImVec4(0.0f, 0.7f, 0.0f, 1.0f);
-        const ImVec4 Green = ImVec4(0.0f, 0.5f, 0.0f, 1.0f);
-        const ImVec4 DarkGreen = ImVec4(0.0f, 0.3f, 0.0f, 1.0f);
-        const ImVec4 Yellow = ImVec4(1.0f, 0.627f, 0.0f, 1.0f);
+    // mostly in order for colors usable by the menu without custom text color
+    enum Color {
+        Pink,
+        Red,
+        DarkRed,
+        Orange,
+        LightGreen,
+        Green,
+        DarkGreen,
+        LightBlue,
+        Blue,
+        DarkBlue,
+        Indigo,
+        Violet,
+        Purple,
+        Brown,
+        DarkBrown,
+        LightGray,
+        Gray,
+        DarkGray,
+        // not suitable for menu theme use
+        Yellow,
+        Cyan,
+        Black,
+        White,
+        NoColor
+    };
+
+    const std::unordered_map<Color, ImVec4> Colors = {
+        { Color::Pink, ImVec4(0.87f, 0.3f, 0.87f, 1.0f) },
+        { Color::Red, ImVec4(0.5f, 0.0f, 0.0f, 1.0f) },
+        { Color::DarkRed, ImVec4(0.3f, 0.0f, 0.0f, 1.0f) },
+        { Color::Orange, ImVec4(0.95f, 0.627f, 0.0f, 1.0f) },
+        { Color::Yellow, ImVec4(0.95f, 0.95f, 0.0f, 1.0f) },
+        { Color::LightGreen, ImVec4(0.0f, 0.7f, 0.0f, 1.0f) },
+        { Color::Green, ImVec4(0.0f, 0.5f, 0.0f, 1.0f) },
+        { Color::DarkGreen, ImVec4(0.0f, 0.3f, 0.0f, 1.0f) },
+        { Color::Cyan, ImVec4(0.0f, 0.9f, 0.9f, 1.0f) },
+        { Color::LightBlue, ImVec4(0.0f, 0.39f, 1.0f, 1.0f) },
+        { Color::Blue, ImVec4(0.18f, 0.13f, 0.89f, 1.0f) },
+        { Color::DarkBlue, ImVec4(0.05f, 0.0f, 0.65f, 1.0f) },
+        { Color::Indigo, ImVec4(0.4f, 0.0f, 0.87f, 1.0f) },
+        { Color::Violet, ImVec4(0.6f, 0.0f, 1.0f, 1.0f) },
+        { Color::Purple, ImVec4(0.31f, 0.0f, 0.67f, 1.0f) },
+        { Color::Brown, ImVec4(0.5f, 0.3f, 0.08f, 1.0f) },
+        { Color::DarkBrown, ImVec4(0.26f, 0.13f, 0.0f, 1.0f) },
+        { Color::LightGray, ImVec4(0.75f, 0.75f, 0.75f, 1.0f) },
+        { Color::Gray, ImVec4(0.4f, 0.4f, 0.4f, 1.0f) },
+        { Color::DarkGray, ImVec4(0.1f, 0.1f, 0.1f, 1.0f) },
+        { Color::Black, ImVec4(0.0f, 0.0f, 0.0f, 1.0f)},
+        { Color::White, ImVec4(1.0f, 1.0f, 1.0f, 1.0f) },
+        { Color::NoColor, ImVec4(0.0f, 0.0f, 0.0f, 0.0f)},
     };
 
     namespace Sizes {
@@ -70,29 +109,32 @@ namespace UIWidgets {
         Right,
     };
 
-    void PushStyleMenu(const ImVec4& color = Colors::Indigo);
+    void PushStyleMenu(const ImVec4& color);
+    void PushStyleMenu(Color color = Color::DarkBlue);
     void PopStyleMenu();
-    bool BeginMenu(const char* label, const ImVec4& color = Colors::Indigo);
+    bool BeginMenu(const char* label, Color color = Color::DarkBlue);
 
-    void PushStyleMenuItem(const ImVec4& color = Colors::Indigo);
+    void PushStyleMenuItem(const ImVec4& color);
+    void PushStyleMenuItem(Color color = Color::DarkBlue);
     void PopStyleMenuItem();
-    bool MenuItem(const char* label, const char* shortcut = NULL, const ImVec4& color = Colors::Indigo);
+    bool MenuItem(const char* label, const char* shortcut = NULL, Color color = Color::DarkBlue);
 
     struct ButtonOptions {
-        ImVec4 color = Colors::Gray;
+        Color color = Color::Gray;
         ImVec2 size = Sizes::Fill;
         const char* tooltip = "";
         bool disabled = false;
         const char* disabledTooltip = "";
     };
 
-    void PushStyleButton(const ImVec4& color = Colors::Gray);
+    void PushStyleButton(const ImVec4& color);
+    void PushStyleButton(Color color = Color::Gray);
     void PopStyleButton();
     bool Button(const char* label, const ButtonOptions& options = {});
     bool WindowButton(const char* label, const char* cvarName, std::shared_ptr<Ship::GuiWindow> windowPtr, const ButtonOptions& options = {});
 
     struct CheckboxOptions {
-        ImVec4 color = Colors::Indigo;
+        Color color = Color::DarkBlue;
         const char* tooltip = "";
         bool disabled = false;
         const char* disabledTooltip = "";
@@ -101,14 +143,15 @@ namespace UIWidgets {
         LabelPosition labelPosition = LabelPosition::Near;
     };
 
-    void PushStyleCheckbox(const ImVec4& color = Colors::Indigo);
+    void PushStyleCheckbox(const ImVec4& color);
+    void PushStyleCheckbox(Color color = Color::DarkBlue);
     void PopStyleCheckbox();
     void RenderText(ImVec2 pos, const char* text, const char* text_end, bool hide_text_after_hash);
     bool Checkbox(const char* label, bool* v, const CheckboxOptions& options = {});
     bool CVarCheckbox(const char* label, const char* cvarName, const CheckboxOptions& options = {});
 
     struct ComboboxOptions {
-        ImVec4 color = Colors::Indigo;
+        Color color = Color::Indigo;
         const char* tooltip = "";
         bool disabled = false;
         const char* disabledTooltip = "";
@@ -118,7 +161,8 @@ namespace UIWidgets {
         ImGuiComboFlags flags = 0;
     };
 
-    void PushStyleCombobox(const ImVec4& color = Colors::Indigo);
+    void PushStyleCombobox(const ImVec4& color);
+    void PushStyleCombobox(Color color = Color::DarkBlue);
     void PopStyleCombobox();
 
     template <typename T>
@@ -387,7 +431,7 @@ namespace UIWidgets {
     }
 
     struct IntSliderOptions {
-        ImVec4 color = Colors::Gray;
+        Color color = Color::Gray;
         const char* tooltip = "";
         bool disabled = false;
         const char* disabledTooltip = "";
@@ -403,7 +447,7 @@ namespace UIWidgets {
     };
 
     struct FloatSliderOptions {
-        ImVec4 color = Colors::Gray;
+        Color color = Color::Gray;
         const char* tooltip = "";
         bool disabled = false;
         const char* disabledTooltip = "";
@@ -419,12 +463,12 @@ namespace UIWidgets {
         LabelPosition labelPosition = LabelPosition::Above;
     };
 
-    struct SeparatorOptions {
-        ImVec4 color = COLOR_NONE;
+    struct TextOptions {
+        Color color = Color::NoColor;
         const char* tooltip = "";
     };
 
-    void PushStyleSlider(const ImVec4& color = Colors::Indigo);
+    void PushStyleSlider(Color color = Color::DarkBlue);
     void PopStyleSlider();
     bool SliderInt(const char* label, int32_t* value, const IntSliderOptions& options = {});
     bool CVarSliderInt(const char* label, const char* cvarName, const IntSliderOptions& options = {});
