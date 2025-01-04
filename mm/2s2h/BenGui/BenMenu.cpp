@@ -766,7 +766,7 @@ void BenMenu::AddEnhancements() {
                              "- Temples + Mini Dungeons: In addition to the above temples, stops time in both Spider "
                              "Houses, Pirate's Fortress, Beneath the Well, Ancient Castle of Ikana, and Secret Shrine.",
                   .type = WIDGET_CVAR_COMBOBOX,
-                  .options = UIWidgets::CheckboxOptions{},
+                  .options = UIWidgets::ComboboxOptions{},
                   .comboMap = timeStopOptions } } } });
     // Gameplay Enhancements
     enhancementsSidebar.push_back(
@@ -828,7 +828,8 @@ void BenMenu::AddEnhancements() {
                 { .name = "Fast Magic Arrow Equip Animation",
                   .cVar = "gEnhancements.Equipment.MagicArrowEquipSpeed",
                   .tooltip = "Removes the animation for equipping Magic Arrows.",
-                  .type = WIDGET_CVAR_CHECKBOX },
+                  .type = WIDGET_CVAR_CHECKBOX,
+                  .options = UIWidgets::CheckboxOptions{} },
                 { .name = "Instant Fin Boomerangs Recall",
                   .cVar = "gEnhancements.PlayerActions.InstantRecall",
                   .tooltip =

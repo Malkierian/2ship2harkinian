@@ -109,16 +109,6 @@ namespace UIWidgets {
         Right,
     };
 
-    void PushStyleMenu(const ImVec4& color);
-    void PushStyleMenu(Color color = Color::DarkBlue);
-    void PopStyleMenu();
-    bool BeginMenu(const char* label, Color color = Color::DarkBlue);
-
-    void PushStyleMenuItem(const ImVec4& color);
-    void PushStyleMenuItem(Color color = Color::DarkBlue);
-    void PopStyleMenuItem();
-    bool MenuItem(const char* label, const char* shortcut = NULL, Color color = Color::DarkBlue);
-
     struct ButtonOptions {
         Color color = Color::Gray;
         ImVec2 size = Sizes::Fill;
@@ -126,12 +116,6 @@ namespace UIWidgets {
         bool disabled = false;
         const char* disabledTooltip = "";
     };
-
-    void PushStyleButton(const ImVec4& color);
-    void PushStyleButton(Color color = Color::Gray);
-    void PopStyleButton();
-    bool Button(const char* label, const ButtonOptions& options = {});
-    bool WindowButton(const char* label, const char* cvarName, std::shared_ptr<Ship::GuiWindow> windowPtr, const ButtonOptions& options = {});
 
     struct CheckboxOptions {
         Color color = Color::DarkBlue;
@@ -143,13 +127,6 @@ namespace UIWidgets {
         LabelPosition labelPosition = LabelPosition::Near;
     };
 
-    void PushStyleCheckbox(const ImVec4& color);
-    void PushStyleCheckbox(Color color = Color::DarkBlue);
-    void PopStyleCheckbox();
-    void RenderText(ImVec2 pos, const char* text, const char* text_end, bool hide_text_after_hash);
-    bool Checkbox(const char* label, bool* v, const CheckboxOptions& options = {});
-    bool CVarCheckbox(const char* label, const char* cvarName, const CheckboxOptions& options = {});
-
     struct ComboboxOptions {
         Color color = Color::Indigo;
         const char* tooltip = "";
@@ -160,6 +137,67 @@ namespace UIWidgets {
         LabelPosition labelPosition = LabelPosition::Above;
         ImGuiComboFlags flags = 0;
     };
+
+    struct IntSliderOptions {
+        Color color = Color::Gray;
+        const char* tooltip = "";
+        bool disabled = false;
+        const char* disabledTooltip = "";
+        bool showButtons = true;
+        ImGuiSliderFlags flags = 0;
+        const char* format = "%d";
+        int32_t step = 1;
+        int32_t min = 1;
+        int32_t max = 10;
+        int32_t defaultValue = 1;
+        ComponentAlignment alignment = ComponentAlignment::Left;
+        LabelPosition labelPosition = LabelPosition::Above;
+    };
+
+    struct FloatSliderOptions {
+        Color color = Color::Gray;
+        const char* tooltip = "";
+        bool disabled = false;
+        const char* disabledTooltip = "";
+        bool showButtons = true;
+        ImGuiSliderFlags flags = 0;
+        const char* format = "%f";
+        float step = 0.01f;
+        float min = 0.01f;
+        float max = 10.0f;
+        float defaultValue = 1.0f;
+        bool isPercentage = false; // Multiplies visual value by 100
+        ComponentAlignment alignment = ComponentAlignment::Left;
+        LabelPosition labelPosition = LabelPosition::Above;
+    };
+
+    struct TextOptions {
+        Color color = Color::NoColor;
+        const char* tooltip = "";
+    };
+
+    void PushStyleMenu(const ImVec4& color);
+    void PushStyleMenu(Color color = Color::DarkBlue);
+    void PopStyleMenu();
+    bool BeginMenu(const char* label, Color color = Color::DarkBlue);
+
+    void PushStyleMenuItem(const ImVec4& color);
+    void PushStyleMenuItem(Color color = Color::DarkBlue);
+    void PopStyleMenuItem();
+    bool MenuItem(const char* label, const char* shortcut = NULL, Color color = Color::DarkBlue);
+
+    void PushStyleButton(const ImVec4& color);
+    void PushStyleButton(Color color = Color::Gray);
+    void PopStyleButton();
+    bool Button(const char* label, const ButtonOptions& options = {});
+    bool WindowButton(const char* label, const char* cvarName, std::shared_ptr<Ship::GuiWindow> windowPtr, const ButtonOptions& options = {});
+
+    void PushStyleCheckbox(const ImVec4& color);
+    void PushStyleCheckbox(Color color = Color::DarkBlue);
+    void PopStyleCheckbox();
+    void RenderText(ImVec2 pos, const char* text, const char* text_end, bool hide_text_after_hash);
+    bool Checkbox(const char* label, bool* v, const CheckboxOptions& options = {});
+    bool CVarCheckbox(const char* label, const char* cvarName, const CheckboxOptions& options = {});
 
     void PushStyleCombobox(const ImVec4& color);
     void PushStyleCombobox(Color color = Color::DarkBlue);
@@ -429,44 +467,6 @@ namespace UIWidgets {
         }
         return dirty;
     }
-
-    struct IntSliderOptions {
-        Color color = Color::Gray;
-        const char* tooltip = "";
-        bool disabled = false;
-        const char* disabledTooltip = "";
-        bool showButtons = true;
-        ImGuiSliderFlags flags = 0;
-        const char* format = "%d";
-        int32_t step = 1;
-        int32_t min = 1;
-        int32_t max = 10;
-        int32_t defaultValue = 1;
-        ComponentAlignment alignment = ComponentAlignment::Left;
-        LabelPosition labelPosition = LabelPosition::Above;
-    };
-
-    struct FloatSliderOptions {
-        Color color = Color::Gray;
-        const char* tooltip = "";
-        bool disabled = false;
-        const char* disabledTooltip = "";
-        bool showButtons = true;
-        ImGuiSliderFlags flags = 0;
-        const char* format = "%f";
-        float step = 0.01f;
-        float min = 0.01f;
-        float max = 10.0f;
-        float defaultValue = 1.0f;
-        bool isPercentage = false; // Multiplies visual value by 100
-        ComponentAlignment alignment = ComponentAlignment::Left;
-        LabelPosition labelPosition = LabelPosition::Above;
-    };
-
-    struct TextOptions {
-        Color color = Color::NoColor;
-        const char* tooltip = "";
-    };
 
     void PushStyleSlider(Color color = Color::DarkBlue);
     void PopStyleSlider();
