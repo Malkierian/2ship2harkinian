@@ -136,6 +136,7 @@ namespace UIWidgets {
         ComponentAlignment alignment = ComponentAlignment::Left;
         LabelPosition labelPosition = LabelPosition::Above;
         ImGuiComboFlags flags = 0;
+        std::unordered_map<int32_t, const char*> comboMap = {};
     };
 
     struct IntSliderOptions {

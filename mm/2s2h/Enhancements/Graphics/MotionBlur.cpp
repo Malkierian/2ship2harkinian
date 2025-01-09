@@ -30,7 +30,8 @@ void MotionBlur_RenderMenuOptions() {
         }
     }
     if (CVarGetInteger("gEnhancements.Graphics.MotionBlur.Mode", 0) == 2) {
-        UIWidgets::CVarSliderInt("Strength", "gEnhancements.Graphics.MotionBlur.Strength", { .min = 0, .max = 255, .defaultValue = 180 });
+        UIWidgets::CVarSliderInt("Strength", "gEnhancements.Graphics.MotionBlur.Strength",
+                                 { .min = 0, .max = 255, .defaultValue = 180 });
     }
 }
 

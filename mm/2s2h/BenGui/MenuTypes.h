@@ -75,6 +75,8 @@ typedef enum {
 // holds the widget values for a widget, contains all CVar types available from LUS. int32_t is used for boolean
 // evaluation
 using CVarVariant = std::variant<int32_t, const char*, float, Color_RGBA8, Color_RGB8>;
+using OptionsVariant = std::variant<UIWidgets::ButtonOptions, UIWidgets::CheckboxOptions, UIWidgets::ComboboxOptions,
+                                    UIWidgets::FloatSliderOptions, UIWidgets::IntSliderOptions, UIWidgets::TextOptions>;
 
 // All the info needed for display and search of all widgets in the menu.
 // `name` is the label displayed,
@@ -101,9 +103,7 @@ struct widgetInfo {
     const char* cVar; // Used by all widgets except
     const char* tooltip;
     WidgetType type;
-    std::variant<UIWidgets::ButtonOptions, UIWidgets::CheckboxOptions, UIWidgets::ComboboxOptions,
-                 UIWidgets::FloatSliderOptions, UIWidgets::IntSliderOptions, UIWidgets::TextOptions>
-        options;
+    OptionsVariant options;
     std::variant<bool*, int32_t*, float*> valuePointer;
     std::unordered_map<int32_t, const char*> comboMap = {};
     CVarVariant min;
@@ -115,6 +115,53 @@ struct widgetInfo {
     const char* windowName = "";
     bool isHidden = false;
     bool sameLine = false;
+
+    widgetInfo& CVar(const char* cVar_) {
+        cVar = cVar_;
+        return *this;
+    }
+    widgetInfo& Tooltip(const char* tooltip_) {
+        tooltip = tooltip_;
+        return *this;
+    }
+    widgetInfo& Options(OptionsVariant options_) {
+        options = options_;
+        return *this;
+    }
+    widgetInfo& ComboMap(std::unordered_map<int32_t, const char*> comboMap_) {
+        comboMap = comboMap_;
+        return *this;
+    }
+    widgetInfo& Callback(WidgetFunc callback_) {
+        callback = callback_;
+        return *this;
+    }
+    widgetInfo& PreFunc(WidgetFunc preFunc_) {
+        preFunc = preFunc_;
+        return *this;
+    }
+    widgetInfo& PostFunc(WidgetFunc postFunc_) {
+        postFunc = postFunc_;
+        return *this;
+    }
+    widgetInfo& WindowName(const char* windowName_) {
+        windowName = windowName_;
+        return *this;
+    }
+    widgetInfo& ValuePointer(std::variant<bool*, int32_t*, float*> valuePointer_) {
+        valuePointer = valuePointer_;
+        return *this;
+    }
+    widgetInfo& SameLine(bool sameLine_) {
+        sameLine = sameLine_;
+        return *this;
+    }
+};
+
+struct WidgetPath {
+    std::string sectionName;
+    std::string sidebarName;
+    uint8_t column;
 };
 
 // `disabledInfo` holds information on reasons for hiding or disabling a widget, as well as an evaluation lambda that
@@ -130,12 +177,33 @@ struct disabledInfo {
     int32_t value = 0;
 };
 
+// struct Sidebar {
+//     //std::unordered_map<std::string, SidebarEntry> entries;
+//     uint32_t columnCount;
+//     std::vector<std::vector<widgetInfo>> columnWidgets;
+//
+//     void Insert(std::string entryName, widgetInfo& entry, int32_t index = -1) {
+//         if (index == -1 || index >= entryOrder.size()) {
+//             entryOrder.push_back(entryName);
+//         } else {
+//             entryOrder.insert(entryOrder.begin() + index, entryName);
+//         }
+//         columnWidgets[entryName].push_back({entry});
+//     }
+//
+//     void Erase(std::string entryName) {
+//         if (columnWidgets.contains(entryName)) {
+//             columnWidgets.erase(entryName);
+//         }
+//         std::erase_if(entryOrder, [entryName](std::string name) { return name == entryName; });
+//     }
+// };
+
 // Contains the name displayed in the sidebar (label), the number of columns to use in drawing (columnCount; for visual
 // separation, 1-3), and nested vectors of the widgets, grouped by column (columnWidgets). The number of widget vectors
 // added to the column groups does not need to match the specified columnCount, e.g. you can have one vector added to
 // the sidebar, but still separate the window into 3 columns and display only in the first column
 struct SidebarEntry {
-    std::string label;
     uint32_t columnCount;
     std::vector<std::vector<widgetInfo>> columnWidgets;
 };
@@ -145,8 +213,9 @@ struct SidebarEntry {
 // the last viewed for that header.
 struct MainMenuEntry {
     std::string label;
-    std::vector<SidebarEntry> sidebarEntries;
+    std::unordered_map<std::string, SidebarEntry> sidebars;
     const char* sidebarCvar;
+    std::vector<std::string> sidebarOrder;
 };
 
 static const std::unordered_map<Ship::AudioBackend, const char*> audioBackendsMap = {

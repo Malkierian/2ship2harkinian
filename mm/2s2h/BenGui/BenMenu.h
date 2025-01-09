@@ -10,10 +10,10 @@
 namespace BenGui {
 
 static const std::unordered_map<int32_t, const char*> menuThemeOptions = {
-    { UIWidgets::Color::Pink, "Pink"},
+    { UIWidgets::Color::Pink, "Pink" },
     { UIWidgets::Color::Red, "Red" },
     { UIWidgets::Color::DarkRed, "Dark Red" },
-    { UIWidgets::Color::Orange, "Orange"},
+    { UIWidgets::Color::Orange, "Orange" },
     { UIWidgets::Color::LightGreen, "Light Green" },
     { UIWidgets::Color::Green, "Green" },
     { UIWidgets::Color::DarkGreen, "Dark Green" },
@@ -97,13 +97,17 @@ class BenMenu : public Ship::Menu {
     void UpdateElement() override;
     void Draw() override;
 
+    widgetInfo& AddWidget(WidgetPath& pathInfo, std::string widgetName, WidgetType widgetType);
     void AddSettings();
     void AddEnhancements();
     void AddDevTools();
 
   protected:
-    std::vector<SidebarEntry> settingsSidebar;
-    std::vector<SidebarEntry> enhancementsSidebar;
-    std::vector<SidebarEntry> devToolsSidebar;
+    std::unordered_map<std::string, SidebarEntry> settingsSidebar;
+    std::vector<std::string> settingsOrder;
+    std::unordered_map<std::string, SidebarEntry> enhancementsSidebar;
+    std::vector<std::string> enhancementsOrder;
+    std::unordered_map<std::string, SidebarEntry> devToolsSidebar;
+    std::vector<std::string> devToolsOrder;
 };
 } // namespace BenGui

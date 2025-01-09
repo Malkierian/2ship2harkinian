@@ -38,10 +38,12 @@ class Menu : public GuiWindow {
 
     std::unordered_map<uint32_t, disabledInfo> disabledMap;
     const SidebarEntry searchSidebarEntry = {
-        .label = "Search",
         .columnCount = 1,
-        .columnWidgets = { { { .name = "Sidebar Search", .tooltip = "Searches all menus for the given text, including tooltips.", .type = WIDGET_SEARCH, .options = UIWidgets::TextOptions{} } } }
-    };;
+        .columnWidgets = { { { .name = "Sidebar Search",
+                               .tooltip = "Searches all menus for the given text, including tooltips.",
+                               .type = WIDGET_SEARCH,
+                               .options = UIWidgets::TextOptions{} } } }
+    };
 
   private:
     bool allowPopout = true; // PortNote: should be set to false on small screen ports
