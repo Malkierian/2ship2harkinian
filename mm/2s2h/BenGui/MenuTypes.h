@@ -106,8 +106,6 @@ struct widgetInfo {
     OptionsVariant options;
     std::variant<bool*, int32_t*, float*> valuePointer;
     std::unordered_map<int32_t, const char*> comboMap = {};
-    CVarVariant min;
-    CVarVariant max;
     WidgetFunc callback = nullptr;
     WidgetFunc preFunc = nullptr;
     WidgetFunc postFunc = nullptr;

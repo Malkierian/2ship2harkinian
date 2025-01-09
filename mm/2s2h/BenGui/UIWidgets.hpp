@@ -109,6 +109,11 @@ namespace UIWidgets {
         Right,
     };
 
+    struct TextOptions {
+        Color color = Color::NoColor;
+        const char* tooltip = "";
+    };
+
     struct ButtonOptions {
         Color color = Color::Gray;
         ImVec2 size = Sizes::Fill;
@@ -170,11 +175,6 @@ namespace UIWidgets {
         bool isPercentage = false; // Multiplies visual value by 100
         ComponentAlignment alignment = ComponentAlignment::Left;
         LabelPosition labelPosition = LabelPosition::Above;
-    };
-
-    struct TextOptions {
-        Color color = Color::NoColor;
-        const char* tooltip = "";
     };
 
     void PushStyleMenu(const ImVec4& color);
