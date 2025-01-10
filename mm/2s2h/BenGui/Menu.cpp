@@ -203,7 +203,7 @@ uint32_t Menu::DrawSearchResults(std::string& menuSearchText) {
     return searchCount;
 }
 
-void Menu::MenuDrawItem(widgetInfo& widget) {
+void Menu::MenuDrawItem(WidgetInfo& widget) {
     disabledTempTooltip = "This setting is disabled because: \n\n";
     disabledValue = false;
     disabledTooltip = " ";

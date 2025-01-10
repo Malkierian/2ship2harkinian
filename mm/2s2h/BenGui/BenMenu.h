@@ -97,7 +97,7 @@ class BenMenu : public Ship::Menu {
     void UpdateElement() override;
     void Draw() override;
 
-    widgetInfo& AddWidget(WidgetPath& pathInfo, std::string widgetName, WidgetType widgetType);
+    WidgetInfo& AddWidget(WidgetPath& pathInfo, std::string widgetName, WidgetType widgetType);
     void AddSettings();
     void AddEnhancements();
     void AddDevTools();

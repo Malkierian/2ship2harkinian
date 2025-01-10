@@ -28,12 +28,12 @@ typedef enum {
     DISABLE_FOR_INTRO_SKIP_OFF,
 } DisableOption;
 
-struct widgetInfo;
+struct WidgetInfo;
 struct disabledInfo;
 using VoidFunc = void (*)();
 using DisableInfoFunc = bool (*)(disabledInfo&);
 using DisableVec = std::vector<DisableOption>;
-using WidgetFunc = void (*)(widgetInfo&);
+using WidgetFunc = void (*)(WidgetInfo&);
 
 typedef enum {
     WIDGET_CHECKBOX,
@@ -98,7 +98,7 @@ using OptionsVariant = std::variant<UIWidgets::ButtonOptions, UIWidgets::Checkbo
 // `windowName` is what is displayed and searched for `windowButton` type and window interactions
 // `isHidden` just prevents the widget from being drawn under whatever circumstances you specify in the `preFunc`
 // `sameLine` allows for specifying that the widget should be on the same line as the previous widget
-struct widgetInfo {
+struct WidgetInfo {
     std::string name; // Used by all widgets
     const char* cVar; // Used by all widgets except
     const char* tooltip;
@@ -114,43 +114,43 @@ struct widgetInfo {
     bool isHidden = false;
     bool sameLine = false;
 
-    widgetInfo& CVar(const char* cVar_) {
+    WidgetInfo& CVar(const char* cVar_) {
         cVar = cVar_;
         return *this;
     }
-    widgetInfo& Tooltip(const char* tooltip_) {
+    WidgetInfo& Tooltip(const char* tooltip_) {
         tooltip = tooltip_;
         return *this;
     }
-    widgetInfo& Options(OptionsVariant options_) {
+    WidgetInfo& Options(OptionsVariant options_) {
         options = options_;
         return *this;
     }
-    widgetInfo& ComboMap(std::unordered_map<int32_t, const char*> comboMap_) {
+    WidgetInfo& ComboMap(std::unordered_map<int32_t, const char*> comboMap_) {
         comboMap = comboMap_;
         return *this;
     }
-    widgetInfo& Callback(WidgetFunc callback_) {
+    WidgetInfo& Callback(WidgetFunc callback_) {
         callback = callback_;
         return *this;
     }
-    widgetInfo& PreFunc(WidgetFunc preFunc_) {
+    WidgetInfo& PreFunc(WidgetFunc preFunc_) {
         preFunc = preFunc_;
         return *this;
     }
-    widgetInfo& PostFunc(WidgetFunc postFunc_) {
+    WidgetInfo& PostFunc(WidgetFunc postFunc_) {
         postFunc = postFunc_;
         return *this;
     }
-    widgetInfo& WindowName(const char* windowName_) {
+    WidgetInfo& WindowName(const char* windowName_) {
         windowName = windowName_;
         return *this;
     }
-    widgetInfo& ValuePointer(std::variant<bool*, int32_t*, float*> valuePointer_) {
+    WidgetInfo& ValuePointer(std::variant<bool*, int32_t*, float*> valuePointer_) {
         valuePointer = valuePointer_;
         return *this;
     }
-    widgetInfo& SameLine(bool sameLine_) {
+    WidgetInfo& SameLine(bool sameLine_) {
         sameLine = sameLine_;
         return *this;
     }
@@ -178,9 +178,9 @@ struct disabledInfo {
 // struct Sidebar {
 //     //std::unordered_map<std::string, SidebarEntry> entries;
 //     uint32_t columnCount;
-//     std::vector<std::vector<widgetInfo>> columnWidgets;
+//     std::vector<std::vector<WidgetInfo>> columnWidgets;
 //
-//     void Insert(std::string entryName, widgetInfo& entry, int32_t index = -1) {
+//     void Insert(std::string entryName, WidgetInfo& entry, int32_t index = -1) {
 //         if (index == -1 || index >= entryOrder.size()) {
 //             entryOrder.push_back(entryName);
 //         } else {
@@ -203,7 +203,7 @@ struct disabledInfo {
 // the sidebar, but still separate the window into 3 columns and display only in the first column
 struct SidebarEntry {
     uint32_t columnCount;
-    std::vector<std::vector<widgetInfo>> columnWidgets;
+    std::vector<std::vector<WidgetInfo>> columnWidgets;
 };
 
 // Contains entries for what's listed in the header at the top, including the name displayed on the top bar (label),
