@@ -10,15 +10,13 @@ const char* motionBlurOptions[] = { "Dynamic (default)", "Always Off", "Always O
 void MotionBlur_RenderMenuOptions() {
     ImGui::SeparatorText("Motion Blur");
     UIWidgets::CVarCombobox("Motion Blur Mode", "gEnhancements.Graphics.MotionBlur.Mode", motionBlurOptions,
-                            {
-                                .labelPosition = UIWidgets::LabelPosition::None,
-                            });
+                            UIWidgets::ComboboxOptions().LabelPosition(UIWidgets::LabelPosition::None));
 
     UIWidgets::CVarCheckbox(
         "Interpolate", "gEnhancements.Graphics.MotionBlur.Interpolate",
-        { .tooltip =
+        UIWidgets::CheckboxOptions().Tooltip(
               "Change motion blur capture to also happen on interpolated frames instead of only on game frames.\n"
-              "This notably reduces the overall motion blur strength but smooths out the trails." });
+              "This notably reduces the overall motion blur strength but smooths out the trails."));
 
     if (CVarGetInteger("gEnhancements.Graphics.MotionBlur.Mode", 0) == 0) {
         UIWidgets::Checkbox("On/Off", (bool*)&R_MOTION_BLUR_ENABLED);
@@ -31,7 +29,7 @@ void MotionBlur_RenderMenuOptions() {
     }
     if (CVarGetInteger("gEnhancements.Graphics.MotionBlur.Mode", 0) == 2) {
         UIWidgets::CVarSliderInt("Strength", "gEnhancements.Graphics.MotionBlur.Strength",
-                                 { .min = 0, .max = 255, .defaultValue = 180 });
+                                 UIWidgets::IntSliderOptions().Min(0).Max(255).DefaultValue(180));
     }
 }
 

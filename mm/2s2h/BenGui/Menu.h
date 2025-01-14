@@ -13,7 +13,7 @@ class Menu : public GuiWindow {
     using GuiWindow::GuiWindow;
 
     Menu(const std::string& cVar, const std::string& name, uint8_t searchSidebarIndex_ = 0,
-         UIWidgets::Color menuThemeIndex_ = UIWidgets::Color::Indigo);
+         UIWidgets::Colors menuThemeIndex_ = UIWidgets::Colors::Indigo);
 
     void InitElement() override;
     void DrawElement() override;
@@ -32,7 +32,7 @@ class Menu : public GuiWindow {
     uint32_t DrawSearchResults(std::string& menuSearchText);
     ImGuiTextFilter menuSearch;
     uint8_t searchSidebarIndex;
-    UIWidgets::Color menuThemeIndex;
+    UIWidgets::Colors menuThemeIndex;
     std::shared_ptr<std::vector<Ship::WindowBackend>> availableWindowBackends;
     std::unordered_map<Ship::WindowBackend, const char*> availableWindowBackendsMap;
     Ship::WindowBackend configWindowBackend;
@@ -40,10 +40,10 @@ class Menu : public GuiWindow {
     std::unordered_map<uint32_t, disabledInfo> disabledMap;
     const SidebarEntry searchSidebarEntry = {
         .columnCount = 1,
-        .columnWidgets = { { { .name = "Sidebar Search",
-                               .tooltip = "Searches all menus for the given text, including tooltips.",
-                               .type = WIDGET_SEARCH,
-                               .options = UIWidgets::TextOptions{} } } }
+        .columnWidgets = { { { 
+                .name = "Sidebar Search",
+                .type = WIDGET_SEARCH,
+                .options = std::make_shared<UIWidgets::WidgetOptions>(UIWidgets::WidgetOptions{}.Tooltip("Searches all menus for the given text, including tooltips.")) }}}
     };
 
   private:

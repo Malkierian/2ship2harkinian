@@ -52,14 +52,14 @@ void Tooltip(const char* text) {
 void PushStyleMenu(const ImVec4& color) {
     ImGui::PushStyleColor(ImGuiCol_Header, ImVec4(color.x, color.y, color.z, 0.5f));
     ImGui::PushStyleColor(ImGuiCol_HeaderHovered, ImVec4(color.x, color.y, color.z, 1.0f));
-    ImGui::PushStyleColor(ImGuiCol_PopupBg, UIWidgets::Colors.at(Color::DarkGray));
-    ImGui::PushStyleColor(ImGuiCol_Border, UIWidgets::Colors.at(Color::DarkGray));
+    ImGui::PushStyleColor(ImGuiCol_PopupBg, UIWidgets::ColorValues.at(Colors::DarkGray));
+    ImGui::PushStyleColor(ImGuiCol_Border, UIWidgets::ColorValues.at(Colors::DarkGray));
     ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(8.0f, 15.0f));
     ImGui::PushStyleVar(ImGuiStyleVar_PopupBorderSize, 3.0f);
 }
 
-void PushStyleMenu(Color color) {
-    PushStyleMenu(UIWidgets::Colors.at(color));
+void PushStyleMenu(Colors color) {
+    PushStyleMenu(UIWidgets::ColorValues.at(color));
 }
 
 void PopStyleMenu() {
@@ -67,7 +67,7 @@ void PopStyleMenu() {
     ImGui::PopStyleColor(4);
 }
 
-bool BeginMenu(const char* label, Color color) {
+bool BeginMenu(const char* label, Colors color) {
     bool dirty = false;
     PushStyleMenu(color);
     ImGui::SetNextWindowSizeConstraints(ImVec2(200.0f, 0.0f), ImVec2(FLT_MAX, FLT_MAX));
@@ -83,8 +83,8 @@ void PushStyleMenuItem(const ImVec4& color) {
     ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(20.0f, 15.0f));
 }
 
-void PushStyleMenuItem(Color color) {
-    PushStyleMenuItem(Colors.at(color));
+void PushStyleMenuItem(Colors color) {
+    PushStyleMenuItem(ColorValues.at(color));
 }
 
 void PopStyleMenuItem() {
@@ -92,7 +92,7 @@ void PopStyleMenuItem() {
     ImGui::PopStyleColor(1);
 }
 
-bool MenuItem(const char* label, const char* shortcut, Color color) {
+bool MenuItem(const char* label, const char* shortcut, Colors color) {
     bool dirty = false;
     PushStyleMenuItem(color);
     if (ImGui::MenuItem(label, shortcut)) {
@@ -112,8 +112,8 @@ void PushStyleButton(const ImVec4& color) {
     ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 5.0f);
 }
 
-void PushStyleButton(Color color) {
-    PushStyleButton(UIWidgets::Colors.at(color));
+void PushStyleButton(Colors color) {
+    PushStyleButton(UIWidgets::ColorValues.at(color));
 }
 
 void PopStyleButton() {
@@ -165,8 +165,8 @@ void PushStyleCheckbox(const ImVec4& color) {
     ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 5.0f);
 }
 
-void PushStyleCheckbox(Color color) {
-    PushStyleCheckbox(UIWidgets::Colors.at(color));
+void PushStyleCheckbox(Colors color) {
+    PushStyleCheckbox(UIWidgets::ColorValues.at(color));
 }
 
 void PopStyleCheckbox() {
@@ -315,8 +315,8 @@ void PushStyleCombobox(const ImVec4& color) {
     ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(10.0f, 6.0f));
 }
 
-void PushStyleCombobox(Color color) {
-    PushStyleCombobox(UIWidgets::Colors.at(color));
+void PushStyleCombobox(Colors color) {
+    PushStyleCombobox(UIWidgets::ColorValues.at(color));
 }
 
 void PopStyleCombobox() {
@@ -324,8 +324,8 @@ void PopStyleCombobox() {
     ImGui::PopStyleColor(9);
 }
 
-void PushStyleSlider(Color color_) {
-    const ImVec4& color = UIWidgets::Colors.at(color_);
+void PushStyleSlider(Colors color_) {
+    const ImVec4& color = UIWidgets::ColorValues.at(color_);
     ImGui::PushStyleColor(ImGuiCol_FrameBg, ImVec4(color.x, color.y, color.z, 1.0f));
     ImGui::PushStyleColor(ImGuiCol_FrameBgHovered, ImVec4(color.x, color.y, color.z, 1.0f));
     ImGui::PushStyleColor(ImGuiCol_FrameBgActive, ImVec4(color.x, color.y, color.z, 1.0f));
@@ -363,7 +363,7 @@ bool SliderInt(const char* label, int32_t* value, const IntSliderOptions& option
         }
     }
     if (options.showButtons) {
-        if (Button("-", { .color = options.color, .size = Sizes::Inline }) && *value > options.min) {
+        if (Button("-", ButtonOptions{ .color = options.color }.Size(Sizes::Inline)) && *value > options.min) {
             *value -= options.step;
             if (*value < options.min)
                 *value = options.min;
@@ -381,7 +381,7 @@ bool SliderInt(const char* label, int32_t* value, const IntSliderOptions& option
     if (options.showButtons) {
         ImGui::SameLine(0, 3.0f);
         ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
-        if (Button("+", { .color = options.color, .size = Sizes::Inline }) && *value < options.max) {
+        if (Button("+", ButtonOptions{ .color = options.color}.Size(Sizes::Inline)) && *value < options.max) {
             *value += options.step;
             if (*value > options.max)
                 *value = options.max;
@@ -474,7 +474,7 @@ bool SliderFloat(const char* label, float* value, const FloatSliderOptions& opti
         }
     }
     if (options.showButtons) {
-        if (Button("-", { .color = options.color, .size = Sizes::Inline }) && *value > options.min) {
+        if (Button("-", ButtonOptions{ .color = options.color }.Size(Sizes::Inline)) && *value > options.min) {
             *value -= options.step;
             ClampFloat(value, options.min, options.max, options.step);
             dirty = true;
@@ -493,7 +493,7 @@ bool SliderFloat(const char* label, float* value, const FloatSliderOptions& opti
     if (options.showButtons) {
         ImGui::SameLine(0, 3.0f);
         ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
-        if (Button("+", { .color = options.color, .size = Sizes::Inline }) && *value < options.max) {
+        if (Button("+", ButtonOptions{ .color = options.color}.Size(Sizes::Inline)) && *value < options.max) {
             *value += options.step;
             ClampFloat(value, options.min, options.max, options.step);
             dirty = true;
@@ -528,7 +528,7 @@ bool CVarColorPicker(const char* label, const char* cvarName, Color_RGBA8 defaul
     Color_RGBA8 color = CVarGetColor(cvarName, defaultColor);
     ImVec4 colorVec = ImVec4(color.r / 255.0f, color.g / 255.0f, color.b / 255.0f, color.a / 255.0f);
     bool changed = false;
-    PushStyleCombobox(Color::Gray);
+    PushStyleCombobox(Colors::Gray);
     if (ImGui::ColorEdit3(label, (float*)&colorVec, ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoBorder)) {
         color.r = (uint8_t)(colorVec.x * 255.0f);
         color.g = (uint8_t)(colorVec.y * 255.0f);
@@ -554,7 +554,8 @@ void DrawFlagArray32(const std::string& name, uint32_t& flags) {
         bool flag = (flags & bitMask) != 0;
         std::string label = fmt::format("0x{:02X} ({})", flagIndex, flagIndex);
         if (UIWidgets::Checkbox(label.c_str(), &flag,
-                                { .tooltip = label.c_str(), .labelPosition = LabelPosition::None })) {
+                                CheckboxOptions{{ .tooltip = label.c_str() }}
+                                .LabelPosition(LabelPosition::None))) {
             if (flag) {
                 flags |= bitMask;
             } else {
@@ -577,7 +578,8 @@ void DrawFlagArray16(const std::string& name, uint16_t& flags) {
         bool flag = (flags & bitMask) != 0;
         std::string label = fmt::format("0x{:02X} ({})", flagIndex, flagIndex);
         if (UIWidgets::Checkbox(label.c_str(), &flag,
-                                { .tooltip = label.c_str(), .labelPosition = LabelPosition::None })) {
+                                CheckboxOptions{{ .tooltip = label.c_str() }}
+                                .LabelPosition(LabelPosition::None))) {
             if (flag) {
                 flags |= bitMask;
             } else {
@@ -600,7 +602,8 @@ void DrawFlagArray8(const std::string& name, uint8_t& flags) {
         bool flag = (flags & bitMask) != 0;
         std::string label = fmt::format("0x{:02X} ({})", flagIndex, flagIndex);
         if (UIWidgets::Checkbox(label.c_str(), &flag,
-                                { .tooltip = label.c_str(), .labelPosition = LabelPosition::None })) {
+                                CheckboxOptions{{ .tooltip = label.c_str() }}
+                                .LabelPosition(LabelPosition::None))) {
             if (flag) {
                 flags |= bitMask;
             } else {
@@ -623,7 +626,8 @@ void DrawFlagArray8Mask(const std::string& name, uint8_t& flags) {
         bool flag = (flags & bitMask) != 0;
         std::string label = fmt::format("0x{:02X} ({})", bitMask, flagIndex);
         if (UIWidgets::Checkbox(label.c_str(), &flag,
-                                { .tooltip = label.c_str(), .labelPosition = LabelPosition::None })) {
+                                CheckboxOptions{{ .tooltip = label.c_str() }}
+                                .LabelPosition(LabelPosition::None))) {
             if (flag) {
                 flags |= bitMask;
             } else {

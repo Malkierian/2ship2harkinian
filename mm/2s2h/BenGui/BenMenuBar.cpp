@@ -68,33 +68,33 @@ static const std::unordered_map<int32_t, const char*> dekuGuardSearchBallsOption
 namespace BenGui {
 
 void DrawMenuBarIcon() {
-    static bool gameIconLoaded = false;
-    if (!gameIconLoaded) {
-        Ship::Context::GetInstance()->GetWindow()->GetGui()->LoadTextureFromRawImage("Game_Icon",
-                                                                                     "textures/icons/g2ShipIcon.png");
-        gameIconLoaded = true;
-    }
-
-    if (Ship::Context::GetInstance()->GetWindow()->GetGui()->HasTextureByName("Game_Icon")) {
-#ifdef __SWITCH__
-        ImVec2 iconSize = ImVec2(20.0f, 20.0f);
-        float posScale = 1.0f;
-#elif defined(__WIIU__)
-        ImVec2 iconSize = ImVec2(16.0f * 2, 16.0f * 2);
-        float posScale = 2.0f;
-#else
-        ImVec2 iconSize = ImVec2(16.0f, 16.0f);
-        float posScale = 1.0f;
-#endif
-        ImGui::SetCursorPos(ImVec2(5, 5) * posScale);
-        ImGui::Image(Ship::Context::GetInstance()->GetWindow()->GetGui()->GetTextureByName("Game_Icon"), iconSize);
-        ImGui::SameLine();
-        ImGui::SetCursorPos(ImVec2(25, 0) * posScale);
-    }
+//    static bool gameIconLoaded = false;
+//    if (!gameIconLoaded) {
+//        Ship::Context::GetInstance()->GetWindow()->GetGui()->LoadTextureFromRawImage("Game_Icon",
+//                                                                                     "textures/icons/g2ShipIcon.png");
+//        gameIconLoaded = true;
+//    }
+//
+//    if (Ship::Context::GetInstance()->GetWindow()->GetGui()->HasTextureByName("Game_Icon")) {
+//#ifdef __SWITCH__
+//        ImVec2 iconSize = ImVec2(20.0f, 20.0f);
+//        float posScale = 1.0f;
+//#elif defined(__WIIU__)
+//        ImVec2 iconSize = ImVec2(16.0f * 2, 16.0f * 2);
+//        float posScale = 2.0f;
+//#else
+//        ImVec2 iconSize = ImVec2(16.0f, 16.0f);
+//        float posScale = 1.0f;
+//#endif
+//        ImGui::SetCursorPos(ImVec2(5, 5) * posScale);
+//        ImGui::Image(Ship::Context::GetInstance()->GetWindow()->GetGui()->GetTextureByName("Game_Icon"), iconSize);
+//        ImGui::SameLine();
+//        ImGui::SetCursorPos(ImVec2(25, 0) * posScale);
+//    }
 }
 
 void DrawBenMenu() {
-    if (UIWidgets::BeginMenu("2Ship")) {
+    /*if (UIWidgets::BeginMenu("2Ship")) {
         if (UIWidgets::MenuItem("Hide Menu Bar",
 #if !defined(__SWITCH__) && !defined(__WIIU__)
                                 "F1"
@@ -133,233 +133,233 @@ void DrawBenMenu() {
         }
 #endif
         ImGui::EndMenu();
-    }
+    }*/
 }
 
 extern std::shared_ptr<BenInputEditorWindow> mBenInputEditorWindow;
 
 void DrawSettingsMenu() {
-    if (UIWidgets::BeginMenu("Settings")) {
-        if (UIWidgets::BeginMenu("Audio")) {
-            UIWidgets::CVarSliderFloat("Master Volume: %.0f %%", "gSettings.Audio.MasterVolume",
-                                       { .showButtons = false,
-                                         .format = "",
-                                         .min = 0.0f,
-                                         .max = 1.0f,
-                                         .defaultValue = 1.0f,
-                                         .isPercentage = true });
-
-            if (UIWidgets::CVarSliderFloat("Main Music Volume: %.0f %%", "gSettings.Audio.MainMusicVolume",
-                                           { .showButtons = false,
-                                             .format = "",
-                                             .min = 0.0f,
-                                             .max = 1.0f,
-                                             .defaultValue = 1.0f,
-                                             .isPercentage = true })) {
-                AudioSeq_SetPortVolumeScale(SEQ_PLAYER_BGM_MAIN, CVarGetFloat("gSettings.Audio.MainMusicVolume", 1.0f));
-            }
-            if (UIWidgets::CVarSliderFloat("Sub Music Volume: %.0f %%", "gSettings.Audio.SubMusicVolume",
-                                           { .showButtons = false,
-                                             .format = "",
-                                             .min = 0.0f,
-                                             .max = 1.0f,
-                                             .defaultValue = 1.0f,
-                                             .isPercentage = true })) {
-                AudioSeq_SetPortVolumeScale(SEQ_PLAYER_BGM_SUB, CVarGetFloat("gSettings.Audio.SubMusicVolume", 1.0f));
-            }
-            if (UIWidgets::CVarSliderFloat("Sound Effects Volume: %.0f %%", "gSettings.Audio.SoundEffectsVolume",
-                                           { .showButtons = false,
-                                             .format = "",
-                                             .min = 0.0f,
-                                             .max = 1.0f,
-                                             .defaultValue = 1.0f,
-                                             .isPercentage = true })) {
-                AudioSeq_SetPortVolumeScale(SEQ_PLAYER_SFX, CVarGetFloat("gSettings.Audio.SoundEffectsVolume", 1.0f));
-            }
-            if (UIWidgets::CVarSliderFloat("Fanfare Volume: %.0f %%", "gSettings.Audio.FanfareVolume",
-                                           { .showButtons = false,
-                                             .format = "",
-                                             .min = 0.0f,
-                                             .max = 1.0f,
-                                             .defaultValue = 1.0f,
-                                             .isPercentage = true })) {
-                AudioSeq_SetPortVolumeScale(SEQ_PLAYER_FANFARE, CVarGetFloat("gSettings.Audio.FanfareVolume", 1.0f));
-            }
-            if (UIWidgets::CVarSliderFloat("Ambience Volume: %.0f %%", "gSettings.Audio.AmbienceVolume",
-                                           { .showButtons = false,
-                                             .format = "",
-                                             .min = 0.0f,
-                                             .max = 1.0f,
-                                             .defaultValue = 1.0f,
-                                             .isPercentage = true })) {
-                AudioSeq_SetPortVolumeScale(SEQ_PLAYER_AMBIENCE, CVarGetFloat("gSettings.Audio.AmbienceVolume", 1.0f));
-            }
-
-            auto currentAudioBackend = Ship::Context::GetInstance()->GetAudio()->GetAudioBackend();
-            if (UIWidgets::Combobox(
-                    "Audio API", &currentAudioBackend, audioBackendsMap,
-                    { .tooltip = "Sets the audio API used by the game. Requires a relaunch to take effect.",
-                      .disabled = Ship::Context::GetInstance()->GetAudio()->GetAvailableAudioBackends()->size() <= 1,
-                      .disabledTooltip = "Only one audio API is available on this platform." })) {
-                Ship::Context::GetInstance()->GetAudio()->SetAudioBackend(currentAudioBackend);
-            }
-
-            ImGui::EndMenu();
-        }
-
-        if (UIWidgets::BeginMenu("Graphics")) {
-
-#ifndef __APPLE__
-            if (UIWidgets::CVarSliderFloat("Internal Resolution: %f %%", CVAR_INTERNAL_RESOLUTION,
-                                           { .min = 0.5f, .max = 2.0f, .defaultValue = 1.0f })) {
-                Ship::Context::GetInstance()->GetWindow()->SetResolutionMultiplier(
-                    CVarGetFloat(CVAR_INTERNAL_RESOLUTION, 1));
-            };
-            UIWidgets::Tooltip(
-                "Multiplies your output resolution by the value inputted, as a more intensive but effective "
-                "form of anti-aliasing");
-#endif
-#ifndef __WIIU__
-            if (UIWidgets::CVarSliderInt((CVarGetInteger(CVAR_MSAA_VALUE, 1) == 1) ? "Anti-aliasing (MSAA): Off"
-                                                                                   : "Anti-aliasing (MSAA): %d",
-                                         CVAR_MSAA_VALUE, { .min = 1, .max = 8, .defaultValue = 1 })) {
-                Ship::Context::GetInstance()->GetWindow()->SetMsaaLevel(CVarGetInteger(CVAR_MSAA_VALUE, 1));
-            };
-            UIWidgets::Tooltip(
-                "Activates MSAA (multi-sample anti-aliasing) from 2x up to 8x, to smooth the edges of rendered "
-                "geometry.\n"
-                "Higher sample count will result in smoother edges on models, but may reduce performance.");
-#endif
-
-            { // FPS Slider
-                constexpr int minFps = 20;
-                static int maxFps;
-                if (Ship::Context::GetInstance()->GetWindow()->GetWindowBackend() ==
-                    Ship::WindowBackend::FAST3D_DXGI_DX11) {
-                    maxFps = 360;
-                } else {
-                    maxFps = Ship::Context::GetInstance()->GetWindow()->GetCurrentRefreshRate();
-                }
-                int currentFps =
-                    std::max(std::min((int32_t)OTRGlobals::Instance->GetInterpolationFPS(), maxFps), minFps);
-                bool matchingRefreshRate = CVarGetInteger("gMatchRefreshRate", 0) &&
-                                           Ship::Context::GetInstance()->GetWindow()->GetWindowBackend() !=
-                                               Ship::WindowBackend::FAST3D_DXGI_DX11;
-                UIWidgets::CVarSliderInt((currentFps == 20) ? "FPS: Original (20)" : "FPS: %d", "gInterpolationFPS",
-                                         {
-                                             .disabled = matchingRefreshRate,
-                                             .min = minFps,
-                                             .max = maxFps,
-                                             .defaultValue = 20,
-                                         });
-                if (Ship::Context::GetInstance()->GetWindow()->GetWindowBackend() ==
-                    Ship::WindowBackend::FAST3D_DXGI_DX11) {
-                    UIWidgets::Tooltip(
-                        "Uses Matrix Interpolation to create extra frames, resulting in smoother graphics. This is "
-                        "purely visual and does not impact game logic, execution of glitches etc.\n\n A higher target "
-                        "FPS than your monitor's refresh rate will waste resources, and might give a worse result.");
-                } else {
-                    UIWidgets::Tooltip(
-                        "Uses Matrix Interpolation to create extra frames, resulting in smoother graphics. This is "
-                        "purely visual and does not impact game logic, execution of glitches etc.");
-                }
-            } // END FPS Slider
-
-            if (Ship::Context::GetInstance()->GetWindow()->GetWindowBackend() ==
-                Ship::WindowBackend::FAST3D_DXGI_DX11) {
-                // UIWidgets::Spacer(0);
-                if (ImGui::Button("Match Refresh Rate")) {
-                    int hz = Ship::Context::GetInstance()->GetWindow()->GetCurrentRefreshRate();
-                    if (hz >= 20 && hz <= 360) {
-                        CVarSetInteger("gInterpolationFPS", hz);
-                        Ship::Context::GetInstance()->GetWindow()->GetGui()->SaveConsoleVariablesOnNextTick();
-                    }
-                }
-            } else {
-                UIWidgets::CVarCheckbox("Match Refresh Rate", "gMatchRefreshRate");
-            }
-            UIWidgets::Tooltip("Matches interpolation value to the current game's window refresh rate");
-
-            if (Ship::Context::GetInstance()->GetWindow()->GetWindowBackend() ==
-                Ship::WindowBackend::FAST3D_DXGI_DX11) {
-                UIWidgets::CVarSliderInt(CVarGetInteger("gExtraLatencyThreshold", 80) == 0 ? "Jitter fix: Off"
-                                                                                           : "Jitter fix: >= %d FPS",
-                                         "gExtraLatencyThreshold", { .min = 0, .max = 360, .defaultValue = 80 });
-                UIWidgets::Tooltip("When Interpolation FPS setting is at least this threshold, add one frame of input "
-                                   "lag (e.g. 16.6 ms for 60 FPS) in order to avoid jitter. This setting allows the "
-                                   "CPU to work on one frame while GPU works on the previous frame.\nThis setting "
-                                   "should be used when your computer is too slow to do CPU + GPU work in time.");
-            }
-
-            // UIWidgets::PaddedSeparator(true, true, 3.0f, 3.0f);
-            //  #endregion */
-
-            // if (UIWidgets::Combobox(
-            //         "Renderer API (Needs reload)", &configWindowBackend, availableWindowBackendsMap,
-            //         { .tooltip = "Sets the renderer API used by the game. Requires a relaunch to take effect.",
-            //           .disabled = availableWindowBackends->size() <= 1,
-            //           .disabledTooltip = "Only one renderer API is available on this platform." })) {
-            //     Ship::Context::GetInstance()->GetConfig()->SetInt("Window.Backend.Id",
-            //                                                       static_cast<int32_t>(configWindowBackend));
-            //     Ship::Context::GetInstance()->GetConfig()->SetString("Window.Backend.Name",
-            //                                                          windowBackendsMap.at(configWindowBackend));
-            //     Ship::Context::GetInstance()->GetConfig()->Save();
-            //     UpdateWindowBackendObjects();
-            // }
-
-            if (Ship::Context::GetInstance()->GetWindow()->CanDisableVerticalSync()) {
-                UIWidgets::CVarCheckbox("Enable Vsync", CVAR_VSYNC_ENABLED);
-            }
-
-            if (Ship::Context::GetInstance()->GetWindow()->SupportsWindowedFullscreen()) {
-                UIWidgets::CVarCheckbox("Windowed fullscreen", CVAR_SDL_WINDOWED_FULLSCREEN);
-            }
-
-            if (Ship::Context::GetInstance()->GetWindow()->GetGui()->SupportsViewports()) {
-                UIWidgets::CVarCheckbox(
-                    "Allow multi-windows", CVAR_ENABLE_MULTI_VIEWPORTS,
-                    { .tooltip = "Allows multiple windows to be opened at once. Requires a reload to take effect." });
-            }
-
-            UIWidgets::CVarCombobox("Texture Filter (Needs reload)", CVAR_TEXTURE_FILTER, textureFilteringMap);
-
-            // Currently this only has "Overlays Text Font", it doesn't use our new UIWidgets so it stands out
-            // Ship::Context::GetInstance()->GetWindow()->GetGui()->GetGameOverlay()->DrawSettings();
-
-            ImGui::EndMenu();
-        }
-        // #region 2S2H [Todo] None of this works yet
-        /*
-        if (UIWidgets::BeginMenu("Controller")) { */
-        if (mBenInputEditorWindow) {
-            UIWidgets::WindowButton("Controller Mapping", "gWindows.InputEditor", mBenInputEditorWindow);
-        }
-        /*
-        #ifndef __SWITCH__
-            UIWidgets::CVarCheckbox("Menubar Controller Navigation", CVAR_IMGUI_CONTROLLER_NAV, {
-                .tooltip = "Allows controller navigation of the SOH menu bar (Settings, Enhancements,...)\nCAUTION: "
-                "This will disable game inputs while the menubar is visible.\n\nD-pad to move between "
-                "items, A to select, and X to grab focus on the menu bar"
-            });
-        #endif
-            UIWidgets::CVarCheckbox("Show Inputs", "gInputEnabled", {
-                .tooltip = "Shows currently pressed inputs on the bottom right of the screen"
-            });
-            UIWidgets::CVarSliderFloat("Input Scale: %.1f", "gInputScale", 1.0f, 3.0f, 1.0f, {
-                .tooltip = "Sets the on screen size of the displayed inputs from the Show Inputs setting",
-                .showButtons = false,
-                .format = ""
-            });
-            UIWidgets::CVarSliderInt("Simulated Input Lag: %d frames", CVAR_SIMULATED_INPUT_LAG, 0, 6, 0, {
-                .tooltip = "Buffers your inputs to be executed a specified amount of frames later"
-            });
-
-            ImGui::EndMenu();
-        }
-        ImGui::EndMenu();
-        */
-        ImGui::EndMenu();
-    }
+//    if (UIWidgets::BeginMenu("Settings")) {
+//        if (UIWidgets::BeginMenu("Audio")) {
+//            UIWidgets::CVarSliderFloat("Master Volume: %.0f %%", "gSettings.Audio.MasterVolume",
+//                                       { .showButtons = false,
+//                                         .format = "",
+//                                         .min = 0.0f,
+//                                         .max = 1.0f,
+//                                         .defaultValue = 1.0f,
+//                                         .isPercentage = true });
+//
+//            if (UIWidgets::CVarSliderFloat("Main Music Volume: %.0f %%", "gSettings.Audio.MainMusicVolume",
+//                                           { .showButtons = false,
+//                                             .format = "",
+//                                             .min = 0.0f,
+//                                             .max = 1.0f,
+//                                             .defaultValue = 1.0f,
+//                                             .isPercentage = true })) {
+//                AudioSeq_SetPortVolumeScale(SEQ_PLAYER_BGM_MAIN, CVarGetFloat("gSettings.Audio.MainMusicVolume", 1.0f));
+//            }
+//            if (UIWidgets::CVarSliderFloat("Sub Music Volume: %.0f %%", "gSettings.Audio.SubMusicVolume",
+//                                           { .showButtons = false,
+//                                             .format = "",
+//                                             .min = 0.0f,
+//                                             .max = 1.0f,
+//                                             .defaultValue = 1.0f,
+//                                             .isPercentage = true })) {
+//                AudioSeq_SetPortVolumeScale(SEQ_PLAYER_BGM_SUB, CVarGetFloat("gSettings.Audio.SubMusicVolume", 1.0f));
+//            }
+//            if (UIWidgets::CVarSliderFloat("Sound Effects Volume: %.0f %%", "gSettings.Audio.SoundEffectsVolume",
+//                                           { .showButtons = false,
+//                                             .format = "",
+//                                             .min = 0.0f,
+//                                             .max = 1.0f,
+//                                             .defaultValue = 1.0f,
+//                                             .isPercentage = true })) {
+//                AudioSeq_SetPortVolumeScale(SEQ_PLAYER_SFX, CVarGetFloat("gSettings.Audio.SoundEffectsVolume", 1.0f));
+//            }
+//            if (UIWidgets::CVarSliderFloat("Fanfare Volume: %.0f %%", "gSettings.Audio.FanfareVolume",
+//                                           { .showButtons = false,
+//                                             .format = "",
+//                                             .min = 0.0f,
+//                                             .max = 1.0f,
+//                                             .defaultValue = 1.0f,
+//                                             .isPercentage = true })) {
+//                AudioSeq_SetPortVolumeScale(SEQ_PLAYER_FANFARE, CVarGetFloat("gSettings.Audio.FanfareVolume", 1.0f));
+//            }
+//            if (UIWidgets::CVarSliderFloat("Ambience Volume: %.0f %%", "gSettings.Audio.AmbienceVolume",
+//                                           { .showButtons = false,
+//                                             .format = "",
+//                                             .min = 0.0f,
+//                                             .max = 1.0f,
+//                                             .defaultValue = 1.0f,
+//                                             .isPercentage = true })) {
+//                AudioSeq_SetPortVolumeScale(SEQ_PLAYER_AMBIENCE, CVarGetFloat("gSettings.Audio.AmbienceVolume", 1.0f));
+//            }
+//
+//            auto currentAudioBackend = Ship::Context::GetInstance()->GetAudio()->GetAudioBackend();
+//            if (UIWidgets::Combobox(
+//                    "Audio API", &currentAudioBackend, audioBackendsMap,
+//                    { .tooltip = "Sets the audio API used by the game. Requires a relaunch to take effect.",
+//                      .disabled = Ship::Context::GetInstance()->GetAudio()->GetAvailableAudioBackends()->size() <= 1,
+//                      .disabledTooltip = "Only one audio API is available on this platform." })) {
+//                Ship::Context::GetInstance()->GetAudio()->SetAudioBackend(currentAudioBackend);
+//            }
+//
+//            ImGui::EndMenu();
+//        }
+//
+//        if (UIWidgets::BeginMenu("Graphics")) {
+//
+//#ifndef __APPLE__
+//            if (UIWidgets::CVarSliderFloat("Internal Resolution: %f %%", CVAR_INTERNAL_RESOLUTION,
+//                                           { .min = 0.5f, .max = 2.0f, .defaultValue = 1.0f })) {
+//                Ship::Context::GetInstance()->GetWindow()->SetResolutionMultiplier(
+//                    CVarGetFloat(CVAR_INTERNAL_RESOLUTION, 1));
+//            };
+//            UIWidgets::Tooltip(
+//                "Multiplies your output resolution by the value inputted, as a more intensive but effective "
+//                "form of anti-aliasing");
+//#endif
+//#ifndef __WIIU__
+//            if (UIWidgets::CVarSliderInt((CVarGetInteger(CVAR_MSAA_VALUE, 1) == 1) ? "Anti-aliasing (MSAA): Off"
+//                                                                                   : "Anti-aliasing (MSAA): %d",
+//                                         CVAR_MSAA_VALUE, { .min = 1, .max = 8, .defaultValue = 1 })) {
+//                Ship::Context::GetInstance()->GetWindow()->SetMsaaLevel(CVarGetInteger(CVAR_MSAA_VALUE, 1));
+//            };
+//            UIWidgets::Tooltip(
+//                "Activates MSAA (multi-sample anti-aliasing) from 2x up to 8x, to smooth the edges of rendered "
+//                "geometry.\n"
+//                "Higher sample count will result in smoother edges on models, but may reduce performance.");
+//#endif
+//
+//            { // FPS Slider
+//                constexpr int minFps = 20;
+//                static int maxFps;
+//                if (Ship::Context::GetInstance()->GetWindow()->GetWindowBackend() ==
+//                    Ship::WindowBackend::FAST3D_DXGI_DX11) {
+//                    maxFps = 360;
+//                } else {
+//                    maxFps = Ship::Context::GetInstance()->GetWindow()->GetCurrentRefreshRate();
+//                }
+//                int currentFps =
+//                    std::max(std::min((int32_t)OTRGlobals::Instance->GetInterpolationFPS(), maxFps), minFps);
+//                bool matchingRefreshRate = CVarGetInteger("gMatchRefreshRate", 0) &&
+//                                           Ship::Context::GetInstance()->GetWindow()->GetWindowBackend() !=
+//                                               Ship::WindowBackend::FAST3D_DXGI_DX11;
+//                UIWidgets::CVarSliderInt((currentFps == 20) ? "FPS: Original (20)" : "FPS: %d", "gInterpolationFPS",
+//                                         {
+//                                             .disabled = matchingRefreshRate,
+//                                             .min = minFps,
+//                                             .max = maxFps,
+//                                             .defaultValue = 20,
+//                                         });
+//                if (Ship::Context::GetInstance()->GetWindow()->GetWindowBackend() ==
+//                    Ship::WindowBackend::FAST3D_DXGI_DX11) {
+//                    UIWidgets::Tooltip(
+//                        "Uses Matrix Interpolation to create extra frames, resulting in smoother graphics. This is "
+//                        "purely visual and does not impact game logic, execution of glitches etc.\n\n A higher target "
+//                        "FPS than your monitor's refresh rate will waste resources, and might give a worse result.");
+//                } else {
+//                    UIWidgets::Tooltip(
+//                        "Uses Matrix Interpolation to create extra frames, resulting in smoother graphics. This is "
+//                        "purely visual and does not impact game logic, execution of glitches etc.");
+//                }
+//            } // END FPS Slider
+//
+//            if (Ship::Context::GetInstance()->GetWindow()->GetWindowBackend() ==
+//                Ship::WindowBackend::FAST3D_DXGI_DX11) {
+//                // UIWidgets::Spacer(0);
+//                if (ImGui::Button("Match Refresh Rate")) {
+//                    int hz = Ship::Context::GetInstance()->GetWindow()->GetCurrentRefreshRate();
+//                    if (hz >= 20 && hz <= 360) {
+//                        CVarSetInteger("gInterpolationFPS", hz);
+//                        Ship::Context::GetInstance()->GetWindow()->GetGui()->SaveConsoleVariablesOnNextTick();
+//                    }
+//                }
+//            } else {
+//                UIWidgets::CVarCheckbox("Match Refresh Rate", "gMatchRefreshRate");
+//            }
+//            UIWidgets::Tooltip("Matches interpolation value to the current game's window refresh rate");
+//
+//            if (Ship::Context::GetInstance()->GetWindow()->GetWindowBackend() ==
+//                Ship::WindowBackend::FAST3D_DXGI_DX11) {
+//                UIWidgets::CVarSliderInt(CVarGetInteger("gExtraLatencyThreshold", 80) == 0 ? "Jitter fix: Off"
+//                                                                                           : "Jitter fix: >= %d FPS",
+//                                         "gExtraLatencyThreshold", { .min = 0, .max = 360, .defaultValue = 80 });
+//                UIWidgets::Tooltip("When Interpolation FPS setting is at least this threshold, add one frame of input "
+//                                   "lag (e.g. 16.6 ms for 60 FPS) in order to avoid jitter. This setting allows the "
+//                                   "CPU to work on one frame while GPU works on the previous frame.\nThis setting "
+//                                   "should be used when your computer is too slow to do CPU + GPU work in time.");
+//            }
+//
+//            // UIWidgets::PaddedSeparator(true, true, 3.0f, 3.0f);
+//            //  #endregion */
+//
+//            // if (UIWidgets::Combobox(
+//            //         "Renderer API (Needs reload)", &configWindowBackend, availableWindowBackendsMap,
+//            //         { .tooltip = "Sets the renderer API used by the game. Requires a relaunch to take effect.",
+//            //           .disabled = availableWindowBackends->size() <= 1,
+//            //           .disabledTooltip = "Only one renderer API is available on this platform." })) {
+//            //     Ship::Context::GetInstance()->GetConfig()->SetInt("Window.Backend.Id",
+//            //                                                       static_cast<int32_t>(configWindowBackend));
+//            //     Ship::Context::GetInstance()->GetConfig()->SetString("Window.Backend.Name",
+//            //                                                          windowBackendsMap.at(configWindowBackend));
+//            //     Ship::Context::GetInstance()->GetConfig()->Save();
+//            //     UpdateWindowBackendObjects();
+//            // }
+//
+//            if (Ship::Context::GetInstance()->GetWindow()->CanDisableVerticalSync()) {
+//                UIWidgets::CVarCheckbox("Enable Vsync", CVAR_VSYNC_ENABLED);
+//            }
+//
+//            if (Ship::Context::GetInstance()->GetWindow()->SupportsWindowedFullscreen()) {
+//                UIWidgets::CVarCheckbox("Windowed fullscreen", CVAR_SDL_WINDOWED_FULLSCREEN);
+//            }
+//
+//            if (Ship::Context::GetInstance()->GetWindow()->GetGui()->SupportsViewports()) {
+//                UIWidgets::CVarCheckbox(
+//                    "Allow multi-windows", CVAR_ENABLE_MULTI_VIEWPORTS,
+//                    { .tooltip = "Allows multiple windows to be opened at once. Requires a reload to take effect." });
+//            }
+//
+//            UIWidgets::CVarCombobox("Texture Filter (Needs reload)", CVAR_TEXTURE_FILTER, textureFilteringMap);
+//
+//            // Currently this only has "Overlays Text Font", it doesn't use our new UIWidgets so it stands out
+//            // Ship::Context::GetInstance()->GetWindow()->GetGui()->GetGameOverlay()->DrawSettings();
+//
+//            ImGui::EndMenu();
+//        }
+//        // #region 2S2H [Todo] None of this works yet
+//        /*
+//        if (UIWidgets::BeginMenu("Controller")) { */
+//        if (mBenInputEditorWindow) {
+//            UIWidgets::WindowButton("Controller Mapping", "gWindows.InputEditor", mBenInputEditorWindow);
+//        }
+//        /*
+//        #ifndef __SWITCH__
+//            UIWidgets::CVarCheckbox("Menubar Controller Navigation", CVAR_IMGUI_CONTROLLER_NAV, {
+//                .tooltip = "Allows controller navigation of the SOH menu bar (Settings, Enhancements,...)\nCAUTION: "
+//                "This will disable game inputs while the menubar is visible.\n\nD-pad to move between "
+//                "items, A to select, and X to grab focus on the menu bar"
+//            });
+//        #endif
+//            UIWidgets::CVarCheckbox("Show Inputs", "gInputEnabled", {
+//                .tooltip = "Shows currently pressed inputs on the bottom right of the screen"
+//            });
+//            UIWidgets::CVarSliderFloat("Input Scale: %.1f", "gInputScale", 1.0f, 3.0f, 1.0f, {
+//                .tooltip = "Sets the on screen size of the displayed inputs from the Show Inputs setting",
+//                .showButtons = false,
+//                .format = ""
+//            });
+//            UIWidgets::CVarSliderInt("Simulated Input Lag: %d frames", CVAR_SIMULATED_INPUT_LAG, 0, 6, 0, {
+//                .tooltip = "Buffers your inputs to be executed a specified amount of frames later"
+//            });
+//
+//            ImGui::EndMenu();
+//        }
+//        ImGui::EndMenu();
+//        */
+//        ImGui::EndMenu();
+//    }
 }
 
 extern std::shared_ptr<HudEditorWindow> mHudEditorWindow;
@@ -367,7 +367,7 @@ extern std::shared_ptr<ItemTrackerWindow> mItemTrackerWindow;
 extern std::shared_ptr<ItemTrackerSettingsWindow> mItemTrackerSettingsWindow;
 
 void DrawEnhancementsMenu() {
-    if (UIWidgets::BeginMenu("Enhancements")) {
+    /*if (UIWidgets::BeginMenu("Enhancements")) {
         if (UIWidgets::BeginMenu("Camera")) {
             ImGui::SeparatorText("Fixes");
             UIWidgets::CVarCheckbox(
@@ -840,11 +840,11 @@ void DrawEnhancementsMenu() {
         }
 
         ImGui::EndMenu();
-    }
+    }*/
 }
 
 void DrawCheatsMenu() {
-    if (UIWidgets::BeginMenu("Cheats")) {
+    /*if (UIWidgets::BeginMenu("Cheats")) {
         UIWidgets::CVarCheckbox("Infinite Health", "gCheats.InfiniteHealth");
         UIWidgets::CVarCheckbox("Infinite Magic", "gCheats.InfiniteMagic");
         UIWidgets::CVarCheckbox("Infinite Rupees", "gCheats.InfiniteRupees");
@@ -872,7 +872,7 @@ void DrawCheatsMenu() {
               .defaultIndex = TIME_STOP_OFF });
 
         ImGui::EndMenu();
-    }
+    }*/
 }
 
 extern std::shared_ptr<Ship::GuiWindow> mStatsWindow;
@@ -888,128 +888,128 @@ const char* logLevels[] = {
 };
 
 void DrawDeveloperToolsMenu() {
-    if (UIWidgets::BeginMenu("Developer Tools", UIWidgets::Color::Orange)) {
-        if (UIWidgets::CVarCheckbox("Debug Mode", "gDeveloperTools.DebugEnabled",
-                                    { .tooltip = "Enables Debug Mode, revealing some developer options and allows you "
-                                                 "to enter Map Select with L + R + Z" })) {
-            // If disabling debug mode, disable all debug features
-            if (!CVarGetInteger("gDeveloperTools.DebugEnabled", 0)) {
-                CVarClear("gDeveloperTools.DebugSaveFileMode");
-                CVarClear("gDeveloperTools.PreventActorUpdate");
-                CVarClear("gDeveloperTools.PreventActorDraw");
-                CVarClear("gDeveloperTools.PreventActorInit");
-                CVarClear("gDeveloperTools.DisableObjectDependency");
-                if (gPlayState != NULL) {
-                    gPlayState->frameAdvCtx.enabled = false;
-                }
-                RegisterDebugSaveCreate();
-                RegisterPreventActorUpdateHooks();
-                RegisterPreventActorDrawHooks();
-                RegisterPreventActorInitHooks();
-            }
-        }
-        if (ImGui::IsItemHovered()) {
-            ImGui::BeginTooltip();
-            ImGui::TextColored(ImVec4(1.0f, 1.0f, 0.0f, 1.0f),
-                               "Warning: Some of these features can break your game,\nor cause unexpected behavior, "
-                               "please ensure you disable them\nbefore reporting any bugs.");
-            ImGui::EndTooltip();
-        }
+    //if (UIWidgets::BeginMenu("Developer Tools", UIWidgets::Color::Orange)) {
+    //    if (UIWidgets::CVarCheckbox("Debug Mode", "gDeveloperTools.DebugEnabled",
+    //                                { .tooltip = "Enables Debug Mode, revealing some developer options and allows you "
+    //                                             "to enter Map Select with L + R + Z" })) {
+    //        // If disabling debug mode, disable all debug features
+    //        if (!CVarGetInteger("gDeveloperTools.DebugEnabled", 0)) {
+    //            CVarClear("gDeveloperTools.DebugSaveFileMode");
+    //            CVarClear("gDeveloperTools.PreventActorUpdate");
+    //            CVarClear("gDeveloperTools.PreventActorDraw");
+    //            CVarClear("gDeveloperTools.PreventActorInit");
+    //            CVarClear("gDeveloperTools.DisableObjectDependency");
+    //            if (gPlayState != NULL) {
+    //                gPlayState->frameAdvCtx.enabled = false;
+    //            }
+    //            RegisterDebugSaveCreate();
+    //            RegisterPreventActorUpdateHooks();
+    //            RegisterPreventActorDrawHooks();
+    //            RegisterPreventActorInitHooks();
+    //        }
+    //    }
+    //    if (ImGui::IsItemHovered()) {
+    //        ImGui::BeginTooltip();
+    //        ImGui::TextColored(ImVec4(1.0f, 1.0f, 0.0f, 1.0f),
+    //                           "Warning: Some of these features can break your game,\nor cause unexpected behavior, "
+    //                           "please ensure you disable them\nbefore reporting any bugs.");
+    //        ImGui::EndTooltip();
+    //    }
 
-        if (CVarGetInteger("gDeveloperTools.DebugEnabled", 0)) {
-            UIWidgets::CVarCheckbox(
-                "Better Map Select", "gDeveloperTools.BetterMapSelect.Enabled",
-                { .tooltip = "Overrides the original map select with a translated, more user-friendly version." });
+    //    if (CVarGetInteger("gDeveloperTools.DebugEnabled", 0)) {
+    //        UIWidgets::CVarCheckbox(
+    //            "Better Map Select", "gDeveloperTools.BetterMapSelect.Enabled",
+    //            { .tooltip = "Overrides the original map select with a translated, more user-friendly version." });
 
-            if (UIWidgets::CVarCombobox(
-                    "Debug Save File Mode", "gDeveloperTools.DebugSaveFileMode", debugSaveOptions,
-                    { .tooltip =
-                          "Change the behavior of creating saves while debug mode is enabled:\n\n"
-                          "- Empty Save: The default 3 heart save file in first cycle\n"
-                          "- Vanilla Debug Save: Uses the title screen save info (8 hearts, all items and masks)\n"
-                          "- 100\% Save: All items, equipment, mask, quest status and bombers notebook complete",
-                      .defaultIndex = DEBUG_SAVE_INFO_NONE })) {
-                RegisterDebugSaveCreate();
-            }
+    //        if (UIWidgets::CVarCombobox(
+    //                "Debug Save File Mode", "gDeveloperTools.DebugSaveFileMode", debugSaveOptions,
+    //                { .tooltip =
+    //                      "Change the behavior of creating saves while debug mode is enabled:\n\n"
+    //                      "- Empty Save: The default 3 heart save file in first cycle\n"
+    //                      "- Vanilla Debug Save: Uses the title screen save info (8 hearts, all items and masks)\n"
+    //                      "- 100\% Save: All items, equipment, mask, quest status and bombers notebook complete",
+    //                  .defaultIndex = DEBUG_SAVE_INFO_NONE })) {
+    //            RegisterDebugSaveCreate();
+    //        }
 
-            if (UIWidgets::CVarCheckbox("Prevent Actor Update", "gDeveloperTools.PreventActorUpdate")) {
-                RegisterPreventActorUpdateHooks();
-            }
-            if (UIWidgets::CVarCheckbox("Prevent Actor Draw", "gDeveloperTools.PreventActorDraw")) {
-                RegisterPreventActorDrawHooks();
-            }
-            if (UIWidgets::CVarCheckbox("Prevent Actor Init", "gDeveloperTools.PreventActorInit")) {
-                RegisterPreventActorInitHooks();
-            }
-            UIWidgets::CVarCheckbox("Disable Object Dependency", "gDeveloperTools.DisableObjectDependency");
+    //        if (UIWidgets::CVarCheckbox("Prevent Actor Update", "gDeveloperTools.PreventActorUpdate")) {
+    //            RegisterPreventActorUpdateHooks();
+    //        }
+    //        if (UIWidgets::CVarCheckbox("Prevent Actor Draw", "gDeveloperTools.PreventActorDraw")) {
+    //            RegisterPreventActorDrawHooks();
+    //        }
+    //        if (UIWidgets::CVarCheckbox("Prevent Actor Init", "gDeveloperTools.PreventActorInit")) {
+    //            RegisterPreventActorInitHooks();
+    //        }
+    //        UIWidgets::CVarCheckbox("Disable Object Dependency", "gDeveloperTools.DisableObjectDependency");
 
-            if (UIWidgets::CVarCombobox("Log Level", "gDeveloperTools.LogLevel", logLevels,
-                                        {
-                                            .tooltip = "The log level determines which messages are printed to the "
-                                                       "console. This does not affect the log file output",
-                                            .defaultIndex = 1,
-                                        })) {
-                Ship::Context::GetInstance()->GetLogger()->set_level(
-                    (spdlog::level::level_enum)CVarGetInteger("gDeveloperTools.LogLevel", 1));
-            }
+    //        if (UIWidgets::CVarCombobox("Log Level", "gDeveloperTools.LogLevel", logLevels,
+    //                                    {
+    //                                        .tooltip = "The log level determines which messages are printed to the "
+    //                                                   "console. This does not affect the log file output",
+    //                                        .defaultIndex = 1,
+    //                                    })) {
+    //            Ship::Context::GetInstance()->GetLogger()->set_level(
+    //                (spdlog::level::level_enum)CVarGetInteger("gDeveloperTools.LogLevel", 1));
+    //        }
 
-            if (gPlayState != NULL) {
-                ImGui::Separator();
-                UIWidgets::Checkbox(
-                    "Frame Advance", (bool*)&gPlayState->frameAdvCtx.enabled,
-                    { .tooltip = "This allows you to advance through the game one frame at a time on command. "
-                                 "To advance a frame, hold Z and tap R on the second controller. Holding Z "
-                                 "and R will advance a frame every half second. You can also use the buttons below." });
-                if (gPlayState->frameAdvCtx.enabled) {
-                    if (UIWidgets::Button("Advance 1", { .size = UIWidgets::Sizes::Inline })) {
-                        CVarSetInteger("gDeveloperTools.FrameAdvanceTick", 1);
-                    }
-                    ImGui::SameLine();
-                    UIWidgets::Button("Advance (Hold)", { .size = UIWidgets::Sizes::Inline });
-                    if (ImGui::IsItemActive()) {
-                        CVarSetInteger("gDeveloperTools.FrameAdvanceTick", 1);
-                    }
-                }
-            }
-        }
-        RenderWarpPointSection();
-        ImGui::Separator();
-        if (mCollisionViewerWindow) {
-            UIWidgets::WindowButton("Collision Viewer", "gWindows.CollisionViewer", mCollisionViewerWindow,
-                                    { .tooltip = "Draws collision to the screen" });
-        }
-        if (mStatsWindow) {
-            UIWidgets::WindowButton(
-                "Stats", "gWindows.Stats", mStatsWindow,
-                { .tooltip = "Shows the stats window, with your FPS and frametimes, and the OS you're playing on" });
-        }
-        if (mConsoleWindow) {
-            UIWidgets::WindowButton(
-                "Console", "gWindows.Console", mConsoleWindow,
-                { .tooltip =
-                      "Enables the console window, allowing you to input commands, type help for some examples" });
-        }
-        if (mGfxDebuggerWindow) {
-            UIWidgets::WindowButton(
-                "Gfx Debugger", "gWindows.GfxDebugger", mGfxDebuggerWindow,
-                { .tooltip =
-                      "Enables the Gfx Debugger window, allowing you to input commands, type help for some examples" });
-        }
-        if (mSaveEditorWindow) {
-            UIWidgets::WindowButton(
-                "Save Editor", "gWindows.SaveEditor", mSaveEditorWindow,
-                { .tooltip = "Enables the Save Editor window, allowing you to edit your save file" });
-        }
-        if (mActorViewerWindow) {
-            UIWidgets::WindowButton(
-                "Actor Viewer", "gWindows.ActorViewer", mActorViewerWindow,
-                { .tooltip = "Enables the Actor Viewer window, allowing you to view actors in the world." });
-        }
-        if (mEventLogWindow) {
-            UIWidgets::WindowButton("Event Log", "gWindows.EventLog", mEventLogWindow);
-        }
-        ImGui::EndMenu();
-    }
+    //        if (gPlayState != NULL) {
+    //            ImGui::Separator();
+    //            UIWidgets::Checkbox(
+    //                "Frame Advance", (bool*)&gPlayState->frameAdvCtx.enabled,
+    //                { .tooltip = "This allows you to advance through the game one frame at a time on command. "
+    //                             "To advance a frame, hold Z and tap R on the second controller. Holding Z "
+    //                             "and R will advance a frame every half second. You can also use the buttons below." });
+    //            if (gPlayState->frameAdvCtx.enabled) {
+    //                if (UIWidgets::Button("Advance 1", { .size = UIWidgets::Sizes::Inline })) {
+    //                    CVarSetInteger("gDeveloperTools.FrameAdvanceTick", 1);
+    //                }
+    //                ImGui::SameLine();
+    //                UIWidgets::Button("Advance (Hold)", { .size = UIWidgets::Sizes::Inline });
+    //                if (ImGui::IsItemActive()) {
+    //                    CVarSetInteger("gDeveloperTools.FrameAdvanceTick", 1);
+    //                }
+    //            }
+    //        }
+    //    }
+    //    RenderWarpPointSection();
+    //    ImGui::Separator();
+    //    if (mCollisionViewerWindow) {
+    //        UIWidgets::WindowButton("Collision Viewer", "gWindows.CollisionViewer", mCollisionViewerWindow,
+    //                                { .tooltip = "Draws collision to the screen" });
+    //    }
+    //    if (mStatsWindow) {
+    //        UIWidgets::WindowButton(
+    //            "Stats", "gWindows.Stats", mStatsWindow,
+    //            { .tooltip = "Shows the stats window, with your FPS and frametimes, and the OS you're playing on" });
+    //    }
+    //    if (mConsoleWindow) {
+    //        UIWidgets::WindowButton(
+    //            "Console", "gWindows.Console", mConsoleWindow,
+    //            { .tooltip =
+    //                  "Enables the console window, allowing you to input commands, type help for some examples" });
+    //    }
+    //    if (mGfxDebuggerWindow) {
+    //        UIWidgets::WindowButton(
+    //            "Gfx Debugger", "gWindows.GfxDebugger", mGfxDebuggerWindow,
+    //            { .tooltip =
+    //                  "Enables the Gfx Debugger window, allowing you to input commands, type help for some examples" });
+    //    }
+    //    if (mSaveEditorWindow) {
+    //        UIWidgets::WindowButton(
+    //            "Save Editor", "gWindows.SaveEditor", mSaveEditorWindow,
+    //            { .tooltip = "Enables the Save Editor window, allowing you to edit your save file" });
+    //    }
+    //    if (mActorViewerWindow) {
+    //        UIWidgets::WindowButton(
+    //            "Actor Viewer", "gWindows.ActorViewer", mActorViewerWindow,
+    //            { .tooltip = "Enables the Actor Viewer window, allowing you to view actors in the world." });
+    //    }
+    //    if (mEventLogWindow) {
+    //        UIWidgets::WindowButton("Event Log", "gWindows.EventLog", mEventLogWindow);
+    //    }
+    //    ImGui::EndMenu();
+    //}
 }
 
 void BenMenuBar::InitElement() {

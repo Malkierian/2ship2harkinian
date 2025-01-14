@@ -70,13 +70,13 @@ void CollisionViewerWindow::DrawElement() {
     ImGui::SeparatorText("Collision Types");
 
     UIWidgets::CVarCombobox("Scene", "gCollisionViewer.SceneCollisionMode", ColRenderSettingNames,
-                            { .color = UIWidgets::Color::Gray });
+                            { .color = UIWidgets::Colors::Gray });
     UIWidgets::CVarCombobox("BG Actors", "gCollisionViewer.BGActorsCollisionMode", ColRenderSettingNames,
-                            { .color = UIWidgets::Color::Gray });
+                            { .color = UIWidgets::Colors::Gray });
     UIWidgets::CVarCombobox("Col Check", "gCollisionViewer.ColCheckCollisionMode", ColRenderSettingNames,
-                            { .color = UIWidgets::Color::Gray });
+                            { .color = UIWidgets::Colors::Gray });
     UIWidgets::CVarCombobox("Waterbox", "gCollisionViewer.WaterboxCollisionMode", ColRenderSettingNames,
-                            { .color = UIWidgets::Color::Gray });
+                            { .color = UIWidgets::Colors::Gray });
 
     ImGui::SeparatorText("Colors");
 

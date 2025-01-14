@@ -104,7 +104,7 @@ void Menu::UpdateWindowBackendObjects() {
 }
 
 Menu::Menu(const std::string& cVar, const std::string& name, uint8_t searchSidebarIndex_,
-           UIWidgets::Color menuThemeIndex_)
+           UIWidgets::Colors menuThemeIndex_)
     : GuiWindow(cVar, name), searchSidebarIndex(searchSidebarIndex_), menuThemeIndex(menuThemeIndex_) {
 }
 
@@ -181,7 +181,7 @@ uint32_t Menu::DrawSearchResults(std::string& menuSearchText) {
                     info.type == WIDGET_SEPARATOR_TEXT || info.isHidden) {
                     continue;
                 }
-                const char* tooltip = info.tooltip;
+                const char* tooltip = info.options->tooltip;
                 std::string widgetStr = std::string(info.name) + std::string(tooltip != NULL ? tooltip : "");
                 std::transform(menuSearchText.begin(), menuSearchText.end(), menuSearchText.begin(), ::tolower);
                 menuSearchText.erase(std::remove(menuSearchText.begin(), menuSearchText.end(), ' '),
@@ -190,7 +190,7 @@ uint32_t Menu::DrawSearchResults(std::string& menuSearchText) {
                 widgetStr.erase(std::remove(widgetStr.begin(), widgetStr.end(), ' '), widgetStr.end());
                 if (widgetStr.find(menuSearchText) != std::string::npos) {
                     MenuDrawItem(info);
-                    ImGui::PushStyleColor(ImGuiCol_Text, UIWidgets::Colors.at(UIWidgets::Color::Gray));
+                    ImGui::PushStyleColor(ImGuiCol_Text, UIWidgets::ColorValues.at(UIWidgets::Colors::Gray));
                     std::string origin = fmt::format("  ({} -> {}, Col {})", menuEntry.label, sidebarLabel, column);
                     ImGui::Text("%s", origin.c_str());
                     ImGui::PopStyleColor();
@@ -209,18 +209,17 @@ void Menu::MenuDrawItem(WidgetInfo& widget) {
     disabledTooltip = " ";
 
     if (widget.preFunc != nullptr) {
-        widget.activeDisables.clear();
-        widget.isHidden = false;
+        widget.ResetDisables();
         widget.preFunc(widget);
         if (widget.isHidden) {
             return;
         }
         if (!widget.activeDisables.empty()) {
-            disabledValue = true;
+            widget.options->disabled = true;
             for (auto option : widget.activeDisables) {
                 disabledTempTooltip += std::string("- ") + disabledMap.at(option).reason + std::string("\n");
             }
-            disabledTooltip = disabledTempTooltip.c_str();
+            widget.options->disabledTooltip = disabledTempTooltip.c_str();
         }
     }
 
@@ -237,20 +236,18 @@ void Menu::MenuDrawItem(WidgetInfo& widget) {
                     assert(false);
                     return;
                 }
-                UIWidgets::CheckboxOptions& options = std::get<UIWidgets::CheckboxOptions>(widget.options);
-                options.color = menuThemeIndex;
-                options.tooltip = widget.tooltip;
-                if (UIWidgets::Checkbox(widget.name.c_str(), pointer, options)) {
+                auto options = std::static_pointer_cast<UIWidgets::CheckboxOptions>(widget.options);
+                options->color = menuThemeIndex;
+                if (UIWidgets::Checkbox(widget.name.c_str(), pointer, *options)) {
                     if (widget.callback != nullptr) {
                         widget.callback(widget);
                     }
                 }
             } break;
             case WIDGET_CVAR_CHECKBOX: {
-                UIWidgets::CheckboxOptions& options = std::get<UIWidgets::CheckboxOptions>(widget.options);
-                options.color = menuThemeIndex;
-                options.tooltip = widget.tooltip;
-                if (UIWidgets::CVarCheckbox(widget.name.c_str(), widget.cVar, options)) {
+                auto options = std::static_pointer_cast<UIWidgets::CheckboxOptions>(widget.options);
+                options->color = menuThemeIndex;
+                if (UIWidgets::CVarCheckbox(widget.name.c_str(), widget.cVar, *options)) {
                     if (widget.callback != nullptr) {
                         widget.callback(widget);
                     }
@@ -258,26 +255,26 @@ void Menu::MenuDrawItem(WidgetInfo& widget) {
             } break;
             case WIDGET_AUDIO_BACKEND: {
                 auto currentAudioBackend = Ship::Context::GetInstance()->GetAudio()->GetAudioBackend();
-                UIWidgets::ComboboxOptions options = { .color = menuThemeIndex,
-                    .disabled = Ship::Context::GetInstance()->GetAudio()->GetAvailableAudioBackends()->size() <= 1,
-                    .disabledTooltip = "Only one audio API is available on this platform." };
-                options.tooltip = widget.tooltip;
-                options.tooltip = widget.tooltip;
+                UIWidgets::ComboboxOptions options = {};
+                options.color = menuThemeIndex;
+                options.tooltip = "Sets the audio API used by the game. Requires a relaunch to take effect.";
+                options.disabled = Ship::Context::GetInstance()->GetAudio()->GetAvailableAudioBackends()->size() <= 1;
+                options.disabledTooltip = "Only one audio API is available on this platform.";
                 if (UIWidgets::Combobox("Audio API", &currentAudioBackend, audioBackendsMap, options)) {
                     Ship::Context::GetInstance()->GetAudio()->SetAudioBackend(currentAudioBackend);
                 }
             } break;
             case WIDGET_VIDEO_BACKEND: {
-                UIWidgets::ComboboxOptions options = { .color = menuThemeIndex,
-                    .disabled = availableWindowBackends->size() <= 1,
-                    .disabledTooltip = "Only one renderer API is available on this platform." };
-                options.tooltip = widget.tooltip;
-                options.tooltip = widget.tooltip;
+                UIWidgets::ComboboxOptions options = {};
+                options.color = menuThemeIndex;
+                options.tooltip = "Sets the renderer API used by the game.";
+                options.disabled = availableWindowBackends->size() <= 1;
+                options.disabledTooltip = "Only one renderer API is available on this platform.";
                 if (UIWidgets::Combobox(
                         "Renderer API (Needs reload)", &configWindowBackend, availableWindowBackendsMap,
                         options)) {
                     Ship::Context::GetInstance()->GetConfig()->SetInt("Window.Backend.Id",
-                                                                      static_cast<int32_t>(configWindowBackend));
+                                                                      (int32_t)(configWindowBackend));
                     Ship::Context::GetInstance()->GetConfig()->SetString("Window.Backend.Name",
                                                                          windowBackendsMap.at(configWindowBackend));
                     Ship::Context::GetInstance()->GetConfig()->Save();
@@ -288,23 +285,21 @@ void Menu::MenuDrawItem(WidgetInfo& widget) {
                 ImGui::Separator();
             } break;
             case WIDGET_SEPARATOR_TEXT: {
-                UIWidgets::TextOptions options = std::get<UIWidgets::TextOptions>(widget.options);
-                if (options.color != UIWidgets::Color::NoColor) {
-                    ImGui::PushStyleColor(ImGuiCol_Text, options.color);
+                if (widget.options->color != UIWidgets::Colors::NoColor) {
+                    ImGui::PushStyleColor(ImGuiCol_Text, widget.options->color);
                 }
                 ImGui::SeparatorText(widget.name.c_str());
-                if (options.color != UIWidgets::Color::NoColor) {
+                if (widget.options->color != UIWidgets::Colors::NoColor) {
                     ImGui::PopStyleColor();
                 }
             } break;
             case WIDGET_TEXT: {
-                UIWidgets::TextOptions options = std::get<UIWidgets::TextOptions>(widget.options);
-                if (options.color != UIWidgets::Color::NoColor) {
-                    ImGui::PushStyleColor(ImGuiCol_Text, options.color);
+                if (widget.options->color != UIWidgets::Colors::NoColor) {
+                    ImGui::PushStyleColor(ImGuiCol_Text, widget.options->color);
                 }
                 ImGui::AlignTextToFramePadding();
                 ImGui::Text(widget.name.c_str());
-                if (options.color != UIWidgets::Color::NoColor) {
+                if (widget.options->color != UIWidgets::Colors::NoColor) {
                     ImGui::PopStyleColor();
                 }
             } break;
@@ -315,20 +310,18 @@ void Menu::MenuDrawItem(WidgetInfo& widget) {
                     assert(false);
                     return;
                 }
-                UIWidgets::ComboboxOptions& options = std::get<UIWidgets::ComboboxOptions>(widget.options);
-                options.color = menuThemeIndex;
-                options.tooltip = widget.tooltip;
-                if (UIWidgets::Combobox(widget.name.c_str(), pointer, widget.comboMap, options)) {
+                auto options = std::static_pointer_cast<UIWidgets::ComboboxOptions>(widget.options);
+                options->color = menuThemeIndex;
+                if (UIWidgets::Combobox(widget.name.c_str(), pointer, options->comboMap, *options)) {
                     if (widget.callback != nullptr) {
                         widget.callback(widget);
                     }
                 };
             } break;
             case WIDGET_CVAR_COMBOBOX: {
-                UIWidgets::ComboboxOptions& options = std::get<UIWidgets::ComboboxOptions>(widget.options);
-                options.color = menuThemeIndex;
-                options.tooltip = widget.tooltip;
-                if (UIWidgets::CVarCombobox(widget.name.c_str(), widget.cVar, widget.comboMap, options)) {
+                auto options = std::static_pointer_cast<UIWidgets::ComboboxOptions>(widget.options);
+                options->color = menuThemeIndex;
+                if (UIWidgets::CVarCombobox(widget.name.c_str(), widget.cVar, options->comboMap, *options)) {
                     if (widget.callback != nullptr) {
                         widget.callback(widget);
                     }
@@ -341,10 +334,18 @@ void Menu::MenuDrawItem(WidgetInfo& widget) {
                     assert(false);
                     return;
                 }
-                UIWidgets::IntSliderOptions& options = std::get<UIWidgets::IntSliderOptions>(widget.options);
-                options.color = menuThemeIndex;
-                options.tooltip = widget.tooltip;
-                if (UIWidgets::SliderInt(widget.name.c_str(), pointer, options)) {
+                auto options = std::static_pointer_cast<UIWidgets::IntSliderOptions>(widget.options);
+                options->color = menuThemeIndex;
+                if (UIWidgets::SliderInt(widget.name.c_str(), pointer, *options)) {
+                    if (widget.callback != nullptr) {
+                        widget.callback(widget);
+                    }
+                };
+            } break;
+            case WIDGET_CVAR_SLIDER_INT: {
+                auto options = std::static_pointer_cast<UIWidgets::IntSliderOptions>(widget.options);
+                options->color = menuThemeIndex;
+                if (UIWidgets::CVarSliderInt(widget.name.c_str(), widget.cVar, *options)) {
                     if (widget.callback != nullptr) {
                         widget.callback(widget);
                     }
@@ -358,49 +359,33 @@ void Menu::MenuDrawItem(WidgetInfo& widget) {
                     assert(false);
                     return;
                 }
-                UIWidgets::FloatSliderOptions& options = std::get<UIWidgets::FloatSliderOptions>(widget.options);
-                options.color = menuThemeIndex;
-                options.tooltip = widget.tooltip;
-                if (UIWidgets::SliderFloat(widget.name.c_str(), pointer, options)) {
+                auto options = std::static_pointer_cast<UIWidgets::FloatSliderOptions>(widget.options);
+                options->color = menuThemeIndex;
+                if (UIWidgets::SliderFloat(widget.name.c_str(), pointer, *options)) {
                     if (widget.callback != nullptr) {
                         widget.callback(widget);
                     }
                 }
             } break;
-            case WIDGET_CVAR_SLIDER_INT: {
-                UIWidgets::IntSliderOptions& options = std::get<UIWidgets::IntSliderOptions>(widget.options);
-                options.color = menuThemeIndex;
-                options.tooltip = widget.tooltip;
-                if (UIWidgets::CVarSliderInt(widget.name.c_str(), widget.cVar, options)) {
-                    if (widget.callback != nullptr) {
-                        widget.callback(widget);
-                    }
-                };
-            } break;
             case WIDGET_CVAR_SLIDER_FLOAT: {
-                UIWidgets::FloatSliderOptions& options = std::get<UIWidgets::FloatSliderOptions>(widget.options);
-                options.color = menuThemeIndex;
-                options.tooltip = widget.tooltip;
-                if (UIWidgets::CVarSliderFloat(widget.name.c_str(), widget.cVar, options)) {
+                auto options = std::static_pointer_cast<UIWidgets::FloatSliderOptions>(widget.options);
+                options->color = menuThemeIndex;
+                if (UIWidgets::CVarSliderFloat(widget.name.c_str(), widget.cVar, *options)) {
                     if (widget.callback != nullptr) {
                         widget.callback(widget);
                     }
                 }
             } break;
             case WIDGET_BUTTON: {
-                UIWidgets::ButtonOptions& options = std::get<UIWidgets::ButtonOptions>(widget.options);
-                options.color = menuThemeIndex;
-                options.tooltip = widget.tooltip;
-                if (UIWidgets::Button(widget.name.c_str(), options)) {
+                auto options = std::static_pointer_cast<UIWidgets::ButtonOptions>(widget.options);
+                options->color = menuThemeIndex;
+                if (UIWidgets::Button(widget.name.c_str(), *options)) {
                     if (widget.callback != nullptr) {
                         widget.callback(widget);
                     }
                 }
             } break;
             case WIDGET_WINDOW_BUTTON: {
-                UIWidgets::ButtonOptions& options = std::get<UIWidgets::ButtonOptions>(widget.options);
-                options.color = menuThemeIndex;
-                options.tooltip = widget.tooltip;
                 if (widget.windowName == nullptr || widget.windowName[0] == '\0') {
                     std::string msg =
                         fmt::format("Error drawing window contents for {}: windowName not defined", widget.name);
@@ -414,7 +399,9 @@ void Menu::MenuDrawItem(WidgetInfo& widget) {
                     SPDLOG_ERROR(msg.c_str());
                     break;
                 }
-                UIWidgets::WindowButton(widget.name.c_str(), widget.cVar, window, options);
+                auto options = std::static_pointer_cast<UIWidgets::ButtonOptions>(widget.options);
+                options->color = menuThemeIndex;
+                UIWidgets::WindowButton(widget.name.c_str(), widget.cVar, window, *options);
                 if (!window->IsVisible()) {
                     window->DrawElement();
                 }
@@ -431,7 +418,7 @@ void Menu::MenuDrawItem(WidgetInfo& widget) {
                     ImGui::SetKeyboardFocusHere(0);
                 }
                 UIWidgets::PushStyleCombobox(menuThemeIndex);
-                ImGui::PushStyleColor(ImGuiCol_Border, UIWidgets::Colors.at(menuThemeIndex));
+                ImGui::PushStyleColor(ImGuiCol_Border, UIWidgets::ColorValues.at(menuThemeIndex));
                 menuSearch.Draw();
                 ImGui::PopStyleColor();
                 UIWidgets::PopStyleCombobox();
@@ -470,7 +457,7 @@ void Menu::DrawElement() {
     for (auto& [reason, info] : disabledMap) {
         info.active = info.evaluation(info);
     }
-    menuThemeIndex = static_cast<UIWidgets::Color>(CVarGetInteger("gSettings.MenuTheme", 3));
+    menuThemeIndex = static_cast<UIWidgets::Colors>(CVarGetInteger("gSettings.MenuTheme", 3));
 
     windowHeight = ImGui::GetMainViewport()->WorkSize.y;
     windowWidth = ImGui::GetMainViewport()->WorkSize.x;
@@ -557,7 +544,8 @@ void Menu::DrawElement() {
         headerHeight += style.ScrollbarSize;
         scrollbar = true;
     }
-    UIWidgets::ButtonOptions options = { .size = UIWidgets::Sizes::Inline };
+    UIWidgets::ButtonOptions options = {};
+    options.size = UIWidgets::Sizes::Inline;
     options.tooltip = "Close Menu (Esc)";
     if (UIWidgets::Button(ICON_FA_TIMES_CIRCLE, options)) {
         ToggleVisibility();
@@ -630,9 +618,10 @@ void Menu::DrawElement() {
     }
     ImGui::EndChild();
     ImGui::SameLine(menuSize.x - (buttonSize.x * 2) - style.ItemSpacing.x);
-    UIWidgets::ButtonOptions options2 = { .color = UIWidgets::Color::Red,
-        .size = UIWidgets::Sizes::Inline };
-    options.tooltip = "Reset"
+    UIWidgets::ButtonOptions options2 = {};
+    options2.color = UIWidgets::Colors::Red;
+    options2.size = UIWidgets::Sizes::Inline;
+    options2.tooltip = "Reset"
 #ifdef __APPLE__
         " (Command-R)"
 #elif !defined(__SWITCH__) && !defined(__WIIU__)
@@ -647,8 +636,9 @@ void Menu::DrawElement() {
             ->Dispatch("reset");
     }
     ImGui::SameLine();
-    UIWidgets::ButtonOptions options3 = { .color = UIWidgets::Color::Red,
-        .size = UIWidgets::Sizes::Inline };
+    UIWidgets::ButtonOptions options3 = {};
+    options3.color = UIWidgets::Colors::Red;
+    options3.size = UIWidgets::Sizes::Inline;
     options3.tooltip = "Quit 2S2H";
     if (UIWidgets::Button(ICON_FA_POWER_OFF, options3)) {
         if (!popped) {
@@ -733,7 +723,9 @@ void Menu::DrawElement() {
         }
         ImGui::SetCursorPosX((ImGui::GetWindowWidth() - ImGui::CalcTextSize("Clear Search").x) / 2 - 10.0f);
         ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 10.0f);
-        if (UIWidgets::Button("Clear Search", { .size = UIWidgets::Sizes::Inline })) {
+        UIWidgets::ButtonOptions clearBtnOpts = {};
+        clearBtnOpts.size = UIWidgets::Sizes::Inline;
+        if (UIWidgets::Button("Clear Search", clearBtnOpts)) {
             menuSearch.Clear();
         }
 

@@ -190,11 +190,11 @@ void ActorViewerWindow::DrawElement() {
             ImGui::SeparatorText("Options");
 
             toggled = UIWidgets::CVarCheckbox("Actor Name Tags", CVAR_ACTOR_NAME_TAGS("Enabled"),
-                                              { .tooltip = "Adds \"name tags\" above actors for identification" });
+                                              {{ .tooltip = "Adds \"name tags\" above actors for identification" }});
 
             ImGui::SameLine();
 
-            UIWidgets::Button("Display Items", { .tooltip = "Click to add display items on the name tags" });
+            UIWidgets::Button("Display Items", {{ .tooltip = "Click to add display items on the name tags" }});
 
             if (ImGui::BeginPopupContextItem(nullptr, ImGuiPopupFlags_MouseButtonLeft | ImGuiPopupFlags_NoReopen)) {
                 optionChange |= UIWidgets::CVarCheckbox("ID", CVAR_ACTOR_NAME_TAGS("DisplayID"));
@@ -207,7 +207,7 @@ void ActorViewerWindow::DrawElement() {
 
             optionChange |= UIWidgets::CVarCheckbox(
                 "Name tags with Z-Buffer", CVAR_ACTOR_NAME_TAGS("WithZBuffer"),
-                { .tooltip = "Allow name tags to be obstructed when behind geometry and actors" });
+                {{ .tooltip = "Allow name tags to be obstructed when behind geometry and actors" }});
 
             if (toggled || optionChange) {
                 bool tagsEnabled = CVarGetInteger(CVAR_ACTOR_NAME_TAGS("Enabled"), 0);
@@ -349,20 +349,20 @@ void ActorViewerWindow::DrawElement() {
                 }
             }
 
-            if (UIWidgets::Button("Fetch: Target", { .tooltip = "Grabs actor with target arrow above it." })) {
+            if (UIWidgets::Button("Fetch: Target", {{ .tooltip = "Grabs actor with target arrow above it." }})) {
                 Player* player = GET_PLAYER(gPlayState);
                 if (player->lockOnActor != nullptr) {
                     SetSelectedActor(player->lockOnActor);
                 }
             }
-            if (UIWidgets::Button("Fetch: Held", { .tooltip = "Grabs actor Link is currently holding." })) {
+            if (UIWidgets::Button("Fetch: Held", {{ .tooltip = "Grabs actor Link is currently holding." }})) {
                 Player* player = GET_PLAYER(gPlayState);
                 if (player->heldActor != nullptr) {
                     SetSelectedActor(player->heldActor);
                 }
             }
 
-            if (UIWidgets::Button("Kill", { .color = UIWidgets::Color::Red }) && selectedActor != nullptr &&
+            if (UIWidgets::Button("Kill", { .color = UIWidgets::Colors::Red }) && selectedActor != nullptr &&
                 selectedActor->id != ACTOR_PLAYER) {
                 Actor_Kill(selectedActor);
             }
@@ -411,12 +411,12 @@ void ActorViewerWindow::DrawElement() {
                 newActor.rot = player->actor.world.rot;
             }
 
-            if (UIWidgets::Button("Spawn", { .color = UIWidgets::Color::Green })) {
+            if (UIWidgets::Button("Spawn", { .color = UIWidgets::Colors::Green })) {
                 Actor_Spawn(&gPlayState->actorCtx, gPlayState, newActor.id, newActor.pos.x, newActor.pos.y,
                             newActor.pos.z, newActor.rot.x, newActor.rot.y, newActor.rot.z, newActor.params);
             }
 
-            if (UIWidgets::Button("Spawn as Child", { .color = UIWidgets::Color::Green })) {
+            if (UIWidgets::Button("Spawn as Child", { .color = UIWidgets::Colors::Green })) {
                 Actor* parent = selectedActor;
                 if (parent != nullptr && parent->child == nullptr) {
                     Actor_SpawnAsChild(&gPlayState->actorCtx, parent, gPlayState, newActor.id, newActor.pos.x,
