@@ -10,11 +10,9 @@
 namespace BenGui {
 
 static const std::unordered_map<int32_t, const char*> menuThemeOptions = {
-    { UIWidgets::Colors::Pink, "Pink" },
     { UIWidgets::Colors::Red, "Red" },
     { UIWidgets::Colors::DarkRed, "Dark Red" },
     { UIWidgets::Colors::Orange, "Orange" },
-    { UIWidgets::Colors::LightGreen, "Light Green" },
     { UIWidgets::Colors::Green, "Green" },
     { UIWidgets::Colors::DarkGreen, "Dark Green" },
     { UIWidgets::Colors::LightBlue, "Light Blue" },
@@ -24,8 +22,6 @@ static const std::unordered_map<int32_t, const char*> menuThemeOptions = {
     { UIWidgets::Colors::Violet, "Violet" },
     { UIWidgets::Colors::Purple, "Purple" },
     { UIWidgets::Colors::Brown, "Brown" },
-    { UIWidgets::Colors::DarkBrown, "Dark Brown" },
-    { UIWidgets::Colors::LightGray, "Light Gray" },
     { UIWidgets::Colors::Gray, "Gray" },
     { UIWidgets::Colors::DarkGray, "Dark Gray" },
 };
@@ -97,6 +93,7 @@ class BenMenu : public Ship::Menu {
     void UpdateElement() override;
     void Draw() override;
 
+    void AddSidebarEntry(std::string sectionName, std::string sidbarName, uint32_t columnCount);
     WidgetInfo& AddWidget(WidgetPath& pathInfo, std::string widgetName, WidgetType widgetType);
     void AddSettings();
     void AddEnhancements();

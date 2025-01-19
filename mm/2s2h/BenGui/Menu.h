@@ -28,7 +28,7 @@ class Menu : public GuiWindow {
     std::string mName;
     uint32_t mWindowFlags;
     std::vector<MainMenuEntry> menuEntries;
-    void MenuDrawItem(WidgetInfo& widget);
+    void MenuDrawItem(WidgetInfo& widget, uint32_t width);
     uint32_t DrawSearchResults(std::string& menuSearchText);
     ImGuiTextFilter menuSearch;
     uint8_t searchSidebarIndex;

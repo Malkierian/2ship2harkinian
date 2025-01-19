@@ -12,7 +12,7 @@
 #include "HudEditor.h"
 #include "Notification.h"
 #include <variant>
-#include <fmt/format.h>
+#include <spdlog/fmt/fmt.h>
 #include "variables.h"
 #include <variant>
 #include <tuple>
@@ -73,7 +73,7 @@ uint32_t GetVectorIndexOf(std::vector<std::string>& vector, std::string value) {
 void Menu::InsertSidebarSearch() {
     menuEntries[0].sidebars.emplace("Search", searchSidebarEntry);
     uint32_t curIndex = 0;
-    if (CVarGetString(menuEntries[0].sidebarCvar, "") != "") {
+    if (!Ship_IsCStringEmpty(CVarGetString(menuEntries[0].sidebarCvar, ""))) {
         curIndex = GetVectorIndexOf(menuEntries[0].sidebarOrder, CVarGetString(menuEntries[0].sidebarCvar, ""));
     }
     menuEntries[0].sidebarOrder.insert(menuEntries[0].sidebarOrder.begin() + searchSidebarIndex, "Search");
@@ -189,7 +189,7 @@ uint32_t Menu::DrawSearchResults(std::string& menuSearchText) {
                 std::transform(widgetStr.begin(), widgetStr.end(), widgetStr.begin(), ::tolower);
                 widgetStr.erase(std::remove(widgetStr.begin(), widgetStr.end(), ' '), widgetStr.end());
                 if (widgetStr.find(menuSearchText) != std::string::npos) {
-                    MenuDrawItem(info);
+                    MenuDrawItem(info, 90 / sidebar.columnCount);
                     ImGui::PushStyleColor(ImGuiCol_Text, UIWidgets::ColorValues.at(UIWidgets::Colors::Gray));
                     std::string origin = fmt::format("  ({} -> {}, Col {})", menuEntry.label, sidebarLabel, column);
                     ImGui::Text("%s", origin.c_str());
@@ -203,7 +203,7 @@ uint32_t Menu::DrawSearchResults(std::string& menuSearchText) {
     return searchCount;
 }
 
-void Menu::MenuDrawItem(WidgetInfo& widget) {
+void Menu::MenuDrawItem(WidgetInfo& widget, uint32_t width) {
     disabledTempTooltip = "This setting is disabled because: \n\n";
     disabledValue = false;
     disabledTooltip = " ";
@@ -238,7 +238,7 @@ void Menu::MenuDrawItem(WidgetInfo& widget) {
                 }
                 auto options = std::static_pointer_cast<UIWidgets::CheckboxOptions>(widget.options);
                 options->color = menuThemeIndex;
-                if (UIWidgets::Checkbox(widget.name.c_str(), pointer, *options)) {
+                if (UIWidgets::Checkbox(UIWidgets::WrappedText(widget.name.c_str(), width).c_str(), pointer, *options)) {
                     if (widget.callback != nullptr) {
                         widget.callback(widget);
                     }
@@ -247,7 +247,7 @@ void Menu::MenuDrawItem(WidgetInfo& widget) {
             case WIDGET_CVAR_CHECKBOX: {
                 auto options = std::static_pointer_cast<UIWidgets::CheckboxOptions>(widget.options);
                 options->color = menuThemeIndex;
-                if (UIWidgets::CVarCheckbox(widget.name.c_str(), widget.cVar, *options)) {
+                if (UIWidgets::CVarCheckbox(UIWidgets::WrappedText(widget.name.c_str(), width).c_str(), widget.cVar, *options)) {
                     if (widget.callback != nullptr) {
                         widget.callback(widget);
                     }
@@ -286,7 +286,7 @@ void Menu::MenuDrawItem(WidgetInfo& widget) {
             } break;
             case WIDGET_SEPARATOR_TEXT: {
                 if (widget.options->color != UIWidgets::Colors::NoColor) {
-                    ImGui::PushStyleColor(ImGuiCol_Text, widget.options->color);
+                    ImGui::PushStyleColor(ImGuiCol_Text, UIWidgets::ColorValues.at(widget.options->color));
                 }
                 ImGui::SeparatorText(widget.name.c_str());
                 if (widget.options->color != UIWidgets::Colors::NoColor) {
@@ -295,10 +295,10 @@ void Menu::MenuDrawItem(WidgetInfo& widget) {
             } break;
             case WIDGET_TEXT: {
                 if (widget.options->color != UIWidgets::Colors::NoColor) {
-                    ImGui::PushStyleColor(ImGuiCol_Text, widget.options->color);
+                    ImGui::PushStyleColor(ImGuiCol_Text, UIWidgets::ColorValues.at(widget.options->color));
                 }
                 ImGui::AlignTextToFramePadding();
-                ImGui::Text(widget.name.c_str());
+                ImGui::Text("%s", widget.name.c_str());
                 if (widget.options->color != UIWidgets::Colors::NoColor) {
                     ImGui::PopStyleColor();
                 }
@@ -426,7 +426,7 @@ void Menu::MenuDrawItem(WidgetInfo& widget) {
                 std::string menuSearchText(menuSearch.InputBuf);
 
                 if (menuSearchText == "") {
-                    ImGui::Text("Start typing to see results.");
+                    ImGui::Text("%s", "Start typing to see results.");
                     return;
                 }
                 DrawSearchResults(menuSearchText);
@@ -740,7 +740,7 @@ void Menu::DrawElement() {
             }
             // for (auto& entryName : sidebar->at(sectionIndex).sidebarOrder) {
             for (auto& entry : sidebar->at(sectionIndex).columnWidgets.at(i)) {
-                MenuDrawItem(entry);
+                MenuDrawItem(entry, 90 / sidebar->at(sectionIndex).columnCount);
             }
             //}
             if (useColumns) {

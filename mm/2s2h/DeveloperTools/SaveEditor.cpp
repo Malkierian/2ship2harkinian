@@ -1269,7 +1269,7 @@ void GetPlayerForm(uint32_t form) {
             break;
         case PLAYER_FORM_HUMAN:
             curForm = "Human";
-            formColor = UIWidgets::Colors::LightGreen;
+            formColor = UIWidgets::Colors::Green;
             formObject = OBJECT_LINK_CHILD;
             break;
         default:
@@ -1372,7 +1372,7 @@ void DrawPlayerTab() {
             static int currentWeapon = 0;
             static int currentShield = 0;
 
-            UIWidgets::PushStyleCombobox(UIWidgets::Colors::LightGreen);
+            UIWidgets::PushStyleCombobox(UIWidgets::Colors::Green);
             ImGui::PushItemWidth(ImGui::GetFontSize() * 15);
             if (ImGui::BeginCombo("Equipped Sword", weaponCombo[currentWeapon])) {
                 for (int i = EQUIP_VALUE_SWORD_KOKIRI; i <= EQUIP_VALUE_SWORD_GILDED; i++) {
