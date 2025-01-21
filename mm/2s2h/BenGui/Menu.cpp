@@ -203,6 +203,14 @@ uint32_t Menu::DrawSearchResults(std::string& menuSearchText) {
     return searchCount;
 }
 
+void Menu::AddHeaderEntry(MainMenuEntry& menuEntry) {
+    menuEntries.push_back(menuEntry);
+}
+
+std::unordered_map<uint32_t, disabledInfo>& Menu::GetDisabledMap() {
+    return disabledMap;
+}
+
 void Menu::MenuDrawItem(WidgetInfo& widget, uint32_t width) {
     disabledTempTooltip = "This setting is disabled because: \n\n";
     disabledValue = false;
@@ -385,6 +393,11 @@ void Menu::MenuDrawItem(WidgetInfo& widget, uint32_t width) {
                     }
                 }
             } break;
+            case WIDGET_CUSTOM: {
+                if (widget.customFunction != nullptr) {
+                    widget.customFunction(widget);
+                }
+            } break;
             case WIDGET_WINDOW_BUTTON: {
                 if (widget.windowName == nullptr || widget.windowName[0] == '\0') {
                     std::string msg =
@@ -426,7 +439,7 @@ void Menu::MenuDrawItem(WidgetInfo& widget, uint32_t width) {
                 std::string menuSearchText(menuSearch.InputBuf);
 
                 if (menuSearchText == "") {
-                    ImGui::Text("%s", "Start typing to see results.");
+                    ImGui::Text("Start typing to see results.");
                     return;
                 }
                 DrawSearchResults(menuSearchText);

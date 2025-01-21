@@ -17,6 +17,7 @@
 #include "variables.h"
 #include <variant>
 #include <tuple>
+#include "ResolutionEditor.h"
 
 extern "C" {
 #include "z64.h"
@@ -52,6 +53,7 @@ void BenMenu::AddSidebarEntry(std::string sectionName, std::string sidebarName, 
 }
 
 WidgetInfo& BenMenu::AddWidget(WidgetPath& pathInfo, std::string widgetName, WidgetType widgetType) {
+    assert(widgetName != ""); // Must be unique
     std::unordered_map<std::string, SidebarEntry>& sidebar =
         (pathInfo.sectionName == "Settings"
              ? settingsSidebar
@@ -219,6 +221,16 @@ void BenMenu::AddSettings() {
         .Callback([](WidgetInfo& info) {
             Ship::Context::GetInstance()->GetWindow()->SetResolutionMultiplier(
                 CVarGetFloat(CVAR_INTERNAL_RESOLUTION, 1));
+        })
+        .PreFunc([](WidgetInfo& info) {
+            if (mBenMenu->disabledMap.at(DISABLE_FOR_ADVANCED_RESOLUTION_ON).active &&
+                mBenMenu->disabledMap.at(DISABLE_FOR_VERTICAL_RES_TOGGLE_ON).active) {
+                info.activeDisables.push_back(DISABLE_FOR_ADVANCED_RESOLUTION_ON);
+                info.activeDisables.push_back(DISABLE_FOR_VERTICAL_RES_TOGGLE_ON);
+            }
+            else if (mBenMenu->disabledMap.at(DISABLE_FOR_LOW_RES_MODE_ON).active) {
+                info.activeDisables.push_back(DISABLE_FOR_LOW_RES_MODE_ON);
+            }
         })
         .Options(FloatSliderOptions()
             .Tooltip("Multiplies your output resolution by the value inputted, as a more intensive but effective "
@@ -1158,6 +1170,7 @@ void BenMenu::InitElement() {
     AddSettings();
     AddEnhancements();
     AddDevTools();
+    RegisterResolutionWidgets();
 
     menuEntries = { { "Settings", settingsSidebar, "gSettings.Menu.SettingsSidebarSection", settingsOrder },
                     { "Enhancements", enhancementsSidebar, "gSettings.Menu.EnhancementsSidebarSection",
@@ -1256,12 +1269,22 @@ void BenMenu::InitElement() {
             "Warp Point Not Saved" } },
         { DISABLE_FOR_INTRO_SKIP_OFF,
           { [](disabledInfo& info) -> bool { return !CVarGetInteger("gEnhancements.Cutscenes.SkipIntroSequence", 0); },
-            "Intro Skip Not Selected" } }
+            "Intro Skip Not Selected" } },
+        { DISABLE_FOR_ADVANCED_RESOLUTION_ON,
+          { [](disabledInfo& info) -> bool { return CVarGetInteger(CVAR_PREFIX_ADVANCED_RESOLUTION ".Enabled", 0); },
+            "Advanced Resolution Enabled" } },
+        { DISABLE_FOR_VERTICAL_RES_TOGGLE_ON,
+          { [](disabledInfo& info) -> bool { return CVarGetInteger(CVAR_PREFIX_ADVANCED_RESOLUTION ".VerticalResolutionToggle", 0); },
+            "Vertical Resolution Toggle Enabled" } },
+        { DISABLE_FOR_LOW_RES_MODE_ON,
+          { [](disabledInfo& info) -> bool { return CVarGetInteger(CVAR_LOW_RES_MODE, 0); },
+            "N64 Mode Enabled" } },
     };
 }
 
 void BenMenu::UpdateElement() {
     Ship::Menu::UpdateElement();
+    UpdateResolutionVars();
 }
 
 void BenMenu::Draw() {

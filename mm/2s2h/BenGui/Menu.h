@@ -23,12 +23,15 @@ class Menu : public GuiWindow {
     void RemoveSidebarSearch();
     void UpdateWindowBackendObjects();
 
+    void MenuDrawItem(WidgetInfo& widget, uint32_t width);
+    void AddHeaderEntry(MainMenuEntry& menuEntry);
+    std::unordered_map<uint32_t, disabledInfo>& GetDisabledMap();
+
   protected:
     ImVec2 mOriginalSize;
     std::string mName;
     uint32_t mWindowFlags;
     std::vector<MainMenuEntry> menuEntries;
-    void MenuDrawItem(WidgetInfo& widget, uint32_t width);
     uint32_t DrawSearchResults(std::string& menuSearchText);
     ImGuiTextFilter menuSearch;
     uint8_t searchSidebarIndex;
@@ -38,6 +41,7 @@ class Menu : public GuiWindow {
     Ship::WindowBackend configWindowBackend;
 
     std::unordered_map<uint32_t, disabledInfo> disabledMap;
+    std::vector<disabledInfo> disabledVector;
     const SidebarEntry searchSidebarEntry = {
         .columnCount = 1,
         .columnWidgets = { { { 

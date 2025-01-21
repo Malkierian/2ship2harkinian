@@ -26,6 +26,9 @@ typedef enum {
     DISABLE_FOR_FRAME_ADVANCE_OFF,
     DISABLE_FOR_WARP_POINT_NOT_SET,
     DISABLE_FOR_INTRO_SKIP_OFF,
+    DISABLE_FOR_ADVANCED_RESOLUTION_ON,
+    DISABLE_FOR_VERTICAL_RES_TOGGLE_ON,
+    DISABLE_FOR_LOW_RES_MODE_ON,
 } DisableOption;
 
 struct WidgetInfo;
@@ -53,7 +56,8 @@ typedef enum {
     WIDGET_TEXT,
     WIDGET_WINDOW_BUTTON,
     WIDGET_AUDIO_BACKEND, // needed for special operations that can't be handled easily with the normal combobox widget
-    WIDGET_VIDEO_BACKEND  // same as above
+    WIDGET_VIDEO_BACKEND,  // same as above
+    WIDGET_CUSTOM,
 } WidgetType;
 
 typedef enum {
@@ -107,6 +111,7 @@ struct WidgetInfo {
     WidgetFunc callback = nullptr;
     WidgetFunc preFunc = nullptr;
     WidgetFunc postFunc = nullptr;
+    WidgetFunc customFunction = nullptr;
     DisableVec activeDisables = {};
     const char* windowName = "";
     bool isHidden = false;
@@ -180,6 +185,10 @@ struct WidgetInfo {
     }
     WidgetInfo& SameLine(bool sameLine_) {
         sameLine = sameLine_;
+        return *this;
+    }
+    WidgetInfo& CustomFunction(WidgetFunc customFunction_) {
+        customFunction = customFunction_;
         return *this;
     }
 };
