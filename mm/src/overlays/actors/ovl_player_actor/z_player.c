@@ -5514,7 +5514,7 @@ s32 func_808339D4(PlayState* play, Player* this, s32 damage) {
         return Actor_ApplyDamage(&this->actor);
     }
 
-    if (GameInteractor_Should(VB_MULTIPLY_INFLICTED_DMG, this->currentMask == PLAYER_MASK_GIANT, &damage)) {
+    if (this->currentMask == PLAYER_MASK_GIANT) {
         damage >>= 2;
     }
 
@@ -6990,7 +6990,7 @@ s32 func_808373F8(PlayState* play, Player* this, u16 sfxId) {
             Player_PlaySfx(this, (NA_SE_PL_DEKUNUTS_JUMP5 + 1 - this->remainingHopsCounter));
             Player_AnimSfx_PlayVoice(this, sfxId);
             this->remainingHopsCounter--;
-            if (GameInteractor_Should(VB_DEKU_LINK_SPIN_ON_LAST_HOP, this->remainingHopsCounter == 0)) {
+            if (this->remainingHopsCounter == 0) {
                 this->stateFlags2 |= PLAYER_STATE2_80000;
                 func_808373A4(play, this);
             }
@@ -12210,7 +12210,7 @@ void Player_UpdateCommon(Player* this, PlayState* play, Input* input) {
 
         this->actor.shape.face = ((play->gameplayFrames & 0x20) ? 0 : 3) + this->blinkInfo.eyeTexIndex;
 
-        if (GameInteractor_Should(VB_CONSIDER_BUNNY_HOOD_EQUIPPED, this->currentMask == PLAYER_MASK_BUNNY, this)) {
+        if (GameInteractor_Should(VB_CONSIDER_BUNNY_HOOD_EQUIPPED, this->currentMask == PLAYER_MASK_BUNNY)) {
             Player_UpdateBunnyEars(this);
         }
 
@@ -13095,7 +13095,7 @@ s32 Ship_HandleFirstPersonAiming(PlayState* play, Player* this, s32 arg2) {
     if (!playerMovementLocked && CVarGetInteger("gEnhancements.Camera.FirstPerson.MoveInFirstPerson", 0) &&
         CVarGetInteger("gEnhancements.Camera.FirstPerson.RightStickEnabled", 0)) {
         f32 movementSpeed = 8.25f; // account for form
-        if (GameInteractor_Should(VB_CONSIDER_BUNNY_HOOD_EQUIPPED, this->currentMask == PLAYER_MASK_BUNNY, this)) {
+        if (GameInteractor_Should(VB_CONSIDER_BUNNY_HOOD_EQUIPPED, this->currentMask == PLAYER_MASK_BUNNY)) {
             movementSpeed *= 1.5f;
         }
 
@@ -14597,7 +14597,7 @@ void Player_Action_13(Player* this, PlayState* play) {
 
     Player_GetMovementSpeedAndYaw(this, &speedTarget, &yawTarget, SPEED_MODE_CURVED, play);
 
-    if (GameInteractor_Should(VB_CONSIDER_BUNNY_HOOD_EQUIPPED, this->currentMask == PLAYER_MASK_BUNNY, this)) {
+    if (GameInteractor_Should(VB_CONSIDER_BUNNY_HOOD_EQUIPPED, this->currentMask == PLAYER_MASK_BUNNY)) {
         speedTarget *= 1.5f;
     }
 
@@ -17229,10 +17229,8 @@ void Player_Action_63(Player* this, PlayState* play) {
           (BEN_ANIM_EQUAL(this->skelAnime.animation, D_8085D17C[this->transformation]))) ||
          ((this->skelAnime.mode == 0) && (this->av2.actionVar2 == 0)))) {
         func_808525C4(play, this);
-        if (!CVarGetInteger("gEnhancements.Playback.NoDropOcarinaInput", 0) || this->av2.actionVar2 == 1) {
-            if (!(this->actor.flags & ACTOR_FLAG_20000000) || (this->unk_A90->id == ACTOR_EN_ZOT)) {
-                Message_DisplayOcarinaStaff(play, OCARINA_ACTION_FREE_PLAY);
-            }
+        if (!(this->actor.flags & ACTOR_FLAG_20000000) || (this->unk_A90->id == ACTOR_EN_ZOT)) {
+            Message_DisplayOcarinaStaff(play, OCARINA_ACTION_FREE_PLAY);
         }
     } else if (this->av2.actionVar2 != 0) {
         if (play->msgCtx.ocarinaMode == OCARINA_MODE_END) {
@@ -19317,11 +19315,10 @@ void Player_Action_96(Player* this, PlayState* play) {
             speedTarget = 18.0f;
             Math_StepToC(&this->av1.actionVar1, 4, 1);
 
-            uint8_t vanillaSpikeModeCondition =
-                (this->stateFlags3 & PLAYER_STATE3_80000) && (!CHECK_BTN_ALL(sPlayerControlInput->cur.button, BTN_A) ||
-                                                              (gSaveContext.save.saveInfo.playerData.magic == 0) ||
-                                                              ((this->av1.actionVar1 == 4) && (this->unk_B08 < 12.0f)));
-            if (GameInteractor_Should(VB_GORON_ROLL_DISABLE_SPIKE_MODE, vanillaSpikeModeCondition)) {
+            if ((this->stateFlags3 & PLAYER_STATE3_80000) &&
+                (!CHECK_BTN_ALL(sPlayerControlInput->cur.button, BTN_A) ||
+                 (gSaveContext.save.saveInfo.playerData.magic == 0) ||
+                 ((this->av1.actionVar1 == 4) && (this->unk_B08 < 12.0f)))) {
                 if (Math_StepToS(&this->unk_B86[1], 0, 1)) {
                     this->stateFlags3 &= ~PLAYER_STATE3_80000;
                     Magic_Reset(play);
@@ -19375,9 +19372,7 @@ void Player_Action_96(Player* this, PlayState* play) {
                 if (this->unk_B86[1] == 0) {
                     this->unk_B0C = 0.0f;
                     if (this->av1.actionVar1 >= 0x36) {
-                        if (GameInteractor_Should(VB_GORON_ROLL_CONSUME_MAGIC, true)) {
-                            Magic_Consume(play, 2, MAGIC_CONSUME_GORON_ZORA);
-                        }
+                        Magic_Consume(play, 2, MAGIC_CONSUME_GORON_ZORA);
                         this->unk_B08 = 18.0f;
                         this->unk_B86[1] = 1;
                         this->stateFlags3 |= PLAYER_STATE3_80000;
@@ -19439,10 +19434,8 @@ void Player_Action_96(Player* this, PlayState* play) {
                     f32 var_fa1;
 
                     if (this->unk_B86[1] == 0) {
-                        if (GameInteractor_Should(VB_GORON_ROLL_INCREASE_SPIKE_LEVEL,
-                                                  (gSaveContext.magicState == MAGIC_STATE_IDLE) &&
-                                                      (gSaveContext.save.saveInfo.playerData.magic >= 2) &&
-                                                      (this->av2.actionVar2 >= 0x36B0))) {
+                        if ((gSaveContext.magicState == MAGIC_STATE_IDLE) &&
+                            (gSaveContext.save.saveInfo.playerData.magic >= 2) && (this->av2.actionVar2 >= 0x36B0)) {
                             this->av1.actionVar1++;
                             Actor_PlaySfx_FlaggedCentered1(&this->actor, NA_SE_PL_GORON_BALL_CHARGE - SFX_FLAG);
                         } else {
