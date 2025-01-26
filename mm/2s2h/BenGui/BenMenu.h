@@ -103,8 +103,6 @@ class BenMenu : public Ship::Menu {
     void AddSettings();
     void AddEnhancements();
     void AddDevTools();
-
-  protected:
 };
 } // namespace BenGui
 
