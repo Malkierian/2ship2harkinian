@@ -86,7 +86,7 @@ static bool disabled_pixelCount;
 using namespace UIWidgets;
 
 void RegisterResolutionWidgets() {
-    WidgetPath path = { "Settings", "Graphics", 2 };
+    WidgetPath path = { "Settings", "Graphics", SECTION_COLUMN_2 };
 #ifdef __APPLE__
     mBenMenu
         ->AddWidget(path, ICON_FA_INFO_CIRCLE " These settings may behave incorrectly on Retina displays.", WIDGET_TEXT)
@@ -535,4 +535,8 @@ bool IsDroppingFrames() {
     const float threshold = targetFPS / 20.0f + 4.1f;
     return ImGui::GetIO().Framerate < targetFPS - threshold;
 }
+
+// static RegisterMenuUpdateFunc updateFunc(UpdateResolutionVars, "Settings", "Graphics");
+// static RegisterMenuInitFunc initFunc(RegisterResolutionWidgets);
+
 } // namespace BenGui

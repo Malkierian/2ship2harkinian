@@ -105,12 +105,6 @@ class BenMenu : public Ship::Menu {
     void AddDevTools();
 
   protected:
-    std::unordered_map<std::string, SidebarEntry> settingsSidebar;
-    std::vector<std::string> settingsOrder;
-    std::unordered_map<std::string, SidebarEntry> enhancementsSidebar;
-    std::vector<std::string> enhancementsOrder;
-    std::unordered_map<std::string, SidebarEntry> devToolsSidebar;
-    std::vector<std::string> devToolsOrder;
 };
 } // namespace BenGui
 
