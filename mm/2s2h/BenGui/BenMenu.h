@@ -1,5 +1,5 @@
 #ifndef BENMENU_H
-#define BENMNEU_H
+#define BENMENU_H
 
 #include <libultraship/libultraship.h>
 #include "UIWidgets.hpp"
