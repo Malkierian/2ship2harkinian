@@ -440,6 +440,9 @@ namespace UIWidgets {
         float startX = ImGui::GetCursorPosX();
         std::string invisibleLabelStr = "##" + std::string(label);
         const char* invisibleLabel = invisibleLabelStr.c_str();
+        if (!comboMap.contains(*value)) {
+            *value = comboMap.begin()->first;
+        }
         ImGui::PushID(label);
         ImGui::BeginGroup();
         ImGui::BeginDisabled(options.disabled);
@@ -514,6 +517,9 @@ namespace UIWidgets {
         size_t currentValueIndex = static_cast<size_t>(*value);
         std::string invisibleLabelStr = "##" + std::string(label);
         const char* invisibleLabel = invisibleLabelStr.c_str();
+        if (currentValueIndex < 0 || currentValueIndex >= comboVector.size()) {
+            currentValueIndex = 0;
+        }
         ImGui::PushID(label);
         ImGui::BeginGroup();
         ImGui::BeginDisabled(options.disabled);
@@ -587,7 +593,7 @@ namespace UIWidgets {
         bool dirty = false;
         float startX = ImGui::GetCursorPosX();
         size_t currentValueIndex = static_cast<size_t>(*value);
-        if (currentValueIndex >= N) {
+        if (currentValueIndex < 0 || currentValueIndex >= N) {
             currentValueIndex = 0;
         }
         std::string invisibleLabelStr = "##" + std::string(label);

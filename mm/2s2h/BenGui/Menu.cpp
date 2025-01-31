@@ -190,8 +190,8 @@ uint32_t Menu::DrawSearchResults(std::string& menuSearchText) {
             for (int i = 0; i < sidebar.columnWidgets.size(); i++) {
                 auto& column = sidebar.columnWidgets.at(i);
                 for (auto& info : column) {
-                    if (info.type == WIDGET_SEARCH || info.type == WIDGET_SEPARATOR || info.type == WIDGET_SEPARATOR_TEXT ||
-                        info.isHidden) {
+                    if (info.type == WIDGET_SEARCH || info.type == WIDGET_SEPARATOR ||
+                        info.type == WIDGET_SEPARATOR_TEXT || info.isHidden) {
                         continue;
                     }
                     const char* tooltip = info.options->tooltip;
@@ -544,6 +544,9 @@ void Menu::DrawElement() {
     ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(10.0f, 8.0f));
     const char* headerCvar = "gSettings.Menu.ActiveHeader";
     std::string headerIndex = CVarGetString(headerCvar, "Settings");
+    if (GetVectorIndexOf(menuOrder, headerIndex) == menuOrder.size()) {
+        headerIndex = menuOrder.at(0);
+    }
     ImVec2 pos = window->DC.CursorPos;
     float centerX = pos.x + windowWidth / 2 - (style.ItemSpacing.x * (menuEntries.size() + 1));
     std::vector<ImVec2> headerSizes;
@@ -695,8 +698,9 @@ void Menu::DrawElement() {
     const char* sidebarCvar = menuEntries.at(headerIndex).sidebarCvar;
 
     std::string sectionIndex = CVarGetString(sidebarCvar, "");
-    if (!sidebar->contains(sectionIndex)) {
-        sectionIndex = sidebar->begin()->first;
+    if (GetVectorIndexOf(menuEntries[headerIndex].sidebarOrder, sectionIndex) ==
+        menuEntries[headerIndex].sidebarOrder.size()) {
+        sectionIndex = menuEntries[headerIndex].sidebarOrder.at(0);
     }
     float sectionCenterX = pos.x + (sidebarWidth / 2);
     float topY = pos.y;
