@@ -208,6 +208,7 @@ void BenMenu::AddSettings() {
 
     // Graphics Settings
     static int32_t maxFps;
+    static bool isFullscreen = false;
     const char* tooltip = "";
     if (Ship::Context::GetInstance()->GetWindow()->GetWindowBackend() == Ship::WindowBackend::FAST3D_DXGI_DX11) {
         maxFps = 360;
@@ -221,8 +222,9 @@ void BenMenu::AddSettings() {
     }
     path.sidebarName = "Graphics";
     AddSidebarEntry("Settings", "Graphics", 3);
-    AddWidget(path, "Toggle Fullscreen", WIDGET_CVAR_CHECKBOX)
-        .CVar("gSettings.Fullscreen")
+    AddWidget(path, "Toggle Fullscreen", WIDGET_CHECKBOX)
+        .ValuePointer(&isFullscreen)
+        .PreFunc([](WidgetInfo& info) { isFullscreen = Ship::Context::GetInstance()->GetWindow()->IsFullscreen(); })
         .Callback([](WidgetInfo& info) { Ship::Context::GetInstance()->GetWindow()->ToggleFullscreen(); })
         .Options(CheckboxOptions().Tooltip("Toggles Fullscreen On/Off."));
 #ifndef __APPLE__
