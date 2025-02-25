@@ -47,6 +47,7 @@
 
 #include "2s2h/BenPort.h"
 #include "2s2h/GameInteractor/GameInteractor.h"
+#include "2s2h/CustomMessage/CustomMessage.h"
 
 #define THIS ((Player*)thisx)
 
@@ -2566,6 +2567,11 @@ GetItemEntry sGetItemTable[GI_MAX - 1] = {
     // GI_TINGLE_MAP_STONE_TOWER
     GET_ITEM(ITEM_TINGLE_MAP, OBJECT_GI_FIELDMAP, GID_TINGLE_MAP, 0xB9, GIFIELD(GIFIELD_20 | GIFIELD_NO_COLLECTIBLE, 0),
              CHEST_ANIM_LONG),
+    // #region 2S2H [Enhancement] Added to enable custom item gives
+    // GI_SHIP
+    GET_ITEM(ITEM_SHIP, OBJECT_UNSET_0, GID_NONE, CUSTOM_MESSAGE_ID, GIFIELD(GIFIELD_20 | GIFIELD_NO_COLLECTIBLE, 0),
+             0),
+    // #endregion
 };
 
 // Player_UpdateCurrentGetItemDrawId?
@@ -9240,7 +9246,11 @@ s32 Player_ActionChange_2(Player* this, PlayState* play) {
                                 giEntry = &sGetItemTable[-this->getItemId - 1];
                             }
 
-                            func_80832558(play, this, func_80837C78);
+                            if (GameInteractor_Should(VB_GIVE_ITEM_FROM_CHEST, true, chest)) {
+                                // This inverts the sign of the getItemId and sets the player's action to GetItem
+                                // (Player_Action_65)
+                                func_80832558(play, this, func_80837C78);
+                            }
                             this->stateFlags1 |= (PLAYER_STATE1_400 | PLAYER_STATE1_800 | PLAYER_STATE1_20000000);
                             func_80838830(this, giEntry->objectId);
 
@@ -13556,7 +13566,7 @@ s32 func_808482E0(PlayState* play, Player* this) {
             Audio_PlayFanfare(seqId);
         }
     } else if (Message_GetState(&play->msgCtx) == TEXT_STATE_CLOSING) {
-        if (this->getItemId == GI_OCARINA_OF_TIME) {
+        if (GameInteractor_Should(VB_PLAY_SONG_OF_TIME_CS, this->getItemId == GI_OCARINA_OF_TIME, this)) {
             // zelda teaching song of time cs?
             play->nextEntrance = ENTRANCE(CUTSCENE, 0);
             gSaveContext.nextCutsceneIndex = 0xFFF2;
@@ -20674,7 +20684,8 @@ void Player_CsAction_41(PlayState* play, Player* this, CsCmdActorCue* cue) {
                 this->getItemDrawIdPlusOne = GID_PENDANT_OF_MEMORIES + 1;
             }
         } else if (this->av2.actionVar2 < 0) {
-            if (Actor_HasParent(&this->actor, play)) {
+            if (Actor_HasParent(&this->actor, play) ||
+                !GameInteractor_Should(VB_GIVE_PENDANT_OF_MEMORIES_FROM_KAFEI, true)) {
                 this->actor.parent = NULL;
                 this->av2.actionVar2 = 1;
             } else {

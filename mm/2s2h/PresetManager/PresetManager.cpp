@@ -62,8 +62,10 @@ nlohmann::json curatedPresetJ = R"(
                 "HideTitleCards": 1,
                 "SkipEntranceCutscenes": 1,
                 "SkipFirstCycle": 1,
+                "SkipGetItemCutscenes": 2,
                 "SkipIntroSequence": 1,
                 "SkipMiscInteractions": 1,
+                "SkipOnePointCutscenes": 1,
                 "SkipStoryCutscenes": 1,
                 "SkipToFileSelect": 1
             },
@@ -79,10 +81,15 @@ nlohmann::json curatedPresetJ = R"(
                 "FastBankSelection": 1,
                 "FastText": 1
             },
+            "DifficultyOptions": {
+                "LowerBankRewardThresholds": 1
+            },
             "Dpad": {
                 "DpadEquips": 1
             },
             "Equipment": {
+                "BetterPictoMessage": 1,
+                "ChuDrops": 1,
                 "MagicArrowEquipSpeed": 1,
                 "TwoHandedSwordSpinAttack": 1
             },
@@ -118,6 +125,9 @@ nlohmann::json curatedPresetJ = R"(
                 "HoneyAndDarlingDay1": 4,
                 "HoneyAndDarlingDay2": 4,
                 "HoneyAndDarlingDay3": 8,
+                "PowderKegCertification": 1,
+                "SkipBalladOfWindfish": 1,
+                "SkipHorseRace": 1,
                 "SwampArcheryScore": 1580,
                 "SwordsmanSchoolScore": 6,
                 "TownArcheryScore": 25
@@ -133,6 +143,7 @@ nlohmann::json curatedPresetJ = R"(
             "Player": {
                 "ClimbSpeed": 5,
                 "FastFlowerLaunch": 1,
+                "FasterPushAndPull": 1,
                 "FierceDeityPutaway": 1,
                 "InfiniteDekuHopping": 1,
                 "InstantPutaway": 1,
@@ -164,12 +175,14 @@ nlohmann::json curatedPresetJ = R"(
             },
             "Timesavers": {
                 "DampeDiggingSkip": 1,
+                "GalleryTwofer": 1,
                 "MarineLabHP": 1,
                 "SwampBoatSpeed": 1
             }
         },
         "gFixes": {
             "FixAmmoCountEnvColor": 1,
+            "FixEponaStealingSword": 1,
             "FixIkanaGreatFairyFountainColor": 1
         },
         "gHudEditor": {

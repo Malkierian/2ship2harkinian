@@ -9,6 +9,8 @@ DEFINE_HOOK(OnKaleidoUpdate, (PauseContext * pauseCtx))
 DEFINE_HOOK(BeforeKaleidoDrawPage, (PauseContext * pauseCtx, u16 pauseIndex))
 DEFINE_HOOK(AfterKaleidoDrawPage, (PauseContext * pauseCtx, u16 pauseIndex))
 DEFINE_HOOK(OnSaveInit, (s16 fileNum))
+DEFINE_HOOK(OnSaveLoad, (s16 fileNum))
+DEFINE_HOOK(OnFileSelectSaveLoad, (s16 fileNum, bool isOwlSave, SaveContext* saveContext))
 DEFINE_HOOK(BeforeEndOfCycleSave, ())
 DEFINE_HOOK(AfterEndOfCycleSave, ())
 DEFINE_HOOK(BeforeMoonCrashSaveReset, ())
@@ -42,7 +44,7 @@ DEFINE_HOOK(OnCameraChangeSettingsFlags, (Camera * camera))
 
 DEFINE_HOOK(OnPassPlayerInputs, (Input * input))
 
-DEFINE_HOOK(OnOpenText, (u16 textId))
+DEFINE_HOOK(OnOpenText, (u16 * textId, bool* loadFromMessageTable))
 
 DEFINE_HOOK(ShouldItemGive, (u8 item, bool* should))
 DEFINE_HOOK(OnItemGive, (u8 item))

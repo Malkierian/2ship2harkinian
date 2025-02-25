@@ -905,6 +905,15 @@ void Flags_ClearWeekEventReg(s32 flag) {
     }
 }
 
+void Flags_SetWeekEventRegHorseRace(u8 state) {
+    u8 previousState = GET_WEEKEVENTREG_HORSE_RACE_STATE;
+    WEEKEVENTREG(92) &= (u8)~WEEKEVENTREG_HORSE_RACE_STATE_MASK;
+    WEEKEVENTREG(92) = WEEKEVENTREG(92) | (u8)((WEEKEVENTREG(92) & ~WEEKEVENTREG_HORSE_RACE_STATE_MASK) | (state));
+    if (previousState != state) {
+        GameInteractor_ExecuteOnFlagSet(FLAG_WEEK_EVENT_REG_HORSE_RACE, state);
+    }
+}
+
 void Flags_SetEventInf(s32 flag) {
     u8 previouslyOff = !CHECK_EVENTINF(flag);
     gSaveContext.eventInf[(flag) >> 4] |= (1 << ((flag)&0xF));
@@ -918,6 +927,28 @@ void Flags_ClearEventInf(s32 flag) {
     gSaveContext.eventInf[(flag) >> 4] &= (u8) ~(1 << ((flag)&0xF));
     if (previouslyOn) {
         GameInteractor_ExecuteOnFlagUnset(FLAG_EVENT_INF, flag);
+    }
+}
+// #endregion
+
+// #region 2S2H Our rando_inf flags
+s32 Flags_GetRandoInf(s32 flag) {
+    return gSaveContext.save.shipSaveInfo.rando.randoInf[(flag) >> 4] & (1 << ((flag)&0xF));
+}
+
+void Flags_SetRandoInf(s32 flag) {
+    u8 previouslyOff = !Flags_GetRandoInf(flag);
+    gSaveContext.save.shipSaveInfo.rando.randoInf[flag >> 4] |= (1 << (flag & 0xF));
+    if (previouslyOff) {
+        GameInteractor_ExecuteOnFlagSet(FLAG_RANDO_INF, flag);
+    }
+}
+
+void Flags_ClearRandoInf(s32 flag) {
+    u8 previouslyOn = Flags_GetRandoInf(flag);
+    gSaveContext.save.shipSaveInfo.rando.randoInf[flag >> 4] &= ~(1 << (flag & 0xF));
+    if (previouslyOn) {
+        GameInteractor_ExecuteOnFlagUnset(FLAG_RANDO_INF, flag);
     }
 }
 // #endregion
@@ -2251,7 +2282,9 @@ s32 Actor_OfferGetItem(Actor* actor, PlayState* play, GetItemId getItemId, f32 x
                 s16 yawDiff = actor->yawTowardsPlayer - player->actor.shape.rot.y;
                 s32 absYawDiff = ABS_ALT(yawDiff);
 
-                if ((getItemId != GI_NONE) || (player->getItemDirection < absYawDiff)) {
+                if (GameInteractor_Should(VB_GIVE_ITEM_FROM_OFFER,
+                                          ((getItemId != GI_NONE) || (player->getItemDirection < absYawDiff)),
+                                          &getItemId, actor)) {
                     player->getItemId = getItemId;
                     player->interactRangeActor = actor;
                     player->getItemDirection = absYawDiff;

@@ -19,6 +19,7 @@
 #include <variant>
 #include <tuple>
 #include "ResolutionEditor.h"
+#include "2s2h/Rando/Rando.h"
 
 extern "C" {
 #include "z64.h"
@@ -40,30 +41,40 @@ void FreeLookPitchMinMax() {
 using namespace UIWidgets;
 
 void BenMenu::AddSidebarEntry(std::string sectionName, std::string sidebarName, uint32_t columnCount) {
-    // TODO: Rework when adding things directly to menuEntries instead of individual sidebar objects
-    std::unordered_map<std::string, SidebarEntry>& sidebar =
-        (sectionName == "Settings" ? settingsSidebar
-                                   : (sectionName == "Enhancements" ? enhancementsSidebar : devToolsSidebar));
-    std::vector<std::string>& order =
-        (sectionName == "Settings" ? settingsOrder
-                                   : (sectionName == "Enhancements" ? enhancementsOrder : devToolsOrder));
-    sidebar.emplace(sidebarName, SidebarEntry{ .columnCount = columnCount });
-    order.push_back(sidebarName);
+    if (sectionName == "Settings") {
+        settingsSidebar.emplace(sidebarName, SidebarEntry{ .columnCount = columnCount });
+        settingsOrder.push_back(sidebarName);
+    } else if (sectionName == "Enhancements") {
+        enhancementsSidebar.emplace(sidebarName, SidebarEntry{ .columnCount = columnCount });
+        enhancementsOrder.push_back(sidebarName);
+    } else if (sectionName == "Dev Tools") {
+        devToolsSidebar.emplace(sidebarName, SidebarEntry{ .columnCount = columnCount });
+        devToolsOrder.push_back(sidebarName);
+    } else if (sectionName == "Rando") {
+        randoSidebar.emplace(sidebarName, SidebarEntry{ .columnCount = columnCount });
+        randoOrder.push_back(sidebarName);
+    }
 }
 
 WidgetInfo& BenMenu::AddWidget(WidgetPath& pathInfo, std::string widgetName, WidgetType widgetType) {
     assert(widgetName != ""); // Must be unique
-    std::unordered_map<std::string, SidebarEntry>& sidebar =
-        (pathInfo.sectionName == "Settings"
-             ? settingsSidebar
-             : (pathInfo.sectionName == "Enhancements" ? enhancementsSidebar : devToolsSidebar));
+    std::unordered_map<std::string, SidebarEntry>* sidebar;
+    if (pathInfo.sectionName == "Settings") {
+        sidebar = &settingsSidebar;
+    } else if (pathInfo.sectionName == "Enhancements") {
+        sidebar = &enhancementsSidebar;
+    } else if (pathInfo.sectionName == "Dev Tools") {
+        sidebar = &devToolsSidebar;
+    } else if (pathInfo.sectionName == "Rando") {
+        sidebar = &randoSidebar;
+    }
     uint8_t column = pathInfo.column - 1;
-    if (sidebar.contains(pathInfo.sidebarName)) {
-        while (sidebar.at(pathInfo.sidebarName).columnWidgets.size() < column + 1) {
-            sidebar.at(pathInfo.sidebarName).columnWidgets.push_back({});
+    if (sidebar->contains(pathInfo.sidebarName)) {
+        while (sidebar->at(pathInfo.sidebarName).columnWidgets.size() < column + 1) {
+            sidebar->at(pathInfo.sidebarName).columnWidgets.push_back({});
         }
     }
-    SidebarEntry& entry = sidebar.at(pathInfo.sidebarName);
+    SidebarEntry& entry = sidebar->at(pathInfo.sidebarName);
     entry.columnWidgets.at(column).push_back({ .name = widgetName, .type = widgetType });
     WidgetInfo& widget = entry.columnWidgets.at(column).back();
     switch (widgetType) {
@@ -341,8 +352,9 @@ void BenMenu::AddSettings() {
         .WindowName("2S2H Input Editor")
         .Options(ButtonOptions().Tooltip("Enables the separate Bindings Window.").Size(Sizes::Inline));
 
-    path.sidebarName = "Notifications";
-    AddSidebarEntry("Settings", "Notifications", 1);
+    path.sidebarName = "Overlay";
+    AddSidebarEntry("Settings", "Overlay", 2);
+    AddWidget(path, "Notifications", WIDGET_SEPARATOR_TEXT);
     AddWidget(path, "Position", WIDGET_CVAR_COMBOBOX)
         .CVar("gNotifications.Position")
         .Options(ComboboxOptions()
@@ -383,7 +395,26 @@ void BenMenu::AddSettings() {
             });
         })
         .Options(ButtonOptions().Tooltip("Displays a test notification."));
+    path.column = 2;
+    AddWidget(path, "In-Game Timer", WIDGET_SEPARATOR_TEXT);
+    AddWidget(path, "Toggle Display Overlay", WIDGET_WINDOW_BUTTON)
+        .CVar("gWindows.DisplayOverlay")
+        .WindowName("Display Overlay")
+        .Options(ButtonOptions().Tooltip("Toggles the Display Overlay window for In-game Timers."));
+    AddWidget(path, "Hide Window Background", WIDGET_CVAR_CHECKBOX)
+        .CVar("gDisplayOverlay.Background")
+        .Options(CheckboxOptions().Tooltip("Hides the background of the Display Overlay window."));
+    AddWidget(path, "Scale: %.0fx", WIDGET_CVAR_SLIDER_FLOAT)
+        .CVar("gDisplayOverlay.Scale")
+        .Options(FloatSliderOptions()
+                     .Tooltip("Adjust the Scale for the Display Overlay window.")
+                     .Min(1.0f)
+                     .Max(5.0f)
+                     .DefaultValue(1.0f)
+                     .Format("%.1f")
+                     .Step(0.1f));
 
+    path.column = 1;
     path.sidebarName = "Presets";
     AddSidebarEntry("Settings", "Presets", 1);
     AddWidget(path, "Presets", WIDGET_CUSTOM).CustomFunction([](WidgetInfo& info) { PresetManager_Draw(); });
@@ -684,6 +715,9 @@ void BenMenu::AddEnhancements() {
                      .Min(1)
                      .Max(5)
                      .DefaultValue(1));
+    AddWidget(path, "Faster Push/Pull", WIDGET_CVAR_CHECKBOX)
+        .CVar("gEnhancements.Player.FasterPushAndPull")
+        .Options(CheckboxOptions().Tooltip("Speeds up the time it takes to push/pull various objects."));
     AddWidget(path, "Prevent Diving Over Water", WIDGET_CVAR_CHECKBOX)
         .CVar("gEnhancements.Player.PreventDiveOverWater")
         .Options(CheckboxOptions().Tooltip("Prevents Link from automatically diving over bodies of water."));
@@ -701,10 +735,18 @@ void BenMenu::AddEnhancements() {
         .CVar("gEnhancements.Equipment.TwoHandedSwordSpinAttack")
         .Options(CheckboxOptions().Tooltip(
             "Enables magic spin attacks for the Fierce Deity Sword and Great Fairy's Sword."));
+    AddWidget(path, "Better Picto Message", WIDGET_CVAR_CHECKBOX)
+        .CVar("gEnhancements.Equipment.BetterPictoMessage")
+        .Options(
+            CheckboxOptions().Tooltip("Inform the player what target if any is being captured in the pictograph."));
     AddWidget(path, "Arrow Type Cycling", WIDGET_CVAR_CHECKBOX)
         .CVar("gEnhancements.PlayerActions.ArrowCycle")
         .Options(CheckboxOptions().Tooltip(
             "While aiming the bow, use L to cycle between Normal, Fire, Ice and Light arrows."));
+    AddWidget(path, "Bombchu Drops", WIDGET_CVAR_CHECKBOX)
+        .CVar("gEnhancements.Equipment.ChuDrops")
+        .Options(
+            CheckboxOptions().Tooltip("When a bomb drop is spawned, it has a 50% chance to be a bombchu instead."));
 
     path.column = 2;
     AddWidget(path, "Modes", WIDGET_SEPARATOR_TEXT);
@@ -819,6 +861,24 @@ void BenMenu::AddEnhancements() {
                      .Min(1)
                      .Max(16)
                      .DefaultValue(16));
+    AddWidget(path, "Skip Powder Keg Certification", WIDGET_CVAR_CHECKBOX)
+        .CVar("gEnhancements.Minigames.PowderKegCertification")
+        .Options(CheckboxOptions().Tooltip(
+            "Skips requiring to take the Powder Keg Test before being given the Certification."));
+    AddWidget(path, "Malon Target Practice Winning Score", WIDGET_CVAR_SLIDER_INT)
+        .CVar("gEnhancements.Minigames.MalonTargetPractice")
+        .Options(IntSliderOptions()
+                     .Tooltip("Sets the score required to win Malon's Target Practice.")
+                     .Min(1)
+                     .Max(10)
+                     .DefaultValue(10));
+    AddWidget(path, "Skip Gorman Horse Race", WIDGET_CVAR_CHECKBOX)
+        .CVar("gEnhancements.Minigames.SkipHorseRace")
+        .Options(CheckboxOptions().Tooltip("Instantly win the Gorman Horse Race"));
+    AddWidget(path, "Skip Ballad of Windfish", WIDGET_CVAR_CHECKBOX)
+        .CVar("gEnhancements.Minigames.SkipBalladOfWindfish")
+        .Options(CheckboxOptions().Tooltip(
+            "Play the complete Ballad after playing in one form if you have all three transformation masks."));
 
     path.column = 3;
     AddWidget(path, "Saving", WIDGET_SEPARATOR_TEXT);
@@ -874,6 +934,11 @@ void BenMenu::AddEnhancements() {
         .Options(CheckboxOptions().Tooltip(
             "Allows the player to keep the Express Mail in their inventory after delivering it "
             "the first time, so that both deliveries can be done within one cycle"));
+    AddWidget(path, "Stop Oceanside Spider House squatter", WIDGET_CVAR_CHECKBOX)
+        .CVar("gEnhancements.Cycle.StopOceansideSpiderHouseSquatter")
+        .Options(
+            CheckboxOptions().Tooltip("The Oceanside Spider House squatter will not move in until the player interacts "
+                                      "with him. Forced on for randomizers."));
     AddWidget(path, "Unstable", WIDGET_SEPARATOR_TEXT).Options(WidgetOptions().Color(Colors::Orange));
     AddWidget(path, "Disable Save Delay", WIDGET_CVAR_CHECKBOX)
         .CVar("gEnhancements.Saving.DisableSaveDelay")
@@ -1052,6 +1117,10 @@ void BenMenu::AddEnhancements() {
     AddWidget(path, "Hide Title Cards", WIDGET_CVAR_CHECKBOX)
         .CVar("gEnhancements.Cutscenes.HideTitleCards")
         .Options(CheckboxOptions().Tooltip("Hides Title Cards when entering areas."));
+    AddWidget(path, "Skip One Point Cutscenes", WIDGET_CVAR_CHECKBOX)
+        .CVar("gEnhancements.Cutscenes.SkipOnePointCutscenes")
+        .Options(CheckboxOptions().Tooltip(
+            "Skips freezing Link to focus on various events like chest spawning, door unlocking, switch pressed, etc"));
     AddWidget(path, "Skip Entrance Cutscenes", WIDGET_CVAR_CHECKBOX)
         .CVar("gEnhancements.Cutscenes.SkipEntranceCutscenes")
         .Options(CheckboxOptions().Tooltip("Skip cutscenes that occur when first entering a new area."));
@@ -1077,6 +1146,11 @@ void BenMenu::AddEnhancements() {
         .CVar("gEnhancements.Cutscenes.SkipMiscInteractions")
         .Options(CheckboxOptions().Tooltip(
             "Disclaimer: This doesn't do much yet, we will be progressively adding more skips over time."));
+    AddWidget(path, "Skip Item Get Cutscene", WIDGET_CVAR_COMBOBOX)
+        .CVar("gEnhancements.Cutscenes.SkipGetItemCutscenes")
+        .Options(ComboboxOptions()
+                     .Tooltip("Note: This only works in Randomizer currently")
+                     .ComboMap(skipGetItemCutscenesOptions));
 
     // Dialogue Enhancements
     path.column = 2;
@@ -1095,6 +1169,10 @@ void BenMenu::AddEnhancements() {
     AddWidget(path, "Swamp Boat Timesaver", WIDGET_CVAR_CHECKBOX)
         .CVar("gEnhancements.Timesavers.SwampBoatSpeed")
         .Options(CheckboxOptions().Tooltip("Hold Z to speed up the boat ride in through the Swamp."));
+    AddWidget(path, "Shooting Gallery Both Rewards", WIDGET_CVAR_CHECKBOX)
+        .CVar("gEnhancements.Timesavers.GalleryTwofer")
+        .Options(CheckboxOptions().Tooltip("When getting a perfect score at the Shooting Gallery, receive both rewards "
+                                           "back to back instead of having to play twice."));
     AddWidget(path, "Fast Marine Lab Fish", WIDGET_CVAR_CHECKBOX)
         .CVar("gEnhancements.Timesavers.MarineLabHP")
         .Options(CheckboxOptions().Tooltip("Only requires a single fish to be fed for the Piece of Heart to spawn. "
@@ -1123,6 +1201,10 @@ void BenMenu::AddEnhancements() {
         .CVar("gFixes.FixAmmoCountEnvColor")
         .Options(CheckboxOptions().Tooltip("Fixes a missing gDPSetEnvColor, which causes the ammo count to be "
                                            "the wrong color prior to obtaining magic or other conditions."));
+    AddWidget(path, "Fix Epona stealing Sword", WIDGET_CVAR_CHECKBOX)
+        .CVar("gFixes.FixEponaStealingSword")
+        .Options(CheckboxOptions().Tooltip(
+            "This fixes a bug where Epona can steal your sword when you mount her without a bow in your inventory."));
     AddWidget(path, "Fix Fierce Deity Z-Target movement", WIDGET_CVAR_CHECKBOX)
         .CVar("gEnhancements.Fixes.FierceDeityZTargetMovement")
         .Options(CheckboxOptions().Tooltip("Fixes Fierce Deity movement being choppy when Z-targeting"));
@@ -1213,6 +1295,12 @@ void BenMenu::AddEnhancements() {
                          "- Always: Always show the search balls.")
                 .DefaultIndex(DekuGuardSearchBallsOptions::DEKU_GUARD_SEARCH_BALLS_NIGHT_ONLY)
                 .ComboMap(dekuGuardSearchBallsOptions));
+    AddWidget(path, "Lower Bank Reward Thresholds", WIDGET_CVAR_CHECKBOX)
+        .CVar("gEnhancements.DifficultyOptions.LowerBankRewardThresholds")
+        .Options(
+            CheckboxOptions().Tooltip("Reduces the amount of rupees required to receive the rewards from the bank.\n"
+                                      "From: 200 -> 1000 -> 5000\n"
+                                      "To:   100 ->  500 -> 1000"));
     AddWidget(path, "Gibdo Trade Sequence Options", WIDGET_CVAR_COMBOBOX)
         .CVar("gEnhancements.DifficultyOptions.GibdoTradeSequence")
         .Options(
@@ -1266,8 +1354,8 @@ void BenMenu::AddEnhancements() {
     // Item Tracker Settings
     path = { "Enhancements", "Item Tracker", 1 };
     AddSidebarEntry("Enhancements", "Item Tracker", 1);
-    AddWidget(path, "Popout Item Tracker", WIDGET_WINDOW_BUTTON)
-        .CVar("gWindows.ItemTracker")
+    AddWidget(path, "Popout Settings", WIDGET_WINDOW_BUTTON)
+        .CVar("gWindows.ItemTrackerSettings")
         .WindowName("Item Tracker Settings");
 }
 
@@ -1494,11 +1582,13 @@ void BenMenu::InitElement() {
     AddEnhancements();
     AddDevTools();
     // RegisterResolutionWidgets();
+    Rando::RegisterMenu();
 
     menuEntries = { { "Settings", settingsSidebar, "gSettings.Menu.SettingsSidebarSection", settingsOrder },
                     { "Enhancements", enhancementsSidebar, "gSettings.Menu.EnhancementsSidebarSection",
                       enhancementsOrder },
-                    { "Developer Tools", devToolsSidebar, "gSettings.Menu.DevToolsSidebarSection", devToolsOrder } };
+                    { "Developer Tools", devToolsSidebar, "gSettings.Menu.DevToolsSidebarSection", devToolsOrder },
+                    { "Rando", randoSidebar, "gSettings.Menu.RandoSidebarSection", randoOrder } };
 
     if (CVarGetInteger("gSettings.Menu.SidebarSearch", 0)) {
         InsertSidebarSearch();

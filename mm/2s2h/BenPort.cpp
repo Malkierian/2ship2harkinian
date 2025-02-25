@@ -54,7 +54,11 @@ CrowdControl* CrowdControl::Instance;
 #include "2s2h/Enhancements/GfxPatcher/AuthenticGfxPatches.h"
 #include "2s2h/DeveloperTools/DebugConsole.h"
 #include "2s2h/DeveloperTools/DeveloperTools.h"
+#include "2s2h/Rando/Rando.h"
+#include "2s2h/Rando/Spoiler/Spoiler.h"
 #include "2s2h/SaveManager/SaveManager.h"
+#include "2s2h/CustomMessage/CustomMessage.h"
+#include "2s2h/CustomItem/CustomItem.h"
 #include "2s2h/BenGui/Notification.h"
 #include "2s2h/ShipUtils.h"
 #include "2s2h/ShipInit.hpp"
@@ -198,7 +202,8 @@ OTRGlobals::OTRGlobals() {
 
     context->InitAudio({ .SampleRate = 32000, .SampleLength = 1024, .DesiredBuffered = 1680 });
 
-    SPDLOG_INFO("Starting 2 Ship 2 Harkinian version {}", (char*)gBuildVersion);
+    SPDLOG_INFO("Starting 2 Ship 2 Harkinian version {} (Branch: {} | Commit: {})", (char*)gBuildVersion,
+                (char*)gGitBranch, (char*)gGitCommitHash);
 
     auto loader = context->GetResourceManager()->GetResourceLoader();
     loader->RegisterResourceFactory(std::make_shared<Fast::ResourceFactoryBinaryTextureV0>(), RESOURCE_FORMAT_BINARY,
@@ -448,9 +453,9 @@ void Ben_ProcessDroppedFiles(std::string filePath) {
         handled = BinarySaveConverter_HandleFileDropped(filePath);
     }
 
-    // if (!handled) {
-    //     handled = Randomizer_HandleFileDropped(filePath);
-    // }
+    if (!handled) {
+        handled = Rando::Spoiler::HandleFileDropped(filePath);
+    }
 
     if (!handled) {
         handled = PresetManager_HandleFileDropped(filePath);
@@ -688,8 +693,12 @@ extern "C" void InitOTR() {
     ShipInit::InitAll();
     InitEnhancements();
     InitDeveloperTools();
+    Rando::Init();
     GfxPatcher_ApplyNecessaryAuthenticPatches();
     DebugConsole_Init();
+    GameInteractor::Instance->RegisterOwnHooks();
+    CustomItem::RegisterHooks();
+    CustomMessage::RegisterHooks();
 
     OTRMessage_Init();
     OTRAudio_Init();
