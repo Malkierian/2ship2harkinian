@@ -1792,7 +1792,10 @@ typedef enum {
 
 typedef enum {
     RO_ACCESS_DUNGEONS_FORM_AND_SONG,
+    RO_ACCESS_DUNGEONS_FORM_OR_SONG,
     RO_ACCESS_DUNGEONS_FORM_ONLY,
+    RO_ACCESS_DUNGEONS_SONG_ONLY,
+    RO_ACCESS_DUNGEONS_OPEN,
 } RandoOptionAccessDungeons;
 
 typedef enum {
