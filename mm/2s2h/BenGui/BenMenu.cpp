@@ -48,18 +48,17 @@ void BenMenu::AddSidebarEntry(std::string sectionName, std::string sidebarName, 
 }
 
 WidgetInfo& BenMenu::AddWidget(WidgetPath& pathInfo, std::string widgetName, WidgetType widgetType) {
-    assert(widgetName != ""); // Must be unique
-    std::unordered_map<std::string, SidebarEntry>& sidebar =
-        (pathInfo.sectionName == "Settings"
-             ? settingsSidebar
-             : (pathInfo.sectionName == "Enhancements" ? enhancementsSidebar : devToolsSidebar));
-    uint8_t column = pathInfo.column - 1;
-    if (sidebar->contains(pathInfo.sidebarName)) {
-        while (sidebar->at(pathInfo.sidebarName).columnWidgets.size() < column + 1) {
-            sidebar->at(pathInfo.sidebarName).columnWidgets.push_back({});
+    assert(!widgetName.empty());                        // Must be unique
+    assert(menuEntries.contains(pathInfo.sectionName)); // Section/header must already exist
+    assert(menuEntries.at(pathInfo.sectionName).sidebars.contains(pathInfo.sidebarName)); // Sidebar must already exist
+    std::unordered_map<std::string, SidebarEntry>& sidebar = menuEntries.at(pathInfo.sectionName).sidebars;
+    uint8_t column = pathInfo.column;
+    if (sidebar.contains(pathInfo.sidebarName)) {
+        while (sidebar.at(pathInfo.sidebarName).columnWidgets.size() < column + 1) {
+            sidebar.at(pathInfo.sidebarName).columnWidgets.push_back({});
         }
     }
-    SidebarEntry& entry = sidebar->at(pathInfo.sidebarName);
+    SidebarEntry& entry = sidebar.at(pathInfo.sidebarName);
     entry.columnWidgets.at(column).push_back({ .name = widgetName, .type = widgetType });
     WidgetInfo& widget = entry.columnWidgets.at(column).back();
     switch (widgetType) {
@@ -383,7 +382,7 @@ void BenMenu::AddSettings() {
             });
         })
         .Options(ButtonOptions().Tooltip("Displays a test notification."));
-    path.column = 2;
+    path.column = SECTION_COLUMN_2;
     AddWidget(path, "In-Game Timer", WIDGET_SEPARATOR_TEXT);
     AddWidget(path, "Toggle Display Overlay", WIDGET_WINDOW_BUTTON)
         .CVar("gWindows.DisplayOverlay")
@@ -402,7 +401,7 @@ void BenMenu::AddSettings() {
                      .Format("%.1f")
                      .Step(0.1f));
 
-    path.column = 1;
+    path.column = SECTION_COLUMN_1;
     path.sidebarName = "Presets";
     AddSidebarEntry("Settings", "Presets", 1);
     AddWidget(path, "Presets", WIDGET_CUSTOM).CustomFunction([](WidgetInfo& info) { PresetManager_Draw(); });
@@ -1334,7 +1333,7 @@ void BenMenu::AddEnhancements() {
                      .Size(Sizes::Inline));
 
     // Cosmetics Editor
-    path = { "Enhancements", "Cosmetic Editor", 1 };
+    path = { "Enhancements", "Cosmetic Editor", SECTION_COLUMN_1 };
     AddSidebarEntry("Enhancements", "Cosmetic Editor", 1);
     AddWidget(path, "Popout Cosmetic Editor", WIDGET_WINDOW_BUTTON)
         .CVar("gWindows.CosmeticEditor")
@@ -1352,9 +1351,9 @@ void BenMenu::AddEnhancements() {
 }
 
 void BenMenu::AddDevTools() {
-    AddMenuEntry("Developer Tools", "gSettings.Menu.DevToolsSidebarSection");
-    AddSidebarEntry("Developer Tools", "General", 3);
-    WidgetPath path = { "Developer Tools", "General", SECTION_COLUMN_1 };
+    AddMenuEntry("Dev Tools", "gSettings.Menu.DevToolsSidebarSection");
+    AddSidebarEntry("Dev Tools", "General", 3);
+    WidgetPath path = { "Dev Tools", "General", SECTION_COLUMN_1 };
     AddWidget(path, "Popout Menu", WIDGET_CVAR_CHECKBOX)
         .CVar("gSettings.Menu.Popout")
         .Options(CheckboxOptions().Tooltip("Changes the menu display from overlay to windowed."));
@@ -1505,60 +1504,60 @@ void BenMenu::AddDevTools() {
         .SameLine(true);
 
     // dev tools windows
-    path = { "Developer Tools", "Collision Viewer", SECTION_COLUMN_1 };
-    AddSidebarEntry("Developer Tools", "Collision Viewer", 1);
+    path = { "Dev Tools", "Collision Viewer", SECTION_COLUMN_1 };
+    AddSidebarEntry("Dev Tools", "Collision Viewer", 1);
     AddWidget(path, "Popout Collision Viewer", WIDGET_WINDOW_BUTTON)
         .CVar("gWindows.CollisionViewer")
         .Options(ButtonOptions().Tooltip("Makes collision visible on screen").Size(Sizes::Inline))
         .WindowName("Collision Viewer");
 
-    path = { "Developer Tools", "Stats", SECTION_COLUMN_1 };
-    AddSidebarEntry("Developer Tools", "Stats", 1);
+    path = { "Dev Tools", "Stats", SECTION_COLUMN_1 };
+    AddSidebarEntry("Dev Tools", "Stats", 1);
     AddWidget(path, "Popout Stats", WIDGET_WINDOW_BUTTON)
         .CVar("gOpenWindows.Stats")
         .Options(ButtonOptions().Tooltip(
             "Shows the stats window, with your FPS and frametimes, and the OS you're playing on"))
         .WindowName("Stats");
 
-    path = { "Developer Tools", "Console", SECTION_COLUMN_1 };
-    AddSidebarEntry("Developer Tools", "Console", 1);
+    path = { "Dev Tools", "Console", SECTION_COLUMN_1 };
+    AddSidebarEntry("Dev Tools", "Console", 1);
     AddWidget(path, "Popout Console", WIDGET_WINDOW_BUTTON)
         .CVar("gOpenWindows.Console")
         .Options(ButtonOptions().Tooltip(
             "Enables the console window, allowing you to input commands. Type help for some examples"))
         .WindowName("Console");
 
-    path = { "Developer Tools", "Gfx Debugger", SECTION_COLUMN_1 };
-    AddSidebarEntry("Developer Tools", "Gfx Debugger", 1);
+    path = { "Dev Tools", "Gfx Debugger", SECTION_COLUMN_1 };
+    AddSidebarEntry("Dev Tools", "Gfx Debugger", 1);
     AddWidget(path, "Popout Gfx Debugger", WIDGET_WINDOW_BUTTON)
         .CVar("gOpenWindows.GfxDebugger")
         .Options(ButtonOptions().Tooltip(
             "Enables the Gfx Debugger window, allowing you to input commands, type help for some examples"))
         .WindowName("GfxDebuggerWindow");
 
-    path = { "Developer Tools", "Hook Debugger", 1 };
+    path = { "Dev Tools", "Hook Debugger", SECTION_COLUMN_1 };
     AddSidebarEntry("Dev Tools", "Hook Debugger", 1);
     AddWidget(path, "Popout Hook Debugger", WIDGET_WINDOW_BUTTON)
         .CVar("gWindows.HookDebugger")
         .Options(ButtonOptions().Tooltip("Enables the Hook Debugger window, for viewing info about registered hooks"))
         .WindowName("Hook Debugger");
 
-    path = { "Developer Tools", "Save Editor", 1 };
+    path = { "Dev Tools", "Save Editor", SECTION_COLUMN_1 };
     AddSidebarEntry("Dev Tools", "Save Editor", 1);
     AddWidget(path, "Popout Save Editor", WIDGET_WINDOW_BUTTON)
         .CVar("gWindows.SaveEditor")
         .Options(ButtonOptions().Tooltip("Enables the Save Editor window, allowing you to edit your save file"))
         .WindowName("Save Editor");
 
-    path = { "Developer Tools", "Actor Viewer", SECTION_COLUMN_1 };
-    AddSidebarEntry("Developer Tools", "Actor Viewer", 1);
+    path = { "Dev Tools", "Actor Viewer", SECTION_COLUMN_1 };
+    AddSidebarEntry("Dev Tools", "Actor Viewer", 1);
     AddWidget(path, "Popout Actor Viewer", WIDGET_WINDOW_BUTTON)
         .CVar("gWindows.ActorViewer")
         .Options(ButtonOptions().Tooltip("Enables the Actor Viewer window, allowing you to view actors in the world."))
         .WindowName("Actor Viewer");
 
-    path = { "Developer Tools", "Event Log", SECTION_COLUMN_1 };
-    AddSidebarEntry("Developer Tools", "Event Log", 1);
+    path = { "Dev Tools", "Event Log", SECTION_COLUMN_1 };
+    AddSidebarEntry("Dev Tools", "Event Log", 1);
     AddWidget(path, "Popout Event Log", WIDGET_WINDOW_BUTTON)
         .CVar("gWindows.EventLog")
         .Options(ButtonOptions().Tooltip("Enables the event log window"))
@@ -1574,14 +1573,6 @@ void BenMenu::InitElement() {
     AddSettings();
     AddEnhancements();
     AddDevTools();
-    // RegisterResolutionWidgets();
-    Rando::RegisterMenu();
-
-    menuEntries = { { "Settings", settingsSidebar, "gSettings.Menu.SettingsSidebarSection", settingsOrder },
-                    { "Enhancements", enhancementsSidebar, "gSettings.Menu.EnhancementsSidebarSection",
-                      enhancementsOrder },
-                    { "Developer Tools", devToolsSidebar, "gSettings.Menu.DevToolsSidebarSection", devToolsOrder },
-                    { "Rando", randoSidebar, "gSettings.Menu.RandoSidebarSection", randoOrder } };
 
     if (CVarGetInteger("gSettings.Menu.SidebarSearch", 0)) {
         InsertSidebarSearch();
