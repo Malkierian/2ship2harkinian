@@ -18,8 +18,6 @@
 #include "variables.h"
 #include <variant>
 #include <tuple>
-#include "ResolutionEditor.h"
-#include "2s2h/Rando/Rando.h"
 
 extern "C" {
 #include "z64.h"
