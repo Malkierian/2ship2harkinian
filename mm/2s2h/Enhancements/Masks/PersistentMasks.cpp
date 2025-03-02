@@ -156,7 +156,7 @@ void RegisterPersistentMasks() {
 
         // But don't speed up if the player is non-human and controller input is being overriden for cutscenes/minigames
         // or if player is Kafei
-        if (STATE_CVAR && player->actor.id == ACTOR_PLAYER &&
+        if (player && STATE_CVAR && player->actor.id == ACTOR_PLAYER &&
             (GET_PLAYER_FORM == PLAYER_FORM_HUMAN || gPlayState->actorCtx.unk268 == 0)) {
             *should = true;
         }
@@ -215,6 +215,17 @@ void RegisterPersistentMasks() {
             } else {
                 Audio_PlaySfx(NA_SE_SY_CAMERA_ZOOM_UP);
             }
+        }
+    });
+
+    // Prevent persistent Bunny Hood from being used as an Item Action. Normally, the currently equipped mask converts
+    // to PLAYER_IA_NONE
+    COND_VB_SHOULD(VB_GET_ITEM_ACTION_FROM_MASK, CVAR, {
+        Player* player = GET_PLAYER(gPlayState);
+        PlayerItemAction playerItemAction = (PlayerItemAction)va_arg(args, int);
+
+        if (player && STATE_CVAR && playerItemAction == PLAYER_IA_MASK_BUNNY) {
+            *should = true;
         }
     });
 }
